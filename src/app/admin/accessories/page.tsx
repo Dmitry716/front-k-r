@@ -69,29 +69,29 @@ export default function AccessoriesAdminPage() {
       if (data.success) {
         setAvailableImages(data.data || []);
       } else {
-        // Fallback к предустановленному списку
+        // Fallback к предустановленному списку с правильными путями
         const predefinedImages = [
-          "/accessories/vases.webp",
-          "/accessories/lamps.webp", 
-          "/accessories/sculptures.webp",
-          "/accessories/frames.webp",
-          "/accessories/bronze.webp",
-          "/accessories/plates.webp",
-          "/accessories/tables.webp"
+          "https://api.k-r.by/api/static/accessories/vases.webp",
+          "https://api.k-r.by/api/static/accessories/lamps.webp", 
+          "https://api.k-r.by/api/static/accessories/sculptures.webp",
+          "https://api.k-r.by/api/static/accessories/frames.webp",
+          "https://api.k-r.by/api/static/accessories/bronze.webp",
+          "https://api.k-r.by/api/static/accessories/plates.webp",
+          "https://api.k-r.by/api/static/accessories/tables.webp"
         ];
         setAvailableImages(predefinedImages);
       }
     } catch (err) {
       console.error("Error fetching images:", err);
-      // Fallback к предустановленному списку при ошибке
+      // Fallback к предустановленному списку при ошибке с правильными путями
       const predefinedImages = [
-        "/accessories/vases.webp",
-        "/accessories/lamps.webp", 
-        "/accessories/sculptures.webp",
-        "/accessories/frames.webp",
-        "/accessories/bronze.webp",
-        "/accessories/plates.webp",
-        "/accessories/tables.webp"
+        "https://api.k-r.by/api/static/accessories/vases.webp",
+        "https://api.k-r.by/api/static/accessories/lamps.webp", 
+        "https://api.k-r.by/api/static/accessories/sculptures.webp",
+        "https://api.k-r.by/api/static/accessories/frames.webp",
+        "https://api.k-r.by/api/static/accessories/bronze.webp",
+        "https://api.k-r.by/api/static/accessories/plates.webp",
+        "https://api.k-r.by/api/static/accessories/tables.webp"
       ];
       setAvailableImages(predefinedImages);
     }
