@@ -1,0 +1,102 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: LatoBold;
+    src: url(/fonts/LatoBold.ttf) format("truetype");
+}
+
+@font-face {
+    font-family: LatoRegular;
+    src: url(/fonts/LatoRegular.ttf) format("truetype");
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #ffffff;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: LatoRegular, Arial, sans-serif;
+}
+
+.font-bold, strong {
+  font-family: LatoBold, Arial, sans-serif;
+  font-weight: 700;
+}
+
+@media (min-width: 1380px) {
+  .container-centered {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1300px) and (max-width: 1379px) {
+  .container-centered {
+    margin-left: 40px; 
+    margin-right: 40px;
+  }
+}
+
+@media (max-width: 1299px) {
+  .container-centered {
+    margin-left: 20px; 
+    margin-right: 20px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .container-centered {
+    margin-left: 16px; 
+    margin-right: 16px;
+  }
+}
+
+@media (min-width: 1380px) {
+  .page-centered {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1300px) and (max-width: 1379px) {
+  .page-centered {
+    margin-left: 40px; 
+    margin-right: 40px;
+  }
+}
+
+@media (max-width: 1299px) {
+  .page-centered {
+    margin-left: 20px; 
+    margin-right: 20px;
+  }
+}
+
+@media (max-width: 1023px) {
+  .page-centered {
+    margin-left: 0; 
+    margin-right: 0;
+  }
+}
+
+.gradient {
+  background: linear-gradient(180deg,#f5f6fa 0,rgba(245,246,250,0) 100%);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
+}
