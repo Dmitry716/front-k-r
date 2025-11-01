@@ -127,21 +127,41 @@ const WorksAdmin = () => {
   // Загрузка доступных изображений из /public/works
   const loadAvailableImages = async () => {
     try {
-      // Предварительный список изображений
-      setAvailableImages([
-        '1.webp',
-        '2.webp',
-        '3.webp',
-        '4.webp',
-        '5.webp',
-        '6.webp',
-        '7.webp',
-        '8.webp',
-        '9.webp',
-        '10.webp',
-      ]);
+      const data = await apiClient.get("/admin/images?folder=works");
+      if (data.success) {
+        setAvailableImages(data.data || []);
+      } else {
+        // Fallback к предустановленному списку с правильными путями
+        const predefinedImages = [
+          'https://api.k-r.by/api/static/works/1.webp',
+          'https://api.k-r.by/api/static/works/2.webp',
+          'https://api.k-r.by/api/static/works/3.webp',
+          'https://api.k-r.by/api/static/works/4.webp',
+          'https://api.k-r.by/api/static/works/5.webp',
+          'https://api.k-r.by/api/static/works/6.webp',
+          'https://api.k-r.by/api/static/works/7.webp',
+          'https://api.k-r.by/api/static/works/8.webp',
+          'https://api.k-r.by/api/static/works/9.webp',
+          'https://api.k-r.by/api/static/works/10.webp',
+        ];
+        setAvailableImages(predefinedImages);
+      }
     } catch (error) {
       console.error('Error loading images:', error);
+      // Fallback к предустановленному списку при ошибке с правильными путями
+      const predefinedImages = [
+        'https://api.k-r.by/api/static/works/1.webp',
+        'https://api.k-r.by/api/static/works/2.webp',
+        'https://api.k-r.by/api/static/works/3.webp',
+        'https://api.k-r.by/api/static/works/4.webp',
+        'https://api.k-r.by/api/static/works/5.webp',
+        'https://api.k-r.by/api/static/works/6.webp',
+        'https://api.k-r.by/api/static/works/7.webp',
+        'https://api.k-r.by/api/static/works/8.webp',
+        'https://api.k-r.by/api/static/works/9.webp',
+        'https://api.k-r.by/api/static/works/10.webp',
+      ];
+      setAvailableImages(predefinedImages);
     }
   };
 

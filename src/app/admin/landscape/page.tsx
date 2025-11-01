@@ -59,9 +59,24 @@ export default function LandscapeAdminPage() {
       const data = await apiClient.get("/admin/images?folder=landscape");
       if (data.success) {
         setAvailableImages(data.data || []);
+      } else {
+        // Fallback к предустановленному списку с правильными путями
+        const predefinedImages = [
+          "https://api.k-r.by/api/static/landscape/landscape-1.webp",
+          "https://api.k-r.by/api/static/landscape/landscape-2.webp",
+          "https://api.k-r.by/api/static/landscape/landscape-3.webp",
+        ];
+        setAvailableImages(predefinedImages);
       }
     } catch (err) {
       console.error("Error fetching images:", err);
+      // Fallback к предустановленному списку при ошибке с правильными путями
+      const predefinedImages = [
+        "https://api.k-r.by/api/static/landscape/landscape-1.webp",
+        "https://api.k-r.by/api/static/landscape/landscape-2.webp",
+        "https://api.k-r.by/api/static/landscape/landscape-3.webp",
+      ];
+      setAvailableImages(predefinedImages);
     }
   };
 

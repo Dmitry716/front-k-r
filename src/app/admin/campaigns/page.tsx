@@ -53,18 +53,33 @@ export default function AdminCampaignsNewPage() {
 
   const fetchAvailableImages = async () => {
     try {
-      // Предварительный список изображений
-      const staticImages = [
-        '/promo/1.webp',
-        '/promo/2.webp',
-        '/promo/3.webp',
-        '/campaigns/campaign-1.webp',
-        '/campaigns/campaign-2.webp',
-        '/campaigns/campaign-3.webp',
-      ];
-      setAvailableImages(staticImages);
+      const data = await apiClient.get("/admin/images?folder=campaigns");
+      if (data.success) {
+        setAvailableImages(data.data || []);
+      } else {
+        // Fallback к предустановленному списку с правильными путями
+        const predefinedImages = [
+          "https://api.k-r.by/api/static/promo/1.webp",
+          "https://api.k-r.by/api/static/promo/2.webp",
+          "https://api.k-r.by/api/static/promo/3.webp",
+          "https://api.k-r.by/api/static/campaigns/campaign-1.webp",
+          "https://api.k-r.by/api/static/campaigns/campaign-2.webp",
+          "https://api.k-r.by/api/static/campaigns/campaign-3.webp",
+        ];
+        setAvailableImages(predefinedImages);
+      }
     } catch (error) {
       console.error('Ошибка загрузки изображений:', error);
+      // Fallback к предустановленному списку при ошибке с правильными путями
+      const predefinedImages = [
+        "https://api.k-r.by/api/static/promo/1.webp",
+        "https://api.k-r.by/api/static/promo/2.webp",
+        "https://api.k-r.by/api/static/promo/3.webp",
+        "https://api.k-r.by/api/static/campaigns/campaign-1.webp",
+        "https://api.k-r.by/api/static/campaigns/campaign-2.webp",
+        "https://api.k-r.by/api/static/campaigns/campaign-3.webp",
+      ];
+      setAvailableImages(predefinedImages);
     }
   };
 

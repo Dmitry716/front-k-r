@@ -59,13 +59,29 @@ export default function BlogsAdminPage() {
   };
 
   const fetchAvailableImages = async () => {
-    // Используем реальные изображения из папок
-    const staticImages = [
-      "/blog/1.webp",
-      "/blog/2.webp", 
-      "/blog/3.webp",
-    ];
-    setAvailableImages(staticImages);
+    try {
+      const data = await apiClient.get("/admin/images?folder=blog");
+      if (data.success) {
+        setAvailableImages(data.data || []);
+      } else {
+        // Fallback к предустановленному списку с правильными путями
+        const predefinedImages = [
+          "https://api.k-r.by/api/static/blog/1.webp",
+          "https://api.k-r.by/api/static/blog/2.webp", 
+          "https://api.k-r.by/api/static/blog/3.webp",
+        ];
+        setAvailableImages(predefinedImages);
+      }
+    } catch (err) {
+      console.error("Error fetching images:", err);
+      // Fallback к предустановленному списку при ошибке с правильными путями
+      const predefinedImages = [
+        "https://api.k-r.by/api/static/blog/1.webp",
+        "https://api.k-r.by/api/static/blog/2.webp", 
+        "https://api.k-r.by/api/static/blog/3.webp",
+      ];
+      setAvailableImages(predefinedImages);
+    }
   };
 
   useEffect(() => {

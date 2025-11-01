@@ -79,9 +79,24 @@ export default function FencesAdminPage() {
       const data = await apiClient.get("/admin/images?folder=fences");
       if (data.success) {
         setAvailableImages(data.data || []);
+      } else {
+        // Fallback к предустановленному списку с правильными путями
+        const predefinedImages = [
+          "https://api.k-r.by/api/static/fences/fence-1.webp",
+          "https://api.k-r.by/api/static/fences/fence-2.webp",
+          "https://api.k-r.by/api/static/fences/fence-3.webp",
+        ];
+        setAvailableImages(predefinedImages);
       }
     } catch (err) {
       console.error("Error fetching images:", err);
+      // Fallback к предустановленному списку при ошибке с правильными путями
+      const predefinedImages = [
+        "https://api.k-r.by/api/static/fences/fence-1.webp",
+        "https://api.k-r.by/api/static/fences/fence-2.webp",
+        "https://api.k-r.by/api/static/fences/fence-3.webp",
+      ];
+      setAvailableImages(predefinedImages);
     }
   };
 
