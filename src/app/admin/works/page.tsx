@@ -74,7 +74,7 @@ const WorksAdmin = () => {
     try {
       const data = await apiClient.get('/admin/works?limit=200');
       if (data.success) {
-        setWorks(data.data || []);
+        setWorks(data.works || []);
       }
     } catch (error) {
       console.error('Error loading works:', error);
@@ -88,15 +88,15 @@ const WorksAdmin = () => {
     try {
       // Загружаем только памятники и ограды
       const [monuments, fences] = await Promise.all([
-        apiClient.get('/monuments?limit=500'),
-        apiClient.get('/fences?limit=200'),
+        apiClient.get('/admin/monuments?limit=500'),
+        apiClient.get('/admin/fences?limit=200'),
       ]);
 
       const allProducts: Product[] = [];
 
       // Памятники
       if (monuments.success) {
-        monuments.data.forEach((p: any) => {
+        monuments.monuments.forEach((p: any) => {
           allProducts.push({
             id: p.id,
             slug: p.slug,
@@ -108,7 +108,7 @@ const WorksAdmin = () => {
 
       // Ограды
       if (fences.success) {
-        fences.data.forEach((p: any) => {
+        fences.products.forEach((p: any) => {
           allProducts.push({
             id: p.id,
             slug: p.slug,

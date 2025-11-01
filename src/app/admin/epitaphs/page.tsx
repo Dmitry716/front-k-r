@@ -25,8 +25,8 @@ export default function AdminEpitaphsPage() {
 
   async function fetchEpitaphs() {
     try {
-      const data = await apiClient.get("/epitaphs");
-      setEpitaphs(data.data || []);
+      const data = await apiClient.get("/admin/epitaphs");
+      setEpitaphs(data.epitaphs || []);
     } catch (err) {
       console.error("Failed to fetch epitaphs:", err);
     }
@@ -40,7 +40,7 @@ export default function AdminEpitaphsPage() {
     setSuccess(false);
 
     try {
-      const data = await apiClient.post("/epitaphs", { text });
+      const data = await apiClient.post("/admin/epitaphs", { text });
       
       if (!data.success) {
         throw new Error(data.error || "Failed to create epitaph");
@@ -62,7 +62,7 @@ export default function AdminEpitaphsPage() {
     if (!confirm("Вы уверены, что хотите удалить эпитафию?")) return;
 
     try {
-      const data = await apiClient.delete(`/epitaphs/${id}`);
+      const data = await apiClient.delete(`/admin/epitaphs/${id}`);
       
       if (!data.success) {
         throw new Error("Failed to delete epitaph");
@@ -79,7 +79,7 @@ export default function AdminEpitaphsPage() {
     if (!editText.trim()) return;
 
     try {
-      const data = await apiClient.put(`/epitaphs/${id}`, { text: editText });
+      const data = await apiClient.put(`/admin/epitaphs/${id}`, { text: editText });
       
       if (!data.success) {
         throw new Error("Failed to update epitaph");

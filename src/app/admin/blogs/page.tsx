@@ -49,9 +49,9 @@ export default function BlogsAdminPage() {
 
   const fetchBlogs = async () => {
     try {
-      const data = await apiClient.get("/blogs?limit=200");
+      const data = await apiClient.get("/admin/blogs?limit=200");
       if (data.success) {
-        setBlogs(data.data || []);
+        setBlogs(data.blogs || []);
       }
     } catch (err) {
       console.error("Error fetching blogs:", err);
@@ -182,7 +182,7 @@ export default function BlogsAdminPage() {
 
       console.log('Отправляю данные блога:', body);
 
-      const data = await apiClient.post("/blogs", body);
+      const data = await apiClient.post("/admin/blogs", body);
       console.log('Ответ сервера:', data);
 
       if (data.success) {
@@ -218,7 +218,7 @@ export default function BlogsAdminPage() {
     if (!window.confirm("Вы уверены, что хотите удалить этот блог? Действие необратимо!")) return;
 
     try {
-      const data = await apiClient.delete(`/blogs/${id}`);
+      const data = await apiClient.delete(`/admin/blogs/${id}`);
       if (data.success) {
         setSuccess("✓ Блог удален");
         await fetchBlogs();

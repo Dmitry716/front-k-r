@@ -54,9 +54,9 @@ export default function AccessoriesAdminPage() {
 
   const fetchAccessories = async () => {
     try {
-      const data = await apiClient.get("/accessories?limit=200");
+      const data = await apiClient.get("/admin/accessories?limit=200");
       if (data.success) {
-        setAccessories(data.data || []);
+        setAccessories(data.products || []);
       }
     } catch (err) {
       console.error("Error fetching accessories:", err);
@@ -179,7 +179,7 @@ export default function AccessoriesAdminPage() {
         description: finalDescription,
       };
 
-      const data = await apiClient.post("/accessories", body);
+      const data = await apiClient.post("/admin/accessories", body);
       if (data.success) {
         setSuccess("✓ Аксессуар добавлен");
         setName("");
@@ -211,7 +211,7 @@ export default function AccessoriesAdminPage() {
     if (!window.confirm("Вы уверены, что хотите удалить этот аксессуар? Действие необратимо!")) return;
 
     try {
-      const data = await apiClient.delete(`/accessories/${id}`);
+      const data = await apiClient.delete(`/admin/accessories/${id}`);
       if (data.success) {
         setSuccess("✓ Аксессуар удален");
         setError(""); // Очищаем ошибку
@@ -231,7 +231,7 @@ export default function AccessoriesAdminPage() {
     if (!window.confirm("Вы уверены, что хотите сохранить изменения?")) return;
     
     try {
-      const data = await apiClient.put(`/accessories/${id}`, editData);
+      const data = await apiClient.put(`/admin/accessories/${id}`, editData);
       if (data.success) {
         setSuccess("✓ Аксессуар обновлен");
         setEditingId(null);

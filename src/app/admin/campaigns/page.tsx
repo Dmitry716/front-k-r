@@ -75,9 +75,9 @@ export default function AdminCampaignsNewPage() {
 
   const fetchCampaigns = async () => {
     try {
-      const data = await apiClient.get('/campaigns?limit=200');
+      const data = await apiClient.get('/admin/campaigns?limit=200');
       if (data.success) {
-        setCampaigns(data.data || []);
+        setCampaigns(data.campaigns || []);
       }
     } catch (error) {
       console.error('Ошибка загрузки кампаний:', error);
@@ -194,7 +194,7 @@ export default function AdminCampaignsNewPage() {
 
       console.log('Отправляю данные кампании:', body);
 
-      const data = await apiClient.post('/campaigns', body);
+      const data = await apiClient.post('/admin/campaigns', body);
       console.log('Ответ сервера:', data);
 
       if (data.success) {
@@ -497,7 +497,7 @@ export default function AdminCampaignsNewPage() {
     if (!confirm('Вы уверены, что хотите удалить эту кампанию?')) return;
 
     try {
-      const data = await apiClient.delete(`/campaigns/${id}`);
+      const data = await apiClient.delete(`/admin/campaigns/${id}`);
       if (data.success) {
         setSuccess('✓ Кампания удалена');
         await fetchCampaigns();

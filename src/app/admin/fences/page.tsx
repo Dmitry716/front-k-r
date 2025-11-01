@@ -65,9 +65,9 @@ export default function FencesAdminPage() {
 
   const fetchFences = async () => {
     try {
-      const data = await apiClient.get("/fences?limit=200");
+      const data = await apiClient.get("/admin/fences?limit=200");
       if (data.success) {
-        setFences(data.data || []);
+        setFences(data.products || []);
       }
     } catch (err) {
       console.error("Error fetching fences:", err);

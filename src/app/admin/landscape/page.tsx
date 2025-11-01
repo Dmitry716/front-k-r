@@ -45,9 +45,9 @@ export default function LandscapeAdminPage() {
 
   const fetchLandscape = async () => {
     try {
-      const data = await apiClient.get("/landscape");
+      const data = await apiClient.get("/admin/landscape");
       if (data.success) {
-        setLandscape(data.data || []);
+        setLandscape(data.landscape || []);
       }
     } catch (err) {
       console.error("Error fetching landscape:", err);
@@ -141,7 +141,7 @@ export default function LandscapeAdminPage() {
         specifications: cleanedSpecifications,
       };
 
-      const data = await apiClient.post("/landscape", body);
+      const data = await apiClient.post("/admin/landscape", body);
       if (data.success) {
         setSuccess("✓ Товар добавлен");
         setName("");
@@ -172,7 +172,7 @@ export default function LandscapeAdminPage() {
     if (!window.confirm("Вы уверены, что хотите удалить этот товар? Действие необратимо!")) return;
 
     try {
-      const data = await apiClient.delete(`/landscape/${id}`);
+      const data = await apiClient.delete(`/admin/landscape/${id}`);
       if (data.success) {
         setSuccess("✓ Товар удален");
         setError("");
@@ -192,7 +192,7 @@ export default function LandscapeAdminPage() {
     if (!window.confirm("Вы уверены, что хотите сохранить изменения?")) return;
     
     try {
-      const data = await apiClient.put("/landscape", { id, ...editData });
+      const data = await apiClient.put(`/admin/landscape/${id}`, editData);
       if (data.success) {
         setSuccess("✓ Товар обновлен");
         setEditingId(null);
