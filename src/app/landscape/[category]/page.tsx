@@ -168,7 +168,7 @@ const LandscapeCategoryPage = () => {
                 finalProducts.length > 0 ? (
                   finalProducts.map((product) => (
                     <ProductCard
-                      key={product.id}
+                      key={product.slug || `product-${product.id}`}
                       product={{
                         id: product.id,
                         slug: product.slug,

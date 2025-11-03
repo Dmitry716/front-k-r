@@ -7,16 +7,63 @@ import PathPage from "../components/PathPage";
 import SidebarCatalogMenu from "../components/Sidebar/SidebarCatalogMenu";
 import SidebarStickyHelp from "../components/Sidebar/SidebarStickyHelp";
 import ProductCard from "../components/ProductCard";
-import { productsMonuments } from "../mock/products";
 import Pagination from "../components/Pagination";
+import { Product } from "../types/types";
+
+// Функция для получения товара по slug из всех категорий
+const fetchProductBySlug = async (slug: string): Promise<Product | null> => {
+    console.log('fetchProductBySlug вызвана для slug:', slug);
+    
+    // Список всех возможных API endpoints
+    const endpoints = [
+        'https://api.k-r.by/api/monuments',
+        'https://api.k-r.by/api/fences'
+    ];
+
+    for (const endpoint of endpoints) {
+        try {
+            console.log(`Проверяем endpoint: ${endpoint} для slug: ${slug}`);
+            const response = await fetch(endpoint);
+            if (!response.ok) {
+                console.log(`Endpoint ${endpoint} вернул ошибку:`, response.status);
+                continue;
+            }
+            
+            const data = await response.json();
+            const products = data.data || [];
+            console.log(`Получено товаров из ${endpoint}:`, products.length);
+            
+            // Логируем первые несколько slug'ов для отладки
+            if (products.length > 0) {
+                console.log(`Первые 3 slug'а из ${endpoint}:`, products.slice(0, 3).map((p: any) => p.slug));
+            }
+            
+            // Ищем товар с нужным slug
+            const product = products.find((p: any) => p.slug === slug);
+            if (product) {
+                console.log(`✅ Товар найден в ${endpoint}:`, product.name);
+                return product;
+            } else {
+                console.log(`❌ Товар с slug ${slug} НЕ найден в ${endpoint}`);
+            }
+        } catch (error) {
+            console.warn(`Error fetching from ${endpoint}:`, error);
+            continue;
+        }
+    }
+    
+    console.error(`🚨 Товар с slug ${slug} не найден НИ В ОДНОЙ категории!`);
+    return null; // Товар не найден ни в одной категории
+};
 
 const FavoritesPage = () => {
-    const [favorites, setFavorites] = useState<number[]>([]);
-    const [favoriteProducts, setFavoriteProducts] = useState<typeof productsMonuments>([]);
+    const [favorites, setFavorites] = useState<string[]>([]); // Теперь это slug'и
+    const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
     const [isTablet, setIsTablet] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isNarrowMobile, setIsNarrowMobile] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const PRODUCTS_PER_PAGE = 12;
 
     // Для адаптивности
@@ -33,19 +80,66 @@ const FavoritesPage = () => {
 
     // Загружаем избранные товары при загрузке
     useEffect(() => {
-        const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        let savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        
+        // Фильтруем только строки (slug'и), удаляя старые числовые ID
+        savedFavorites = savedFavorites.filter((item: any) => typeof item === 'string');
+        
+        console.log('Загруженные избранные при инициализации:', savedFavorites);
+        console.log('Отфильтровано только slug\'и:', savedFavorites);
+        
+        // Обновляем localStorage с очищенными данными
+        localStorage.setItem('favorites', JSON.stringify(savedFavorites));
+        
         setFavorites(savedFavorites);
     }, []);
 
-    // Фильтруем продукты по ID из избранного
+    // Загружаем продукты по slug из избранного через API
     useEffect(() => {
-        const filtered = productsMonuments.filter(p => favorites.includes(p.id));
-        setFavoriteProducts(filtered);
+        const loadFavoriteProducts = async () => {
+            console.log('Начинаем загрузку избранных товаров:', favorites);
+            
+            if (favorites.length === 0) {
+                console.log('Список избранного пуст');
+                setFavoriteProducts([]);
+                return;
+            }
+
+            setIsLoading(true);
+            const products: Product[] = [];
+
+            // Загружаем каждый товар по slug
+            for (const slug of favorites) {
+                console.log('Загружаем товар по slug:', slug);
+                const product = await fetchProductBySlug(slug);
+                if (product) {
+                    console.log('Товар найден:', product.name);
+                    products.push(product);
+                } else {
+                    console.log('Товар не найден по slug:', slug);
+                }
+            }
+
+            console.log('Загружено товаров:', products.length);
+            setFavoriteProducts(products);
+            setIsLoading(false);
+        };
+
+        loadFavoriteProducts();
     }, [favorites]);
 
     useEffect(() => {
         const handleFavoritesChange = () => {
-            const savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            let savedFavorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            
+            // Фильтруем только строки (slug'и)
+            savedFavorites = savedFavorites.filter((item: any) => typeof item === 'string');
+            
+            console.log('Изменения в избранном:', savedFavorites);
+            
+            // Обновляем localStorage с очищенными данными
+            localStorage.setItem('favorites', JSON.stringify(savedFavorites));
+            
             setFavorites(savedFavorites);
             setCurrentPage(1); // Сбрасываем на первую страницу при изменении
         };
@@ -80,11 +174,15 @@ const FavoritesPage = () => {
                     <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Товары в избранном</h1>
 
                     {/* Сетка избранных продуктов */}
-                    {favoriteProducts.length > 0 ? (
+                    {isLoading ? (
+                        <div className="flex justify-center items-center h-64">
+                            <div className="text-gray-500">Загружаем избранные товары...</div>
+                        </div>
+                    ) : favoriteProducts.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-3 mb-7.5">
                             {currentProducts.map((product) => (
                                 <ProductCard
-                                    key={product.id}
+                                    key={product.slug || `product-${product.id}`}
                                     product={product}
                                     isTablet={isTablet}
                                     isMobile={isMobile}

@@ -123,8 +123,9 @@ export default function CampaignPage({ params }: CampaignPageProps) {
         const resolvedParams = await params;
         const data = await apiClient.get(`/campaigns?slug=${resolvedParams.slug}`);
         
-        if (data.success && data.campaigns && data.campaigns.length > 0) {
-          const campaignData = data.campaigns[0];
+        if (data.success && data.data && data.data.length > 0) {
+          // Находим акцию с нужным slug (может быть несколько с одинаковым slug)
+          const campaignData = data.data.find((campaign: any) => campaign.slug === resolvedParams.slug) || data.data[0];
           setCampaign(campaignData);
           
           // Если у акции есть товары, получаем их полные данные

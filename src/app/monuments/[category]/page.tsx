@@ -563,7 +563,7 @@ const MonumentsSubcategoryPage = () => {
                             {isClient ? (
                                 finalProducts.map((product) => (
                                     <ProductCard
-                                        key={product.id}
+                                        key={product.slug || `product-${product.id}`}
                                         product={product}
                                         isTablet={isTablet}
                                         isMobile={isMobile}
@@ -572,7 +572,7 @@ const MonumentsSubcategoryPage = () => {
                                 ))
                             ) : (
                                 finalProducts.map((product) => (
-                                    <div key={product.id} className="invisible h-0" />
+                                    <div key={product.slug || `product-${product.id}`} className="invisible h-0" />
                                 ))
                             )}
                         </div>

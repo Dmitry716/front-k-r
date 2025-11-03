@@ -130,7 +130,7 @@ const CompleteSolutionSlider = () => {
             }}
           >
             {productsMonuments.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.slug || `product-${product.id}`} product={product} />
             ))}
           </div>
         ) : (
@@ -165,7 +165,7 @@ const CompleteSolutionSlider = () => {
               }}
             >
               {productsMonuments.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.slug || `product-${product.id}`} product={product} />
               ))}
             </div>
             <button

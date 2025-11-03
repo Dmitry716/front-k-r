@@ -209,15 +209,31 @@ export default function PathPage() {
             })
             .catch(() => setProductName(productSlugOrId));
         }
-        // Для категории exclusive используем API с slug'ом
-        else if (subcategoryPath === '/monuments/exclusive') {
-          apiClient.get(`/monuments/exclusive/${productSlugOrId}`)
-            .then(data => {
-              if (data.data) {
-                setProductName(data.data.name);
-              }
-            })
-            .catch(() => setProductName(productSlugOrId));
+        // Для памятников используем API с slug'ом
+        else if (subcategoryPath.startsWith('/monuments')) {
+          if (subcategoryPath === '/monuments/exclusive') {
+            apiClient.get(`/monuments/exclusive/${productSlugOrId}`)
+              .then(data => {
+                if (data.data) {
+                  setProductName(data.data.name);
+                }
+              })
+              .catch(() => setProductName(productSlugOrId));
+          } else {
+            // Для остальных категорий памятников
+            apiClient.get(`/monuments?slug=${productSlugOrId}`)
+              .then(data => {
+                if (data.success && data.data) {
+                  const item = Array.isArray(data.data) 
+                    ? data.data.find((item: any) => item.slug === productSlugOrId)
+                    : data.data;
+                  if (item) {
+                    setProductName(item.name);
+                  }
+                }
+              })
+              .catch(() => setProductName(productSlugOrId));
+          }
         } else {
           // Для остальных категорий ищем в mock'е по ID
           const productArray = subcategoryToProductArray[subcategoryPath];
@@ -243,7 +259,7 @@ export default function PathPage() {
 
     return (
       <div className="mb-2.5">
-        <ul className="flex items-center text-xs text-[#cbcbcb] space-x-2 font-[600]">
+        <ul className="flex items-center text-xs text-[#cbcbcb] space-x-2 font-semibold">
           <li>
             <Link href="/" className="text-[#2c3a54] hover:underline transition-colors">
               Главная
@@ -270,7 +286,7 @@ export default function PathPage() {
 
       return (
         <div className="mb-2.5">
-          <ul className="flex items-center text-xs text-[#cbcbcb] space-x-2 font-[600]">
+          <ul className="flex items-center text-xs text-[#cbcbcb] space-x-2 font-semibold">
             <li>
               <Link href="/" className="text-[#2c3a54] hover:underline transition-colors">
                 Главная
@@ -301,7 +317,7 @@ export default function PathPage() {
 
   return (
     <div className="mb-2.5">
-      <ul className="flex items-center text-xs text-[#cbcbcb] space-x-2 font-[600]">
+      <ul className="flex items-center text-xs text-[#cbcbcb] space-x-2 font-semibold">
         <li>
           <Link href="/" className="text-[#2c3a54] hover:underline transition-colors">
             Главная

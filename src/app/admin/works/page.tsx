@@ -20,6 +20,7 @@ interface Product {
   slug: string;
   name: string;
   category: string;
+  uniqueKey?: string;
 }
 
 const WorksAdmin = () => {
@@ -27,6 +28,9 @@ const WorksAdmin = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editingWork, setEditingWork] = useState<Work | null>(null);
 
@@ -40,7 +44,7 @@ const WorksAdmin = () => {
     category: "",
   });
 
-  // Категории для каждого типа продукта (только памятники и ограды)
+  // Категории для каждого типа продукта (для фронтенда)
   const categoryOptions = {
     monuments: [
       "Одиночные",
@@ -65,16 +69,24 @@ const WorksAdmin = () => {
   // Загрузка данных при монтировании
   useEffect(() => {
     loadWorks();
-    loadProducts();
     loadAvailableImages();
   }, []);
+
+  // Загрузка товаров при изменении типа продукта или категории
+  useEffect(() => {
+    if (formData.category) {
+      loadProducts(formData.productType, formData.category);
+    } else {
+      setProducts([]); // Очищаем список если категория не выбрана
+    }
+  }, [formData.productType, formData.category]);
 
   // Загрузка работ
   const loadWorks = async () => {
     try {
       const data = await apiClient.get('/admin/works?limit=200');
       if (data.success) {
-        setWorks(data.works || []);
+        setWorks(data.data || []);
       }
     } catch (error) {
       console.error('Error loading works:', error);
@@ -83,44 +95,62 @@ const WorksAdmin = () => {
     }
   };
 
-  // Загрузка продуктов для привязки (только памятники и ограды)
-  const loadProducts = async () => {
+  // Маппинг категорий фронтенда к API endpoints
+  const categoryToApiMap: Record<string, string> = {
+    "Одиночные": "single",
+    "Двойные": "double", 
+    "Эксклюзивные": "exclusive",
+    "Недорогие": "cheap",
+    "В виде креста": "cross",
+    "В виде сердца": "heart",
+    "Составные": "composite",
+    "Европейские": "europe",
+    "Художественная резка": "artistic",
+    "В виде деревьев": "tree",
+    "Мемориальные комплексы": "complex",
+    "Гранитные ограды": "granite",
+    "С полимерным покрытием": "polymer",
+    "Металлические ограды": "metal"
+  };
+
+  // Загрузка продуктов для привязки (только когда выбран тип продукта и категория)
+  const loadProducts = async (productType: "monuments" | "fences", category?: string) => {
     try {
-      // Загружаем только памятники и ограды
-      const [monuments, fences] = await Promise.all([
-        apiClient.get('/admin/monuments?limit=500'),
-        apiClient.get('/admin/fences?limit=200'),
-      ]);
-
-      const allProducts: Product[] = [];
-
-      // Памятники
-      if (monuments.success) {
-        monuments.monuments.forEach((p: any) => {
-          allProducts.push({
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            category: `Памятники / ${p.category}`,
-          });
-        });
+      setLoadingProducts(true);
+      setProducts([]); // Очищаем список перед загрузкой
+      
+      if (!category) {
+        return; // Не загружаем товары без категории
       }
 
-      // Ограды
-      if (fences.success) {
-        fences.products.forEach((p: any) => {
-          allProducts.push({
-            id: p.id,
-            slug: p.slug,
-            name: p.name,
-            category: `Ограды / ${p.category}`,
-          });
-        });
+      const apiCategory = categoryToApiMap[category];
+      if (!apiCategory) {
+        console.error('Unknown category:', category);
+        return;
       }
 
-      setProducts(allProducts);
+      let data;
+      if (productType === "monuments") {
+        data = await apiClient.get(`/monuments/${apiCategory}`);
+      } else {
+        data = await apiClient.get(`/fences/${apiCategory}`);
+      }
+
+      if (data.success && data.data) {
+        const productsData = data.data.map((p: any, index: number) => ({
+          id: p.id,
+          slug: p.slug,
+          name: p.name,
+          category: `${productType === "monuments" ? "Памятники" : "Ограды"} / ${category}`,
+          uniqueKey: `${productType}-${apiCategory}-${p.id}-${index}` // Уникальный ключ
+        }));
+
+        setProducts(productsData);
+      }
     } catch (error) {
       console.error('Error loading products:', error);
+    } finally {
+      setLoadingProducts(false);
     }
   };
 
@@ -162,6 +192,39 @@ const WorksAdmin = () => {
         'https://api.k-r.by/api/static/works/10.webp',
       ];
       setAvailableImages(predefinedImages);
+    }
+  };
+
+  // Загрузка файла
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    setUploadError("");
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("folder", "works");
+
+      const response = await fetch((process.env.NEXT_PUBLIC_API_URL || 'https://api.k-r.by/api') + "/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setFormData(prev => ({ ...prev, image: data.data.path }));
+        await loadAvailableImages(); // Обновляем список доступных изображений
+      } else {
+        setUploadError(data.error || "Ошибка загрузки");
+      }
+    } catch (err: any) {
+      setUploadError("Ошибка: " + err.message);
+    } finally {
+      setUploading(false);
+      e.target.value = ""; // Очищаем input
     }
   };
 
@@ -230,6 +293,7 @@ const WorksAdmin = () => {
     });
     setEditingWork(null);
     setShowForm(false);
+    setUploadError(""); // Очищаем ошибки загрузки
   };
 
   if (loading) {
@@ -317,42 +381,73 @@ const WorksAdmin = () => {
                 value={formData.productId}
                 onChange={(e) => setFormData({...formData, productId: e.target.value})}
                 className="w-full p-2 border border-gray-300 rounded"
+                disabled={loadingProducts}
               >
-                <option value="">Не привязано</option>
-                {products
-                  .filter(p => formData.productType === "monuments" ? 
-                    p.category.startsWith("Памятники") :
-                    p.category.startsWith("Ограды")
-                  )
-                  .map(product => (
-                    <option key={product.id} value={product.id}>
-                      {product.name} ({product.category})
-                    </option>
-                  ))}
+                <option value="">
+                  {!formData.category ? "Сначала выберите категорию" : 
+                   loadingProducts ? "Загрузка товаров..." : 
+                   "Не привязано"}
+                </option>
+                {products.map((product) => (
+                  <option key={product.uniqueKey || `${product.id}-${product.category}`} value={product.id}>
+                    {product.name} ({product.category})
+                  </option>
+                ))}
               </select>
             </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium mb-2">Изображение</label>
-              <select
-                value={formData.image}
-                onChange={(e) => setFormData({...formData, image: e.target.value})}
-                className="w-full p-2 border border-gray-300 rounded mb-2"
-              >
-                <option value="">Выберите изображение</option>
-                {availableImages.map(img => (
-                  <option key={img} value={`/works/${img}`}>
-                    {img}
-                  </option>
-                ))}
-              </select>
+              <div className="space-y-3">
+                <select
+                  value={formData.image}
+                  onChange={(e) => setFormData({...formData, image: e.target.value})}
+                  className="w-full p-2 border border-gray-300 rounded"
+                >
+                  <option value="">Выберите изображение</option>
+                  {availableImages.map(img => (
+                    <option key={img} value={img}>
+                      {img.split('/').pop() || img}
+                    </option>
+                  ))}
+                </select>
+                
+                <div className="border-t pt-3">
+                  <label className="block text-sm font-medium mb-2">Или загрузите новое</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="file"
+                      accept=".webp,.png,.jpg,.jpeg"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      className="flex-1 px-4 py-2 border rounded"
+                    />
+                    {uploading && <span className="text-blue-600">Загрузка...</span>}
+                  </div>
+                  {uploadError && <p className="text-red-600 text-sm mt-1">{uploadError}</p>}
+                </div>
+              </div>
               
               {formData.image && (
-                <div className="mt-2">
+                <div className="mt-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-sm text-gray-600">Превью:</p>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({...formData, image: ""})}
+                      className="text-red-600 hover:text-red-800 text-sm"
+                    >
+                      Очистить
+                    </button>
+                  </div>
                   <img 
                     src={formData.image} 
                     alt="Preview" 
                     className="w-32 h-24 object-cover border rounded"
+                    onError={(e) => {
+                      console.error('Image load error:', formData.image);
+                      e.currentTarget.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9Ijk2IiB2aWV3Qm94PSIwIDAgMTI4IDk2IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cmVjdCB3aWR0aD0iMTI4IiBoZWlnaHQ9Ijk2IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik00MCA0MEg4OFY1Nkg0MFY0MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHBhdGggZD0iTTQ4IDQ4SCA4MFY1Nkg0OFY0OFoiIGZpbGw9IndoaXRlIi8+Cjx0ZXh0IHg9IjY0IiB5PSI3NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzlDQTNBRiIgZm9udC1zaXplPSIxMiIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIj7QntGI0LjQsdC60LAg0LfQsNCz0YDRg9C30LrQuDwvdGV4dD4KPC9zdmc+'; // Placeholder изображение
+                    }}
                   />
                 </div>
               )}

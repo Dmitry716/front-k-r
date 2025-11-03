@@ -15,7 +15,7 @@ import View360 from "@/app/components/View360";
 import { ColorOption } from "@/app/types/types";
 import { getMaterialData } from "@/lib/materials-mapping";
 import { apiClient } from "@/lib/api-client";
-import OurWorksSlider from "@/app/components/OurWorksSlider";
+import ProductWorksGallery from "@/app/components/ProductWorksGallery";
 
 interface Product {
   id: number;
@@ -589,12 +589,11 @@ const ExclusiveProductPage = () => {
         </div>
       </section>
 
-      {/* Слайдер готовых работ с этим товаром */}
-      <OurWorksSlider 
+      {/* Галерея готовых работ с этим товаром */}
+      <ProductWorksGallery 
         productId={product.id.toString()}
         productType="monuments"
-        title="Наши работы"
-        maxWorks={8}
+        title="Готовые работы с этим товаром"
       />
 
       {/* Модальные окна */}

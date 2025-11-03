@@ -8,7 +8,8 @@ interface Campaign {
   title: string;
   description: string;
   content: string;
-  image: string;
+  featuredImage: string;
+  image?: string; // Для обратной совместимости
   createdAt: string;
 }
 
@@ -16,6 +17,17 @@ const Promo = () => {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // Функция для конвертации URL изображений
+  const convertImageUrl = (imagePath: string) => {
+    if (!imagePath) return '';
+    if (imagePath.startsWith('http')) return imagePath; // уже полный URL
+    if (imagePath.startsWith('/')) {
+      // Конвертируем /folder/filename в https://api.k-r.by/api/static/folder/filename  
+      return `https://api.k-r.by/api/static${imagePath}`;
+    }
+    return imagePath;
+  };
 
   useEffect(() => {
     const fetchCampaigns = async () => {
@@ -72,29 +84,44 @@ const Promo = () => {
   return (
     <section className="max-w-[1300px]">
       <div className="flex flex-col flex-wrap -mx-2.5 md:flex-row space-y-5 md:space-y-0">
-        {campaigns.map((campaign) => (
-          <div
-            key={campaign.id}
-            className="w-full px-2.5 md:w-1/2 lg:w-1/3 overflow-hidden mb-5"
-          >
-            <a href={`/sales/${campaign.slug}`} className="bg-[#f5f6fa] rounded-lg block hover:shadow-lg transition-shadow">
-              <img
-                src={campaign.image}
-                alt={campaign.title}
-                className="w-full h-48 rounded-t-lg object-cover"
-              />
-              <div className="px-4.25 py-3.75 md:p-6">
-                <h3 className="font-bold text-md lg:text-xl text-[#2c3a54] mb-1.25">{campaign.title}</h3>
-                <p className="text-sm md:text-md text-[#2c3a54cc] leading-relaxed">
-                  {campaign.description}
-                </p>
-                <div className="mt-3 text-xs text-gray-400">
-                  {new Date(campaign.createdAt).toLocaleDateString('ru-RU')}
+        {campaigns.map((campaign) => {
+          const imageUrl = convertImageUrl(campaign.featuredImage || campaign.image || '');
+          
+          return (
+            <div
+              key={campaign.id}
+              className="w-full px-2.5 md:w-1/2 lg:w-1/3 overflow-hidden mb-5"
+            >
+              <a href={`/sales/${campaign.slug}`} className="bg-[#f5f6fa] rounded-lg block hover:shadow-lg transition-shadow">
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={campaign.title}
+                    className="w-full h-48 rounded-t-lg object-cover"
+                    onError={(e) => {
+                      // Если изображение не загружается, скрываем его
+                      (e.target as HTMLImageElement).style.display = 'none';
+                    }}
+                  />
+                )}
+                {!imageUrl && (
+                  <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
+                    <span className="text-gray-400">Нет изображения</span>
+                  </div>
+                )}
+                <div className="px-4.25 py-3.75 md:p-6">
+                  <h3 className="font-bold text-md lg:text-xl text-[#2c3a54] mb-1.25">{campaign.title}</h3>
+                  <p className="text-sm md:text-md text-[#2c3a54cc] leading-relaxed">
+                    {campaign.description}
+                  </p>
+                  <div className="mt-3 text-xs text-gray-400">
+                    {new Date(campaign.createdAt).toLocaleDateString('ru-RU')}
+                  </div>
                 </div>
-              </div>
-            </a>
-          </div>
-        ))}
+              </a>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

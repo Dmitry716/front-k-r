@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useParams, notFound } from "next/navigation";
-import OurWorksSlider from "@/app/components/OurWorksSlider";
+import ProductWorksGallery from "@/app/components/ProductWorksGallery";
 import PathPage from "../../../components/PathPage";
 import SidebarCatalogMenu from "../../../components/Sidebar/SidebarCatalogMenu";
 import SidebarStickyHelp from "../../../components/Sidebar/SidebarStickyHelp";
@@ -12,6 +12,53 @@ import Tooltip from "../../../components/Tooltip";
 import { apiClient } from "@/lib/api-client";
 import ModalCommunication from "../../../components/Modal/ModalCommunication";
 import { categorySlugToName } from "../page";
+
+// Функция для конвертации товара из админки в формат ProductCard
+function convertMonumentToProductFormat(dbProduct: Record<string, unknown>) {
+    // Парсим options если это строка JSON
+    let parsedOptions = {};
+    if (typeof dbProduct.options === 'string') {
+        try {
+            parsedOptions = JSON.parse(dbProduct.options as string);
+        } catch (e) {
+            console.warn('Failed to parse options:', dbProduct.options);
+        }
+    } else if (dbProduct.options) {
+        parsedOptions = dbProduct.options as Record<string, unknown>;
+    }
+
+    // Парсим цвета из БД
+    let parsedColors: any[] = [];
+    if (typeof dbProduct.colors === 'string') {
+        try {
+            parsedColors = JSON.parse(dbProduct.colors as string);
+        } catch (e) {
+            console.warn('Failed to parse colors:', dbProduct.colors);
+            parsedColors = [];
+        }
+    } else if (Array.isArray(dbProduct.colors)) {
+        parsedColors = dbProduct.colors as any[];
+    }
+
+    const imageUrl = String(dbProduct.image || '');
+
+    return {
+        id: Number(dbProduct.id),
+        slug: String(dbProduct.slug || ''),
+        name: String(dbProduct.name || ''),
+        category: String(dbProduct.category || ''),
+        price: Number(dbProduct.price) || 0,
+        oldPrice: dbProduct.oldPrice ? Number(dbProduct.oldPrice) : undefined,
+        discount: Number(dbProduct.discount) || 0,
+        image: imageUrl,
+        description: String(dbProduct.description || ''),
+        height: String(dbProduct.height || ''),
+        colors: parsedColors,
+        options: parsedOptions,
+        hit: Boolean(dbProduct.hit),
+        popular: Boolean(dbProduct.popular),
+    };
+}
 
 // Статические характеристики для памятников
 const STATIC_CHARACTERISTICS = {
@@ -69,7 +116,7 @@ const ProductPage = () => {
     // Модальное окно для видов гранита (как на странице /granite)
     const [isGraniteModalOpen, setIsGraniteModalOpen] = useState(false);
     const [currentGraniteSlide, setCurrentGraniteSlide] = useState(0);
-    //Модальное окно для готовых работ и примеров оформления
+    //Модальное окно для примеров оформления
     const [isImageModalOpen, setIsImageModalOpen] = useState(false);
     const [currentImageSlide, setCurrentImageSlide] = useState(0);
 
@@ -124,39 +171,38 @@ const ProductPage = () => {
                         options: parsedOptions
                     });
                     
-                    // Загружаем похожие товары
+                    // Загружаем похожие товары из той же категории
                     try {
-                        let apiEndpoint = "";
-                        const lowerCategorySlug = categorySlug.toLowerCase();
-                        
-                        switch (lowerCategorySlug) {
-                            case "одиночные":
-                            case "single":
-                                apiEndpoint = "/monuments/single";
-                                break;
-                            case "двойные":
-                            case "double":
-                                apiEndpoint = "/monuments/double";
-                                break;
-                            case "недорогие":
-                            case "cheap":
-                                apiEndpoint = "/monuments/cheap";
-                                break;
-                            default:
-                                return;
-                        }
-
-                        const similarData = await apiClient.get(apiEndpoint);
-                        if (similarData.success && similarData.data) {
-                            // Фильтруем и рандомизируем похожие товары
-                            const filtered = similarData.data
-                                .filter((p: any) => p.id !== data.data.id) // Исключаем текущий товар
-                                .sort(() => 0.5 - Math.random())
-                                .slice(0, 6);
+                        console.log('Loading similar products for category:', categorySlug);
+                        // Используем правильный endpoint для категории
+                        const similarData = await apiClient.get(`/admin/monuments?category=${categorySlug}`);
+                        console.log('Similar products response:', similarData);
+                        if (similarData.success && similarData.products) {
+                            // Фильтруем товары, исключая текущий товар, и конвертируем в нужный формат
+                            const filtered = similarData.products
+                                .filter((p: any) => p.id !== data.data.id)
+                                .sort(() => 0.5 - Math.random()) // Рандомизируем
+                                .slice(0, 6) // Берем максимум 6 товаров
+                                .map(convertMonumentToProductFormat); // Конвертируем в формат ProductCard
+                            console.log('Filtered similar products:', filtered);
                             setSimilarProducts(filtered);
                         }
                     } catch (error) {
-                        // Ошибка загрузки похожих товаров - не критично
+                        console.error("Ошибка загрузки похожих товаров:", error);
+                        // Fallback: пробуем другой endpoint
+                        try {
+                            const fallbackData = await apiClient.get("/monuments");
+                            if (fallbackData.success && fallbackData.data) {
+                                const filtered = fallbackData.data
+                                    .filter((p: any) => p.category === data.data.category && p.id !== data.data.id)
+                                    .sort(() => 0.5 - Math.random()) 
+                                    .slice(0, 6)
+                                    .map(convertMonumentToProductFormat); // Конвертируем в формат ProductCard
+                                setSimilarProducts(filtered);
+                            }
+                        } catch (fallbackError) {
+                            console.error("Ошибка загрузки похожих товаров (fallback):", fallbackError);
+                        }
                     }
                 } else {
                     setError("Продукт не найден");
@@ -474,44 +520,38 @@ const ProductPage = () => {
     };
 
 
-    const openImageModal = (index: number, type: "work" | "example") => {
-        // Подготовьте массив изображений в зависимости от типа
-        const slides: ImageItem[] =
-            type === "work"
-                ? [
-                    { id: 1, src: "/single/work1.webp", alt: "Готовая работа 1" },
-                    { id: 2, src: "/single/work2.webp", alt: "Готовая работа 2" },
-                ]
-                : [
-                    {
-                        id: 1,
-                        src: "/single/example1.webp",
-                        alt: "Пример оформления 1",
-                        caption:
-                            "Гравировка портрета A4, текста (ФИО, даты, памятная надпись), крестика",
-                    },
-                    {
-                        id: 2,
-                        src: "/single/example2.webp",
-                        alt: "Пример оформления 2",
-                        caption:
-                            "Гравировка портрета, текст (ФИО, даты, памятная надпись), крест - сусальное золото или золотая краска+ бронзовые буквы",
-                    },
-                    {
-                        id: 3,
-                        src: "/single/example3.webp",
-                        alt: "Пример оформления 3",
-                        caption:
-                            "Медальон в нише, текст (ФИО, даты, памятная надпись), крест - сусальное золото или золотая краска",
-                    },
-                    {
-                        id: 4,
-                        src: "/single/example4.webp",
-                        alt: "Пример оформления 4",
-                        caption:
-                            "Медальон в рамке, текст (ФИО, даты), крест - итальянская бронза Caggiati",
-                    },
-                ];
+    const openImageModal = (index: number) => {
+        // Подготовьте массив изображений для примеров оформления
+        const slides: ImageItem[] = [
+            {
+                id: 1,
+                src: "/single/example1.webp",
+                alt: "Пример оформления 1",
+                caption:
+                    "Гравировка портрета A4, текста (ФИО, даты, памятная надпись), крестика",
+            },
+            {
+                id: 2,
+                src: "/single/example2.webp",
+                alt: "Пример оформления 2",
+                caption:
+                    "Гравировка портрета, текст (ФИО, даты, памятная надпись), крест - сусальное золото или золотая краска+ бронзовые буквы",
+            },
+            {
+                id: 3,
+                src: "/single/example3.webp",
+                alt: "Пример оформления 3",
+                caption:
+                    "Медальон в нише, текст (ФИО, даты, памятная надпись), крест - сусальное золото или золотая краска",
+            },
+            {
+                id: 4,
+                src: "/single/example4.webp",
+                alt: "Пример оформления 4",
+                caption:
+                    "Медальон в рамке, текст (ФИО, даты), крест - итальянская бронза Caggiati",
+            },
+        ];
 
         setImageSlides(slides);
         setCurrentImageSlide(index);
@@ -930,28 +970,12 @@ const ProductPage = () => {
                         )}
                     </div>
 
-
-                    <div className="mb-7.5">
-                        <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
-                            Готовые работы с этим товаром
-                        </h2>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-5">
-                            {[1, 2].map((id) => (
-                                <div
-                                    key={id}
-                                    className="cursor-pointer group overflow-hidden rounded-lg"
-                                    onClick={() => openImageModal(id - 1, "work")}
-                                >
-                                    <img
-                                        src={`/single/work${id}.webp`}
-                                        alt={`Готовая работа ${id}`}
-                                        className="w-full h-auto object-cover rounded-lg group-hover:brightness-105 transition-transform duration-300"
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
+                    {/* Готовые работы с этим товаром */}
+                    <ProductWorksGallery 
+                        productId={product.id.toString()}
+                        productType="monuments"
+                        title="Готовые работы с этим товаром"
+                    />
 
                     <div className="mb-7.5">
                         <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
@@ -968,7 +992,7 @@ const ProductPage = () => {
                                 <div
                                     key={id}
                                     className="cursor-pointer group overflow-hidden rounded-lg"
-                                    onClick={() => openImageModal(id - 1, "example")}
+                                    onClick={() => openImageModal(id - 1)}
                                 >
                                     <img
                                         src={`/single/example${id}.webp`}
@@ -1009,17 +1033,6 @@ const ProductPage = () => {
                     </div>
                 </div>
             </section>
-
-
-            <div className="mb-22.5">
-                <OurWorksSlider 
-                    productId={product.id.toString()}
-                    productType="monuments"
-                    title="Наши работы"
-                    maxWorks={8}
-                />
-            </div>
-
 
             <ModalCommunication
                 isOpen={isModalOpen}

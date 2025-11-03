@@ -5,7 +5,7 @@ import PathPage from "@/app/components/PathPage";
 import SidebarCatalogMenu from "@/app/components/Sidebar/SidebarCatalogMenu";
 import SidebarStickyHelp from "@/app/components/Sidebar/SidebarStickyHelp";
 import ModalCommunication from "@/app/components/Modal/ModalCommunication";
-import OurWorksSlider from "@/app/components/OurWorksSlider";
+import ProductWorksGallery from "@/app/components/ProductWorksGallery";
 import Image from "next/image";
 import Tooltip from "@/app/components/Tooltip";
 import { apiClient } from "@/lib/api-client";
@@ -447,12 +447,11 @@ const FenceDetailPage = () => {
                 </div>
             </section>
 
-            {/* Слайдер готовых работ с этим товаром */}
-            <OurWorksSlider 
+            {/* Галерея готовых работ с этим товаром */}
+            <ProductWorksGallery 
                 productId={fence.id.toString()}
                 productType="fences"
-                title="Наши работы"
-                maxWorks={8}
+                title="Готовые работы с этим товаром"
             />
 
             {/* Модальное окно */}

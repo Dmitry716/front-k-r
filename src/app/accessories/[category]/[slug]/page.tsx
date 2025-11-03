@@ -8,6 +8,7 @@ import ModalCommunication from "@/app/components/Modal/ModalCommunication";
 import OurWorksSlider from "@/app/components/OurWorksSlider";
 import Image from "next/image";
 import { apiClient } from "@/lib/api-client";
+import { graniteTypes } from "@/app/mock/graniteTypes";
 
 interface Specifications {
   color?: string;
@@ -38,35 +39,47 @@ const SPEC_LABELS: Record<string, string> = {
   height: "Высота",
   dimensions: "Габариты",
   material: "Материал",
-  warranty: "Гарантия",
   drainageHole: "Сливное отверстие",
   attachmentMethod: "Способ крепления",
+  graniteTypes: "Другие виды гранита",
+  secondarySize: "Другой размер",
+  storage: "Хранение",
+  warranty: "Гарантия",
+  antirain: "Антидождь"
 };
 
 // Статичные характеристики для каждой категории
 const STATIC_CHARACTERISTICS: Record<string, Record<string, string>> = {
   "Вазы": {
-    material: "Гранит",
-    warranty: "10 лет",
+    material: "Полимербетон",
+    warranty: "1 год",
     drainageHole: "есть",
     attachmentMethod: "на поверхность гранита с помощью штырей и клея-герметика"
   },
   "Лампады": {
     material: "Гранит",
-    warranty: "10 лет",
+    warranty: "1 год",
     attachmentMethod: "на поверхность гранита с помощью штырей и клея-герметика"
   },
   "Надгробные плиты": {
-    material: "Гранит",
+    material: "Гранит Габбро Карелия",
+    graniteTypes: "Более 20",
+    secondarySize: "Возможно",
+    storage: "Бесплатно",
     warranty: "10 лет"
   },
   "Гранитные таблички": {
-    material: "Гранит", 
-    warranty: "10 лет"
+    material: "Гранит Габбро Карелия",
+    warranty: "10 лет",
+    graniteTypes: "Более 20",
+    secondarySize: "Возможно",
+    storage: "Бесплатно",
+    antirain: "Бесплатно"
   },
   "Скульптуры": {
     material: "Полимербетон",
-    warranty: "10 лет"
+    attachmentMethod: "На клей-герметик",
+    warranty: "1 год"
   }
 };
 
@@ -199,9 +212,9 @@ const AccessoryDetailPage = () => {
   const dynamicSpecs = accessory?.specifications || {};
   const staticSpecs = STATIC_CHARACTERISTICS[accessory?.category || ""] || {};
   const allSpecs = { ...dynamicSpecs, ...staticSpecs };
-  
+
   const hasCharacteristics = Object.keys(allSpecs).some(key => allSpecs[key]);
-  const hasDescription = accessory?.description || (accessory?.category === "Изделия из бронзы") || (accessory?.category === "Рамки");
+  const hasDescription = accessory?.description || (accessory?.category === "Изделия из бронзы") || (accessory?.category === "Рамки") || (accessory?.category === "Скульптуры");
 
   // Устанавливаем активную вкладку по умолчанию
   useEffect(() => {
@@ -234,6 +247,15 @@ const AccessoryDetailPage = () => {
 
   // Генерируем описание для изделий из бронзы
   const getBronzeDescription = () => {
+    return `Материал, производство, производитель: 
+Бронза, Италия, Caggiati
+
+Монтаж: с помощью штырей на задней стороне
+
+Важно: розничная продажа не осуществляется. Образцы представлены для ознакомления перед заказом памятника.`;
+  };
+
+  const getSculptureDescription = () => {
     return "Скульптура из полимербетона - отличный способ дополнить надгробие, придать ему индивидуальность. Они подходят для памятников, изготовленных из любого вида гранита.\n\nПри выборе скульптуры из полимербетона необходимо ориентироваться на размеры памятника, способ художественного оформления и вид гранита.\n\nБронзовые скульптуры хорошо сочетаются памятники, оформленными буквами из бронзы или позолоченным текстом. Скульптуры цвета белого мрамора хорошо дополняют белый гравированный текст. Модели цвета серебра и бронзы хорошо подходят под любой способ оформления.";
   };
 
@@ -327,8 +349,8 @@ const AccessoryDetailPage = () => {
                     <button
                       onClick={() => setActiveTab("characteristics")}
                       className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${activeTab === "characteristics"
-                          ? ""
-                          : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
+                        ? ""
+                        : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
                         }`}
                     >
                       Характеристики
@@ -338,8 +360,8 @@ const AccessoryDetailPage = () => {
                     <button
                       onClick={() => setActiveTab("description")}
                       className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${activeTab === "description"
-                          ? ""
-                          : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
+                        ? ""
+                        : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
                         }`}
                     >
                       Описание
@@ -370,8 +392,10 @@ const AccessoryDetailPage = () => {
                   <div>
                     <p className="text-[#2D4266] whitespace-pre-wrap">
                       {accessory.description || 
-                       (accessory.category === "Изделия из бронзы" ? getBronzeDescription() : "") ||
-                       (accessory.category === "Рамки" ? getFrameDescription() : "")}
+                        (accessory.category === "Изделия из бронзы" && getBronzeDescription()) ||
+                        (accessory.category === "Скульптуры" && getSculptureDescription()) ||
+                        (accessory.category === "Рамки" && getFrameDescription()) ||
+                        ""}
                     </p>
                   </div>
                 )}
@@ -382,7 +406,7 @@ const AccessoryDetailPage = () => {
       </section>
 
       {/* Слайдер готовых работ с этим товаром */}
-      <OurWorksSlider 
+      <OurWorksSlider
         productId={accessory.id.toString()}
         productType="accessories"
         title="Наши работы"

@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import React, { useState, useRef, useEffect } from "react";
-import { productsMonuments } from "../mock/products";
 import ProductCard from "./ProductCard";
+import { Product } from "../types/types";
 
 const RelatedProductsSlider = () => {
   const [isTablet, setIsTablet] = useState(false);
@@ -11,6 +11,49 @@ const RelatedProductsSlider = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState("Все");
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Функция для загрузки товаров со скидкой из всех API
+  const fetchDiscountedProducts = async () => {
+    setLoading(true);
+    const endpoints = [
+      'https://api.k-r.by/api/monuments',
+      'https://api.k-r.by/api/fences'
+    ];
+
+    let allDiscountedProducts: Product[] = [];
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint);
+        if (response.ok) {
+          const data = await response.json();
+          const products = data.data || [];
+          
+          // Фильтруем товары со скидкой (discount > 0 или есть oldPrice > price)
+          const discountedProducts = products.filter((product: any) => {
+            const hasExplicitDiscount = product.discount && Number(product.discount) > 0;
+            const hasOldPrice = product.oldPrice && Number(product.oldPrice) > Number(product.price || 0);
+            return hasExplicitDiscount || hasOldPrice;
+          });
+          
+          allDiscountedProducts = [...allDiscountedProducts, ...discountedProducts];
+        }
+      } catch (error) {
+        console.warn(`Error fetching from ${endpoint}:`, error);
+      }
+    }
+
+    console.log('Загружено товаров со скидкой:', allDiscountedProducts.length);
+    setAllProducts(allDiscountedProducts);
+    setLoading(false);
+  };
+
+  // Загрузка товаров со скидкой при монтировании компонента
+  useEffect(() => {
+    fetchDiscountedProducts();
+  }, []);
 
   // Для адаптивности
   useEffect(() => {
@@ -50,13 +93,14 @@ const RelatedProductsSlider = () => {
     }
   };
 
-// Фильтр только товары со скидкой (discount !== undefined)
-const discountedProducts = productsMonuments
-  .filter((p) => p.discount !== undefined)
-  .filter(
-    (product) =>
-      activeCategory === "Все" || product.category === activeCategory
-  );
+  // Получаем уникальные категории из загруженных товаров
+  const uniqueCategories = Array.from(new Set(allProducts.map(product => product.category)));
+  const availableCategories = ["Все", ...uniqueCategories];
+
+  // Фильтруем товары по категории
+  const discountedProducts = activeCategory === "Все"
+    ? allProducts
+    : allProducts.filter((product) => product.category === activeCategory);
   
   return (
     <section className="max-w-[1300px]  mt-17 lg:mt-30 container-centered">
@@ -66,13 +110,7 @@ const discountedProducts = productsMonuments
 
       {/* Панель категорий */}
       <div className="flex flex-wrap gap-2 mb-6">
-        {[
-          "Все",
-          "Одиночные",
-          "Двойные",
-          "Эксклюзивные",
-          "Гранитные ограды",
-        ].map((category) => (
+        {availableCategories.map((category) => (
           <button
             key={category}
             onClick={() => setActiveCategory(category)}
@@ -88,66 +126,78 @@ const discountedProducts = productsMonuments
       </div>
 
       <div ref={containerRef} className="relative">
-        {!isMobile && (
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-gray-500">Загружаем товары со скидкой...</div>
+          </div>
+        ) : discountedProducts.length > 0 ? (
           <>
-            <button
-              onClick={scrollLeft}
-              className="absolute left-[-16px] border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2c3a54"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <div
-              ref={sliderRef}
-              className="flex overflow-x-auto pb-4 snap-x snap-mandatory"
-              style={{
-                scrollSnapType: "x mandatory",
-                msOverflowStyle: "none",
-                scrollbarWidth: "none",
-                WebkitOverflowScrolling: "touch",
-              }}
-            >
-              {discountedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} isTablet={isTablet} isMobile={isMobile} isNarrowMobile={isNarrowMobile}/>
-              ))}
-            </div>
-            <button
-              onClick={scrollRight}
-              className="absolute right-[-16px] border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2c3a54"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
-          </>
-        )}
+            {!isMobile && (
+              <>
+                <button
+                  onClick={scrollLeft}
+                  className="absolute -left-4 border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2c3a54"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                </button>
+                <div
+                  ref={sliderRef}
+                  className="flex overflow-x-auto pb-4 snap-x snap-mandatory"
+                  style={{
+                    scrollSnapType: "x mandatory",
+                    msOverflowStyle: "none",
+                    scrollbarWidth: "none",
+                    WebkitOverflowScrolling: "touch",
+                  }}
+                >
+                  {discountedProducts.map((product) => (
+                    <ProductCard key={product.slug || `product-${product.id}`} product={product} isTablet={isTablet} isMobile={isMobile} isNarrowMobile={isNarrowMobile}/>
+                  ))}
+                </div>
+                <button
+                  onClick={scrollRight}
+                  className="absolute -right-4 border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#2c3a54"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M9 6l6 6-6 6" />
+                  </svg>
+                </button>
+              </>
+            )}
 
-        {isMobile && (
-          <div className="grid grid-cols-2 ">
-            {discountedProducts.map((product) => (
-              <ProductCard key={product.id} product={product} isTablet={isTablet} isMobile={isMobile} isNarrowMobile={isNarrowMobile}/>
-            ))}
+            {isMobile && (
+              <div className="grid grid-cols-2 ">
+                {discountedProducts.map((product) => (
+                  <ProductCard key={product.slug || `product-${product.id}`} product={product} isTablet={isTablet} isMobile={isMobile} isNarrowMobile={isNarrowMobile}/>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center text-gray-500 py-8">
+            Товары со скидкой не найдены в выбранной категории.
           </div>
         )}
       </div>

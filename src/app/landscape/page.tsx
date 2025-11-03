@@ -204,7 +204,7 @@ const LandscapePage = () => {
                         {isClient ? (
                             currentProducts.map((product) => (
                                 <ProductCard
-                                    key={product.id}
+                                    key={product.slug || `product-${product.id}`}
                                     product={{
                                         id: product.id,
                                         slug: product.slug,
@@ -227,7 +227,7 @@ const LandscapePage = () => {
                             ))
                         ) : (
                             currentProducts.map((product) => (
-                                <div key={product.id} className="invisible h-0" />
+                                <div key={product.slug || `product-${product.id}`} className="invisible h-0" />
                             ))
                         )}
                     </div>

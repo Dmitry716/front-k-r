@@ -10,10 +10,11 @@ interface Stats {
   campaigns: number;
   blogs: number;
   works: number;
+  fences: number;
 }
 
 export default function AdminPage() {
-  const [stats, setStats] = useState<Stats>({ epitaphs: 0, products: 0, campaigns: 0, blogs: 0, works: 0 });
+  const [stats, setStats] = useState<Stats>({ epitaphs: 0, products: 0, campaigns: 0, blogs: 0, works: 0, fences: 0 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,7 +26,7 @@ export default function AdminPage() {
       const epitaphsData = await apiClient.get("/epitaphs");
       const epitaphsCount = epitaphsData.data?.length || 0;
 
-      const productsData = await apiClient.get("/monuments");
+      const productsData = await apiClient.get("/monuments?limit=1000");
       const productsCount = productsData.data?.length || 0;
 
       const campaignsData = await apiClient.get("/campaigns");
@@ -37,12 +38,16 @@ export default function AdminPage() {
       const worksData = await apiClient.get("/works");
       const worksCount = worksData.data?.length || 0;
 
+      const fencesData = await apiClient.get("/fences");
+      const fencesCount = fencesData.data?.length || 0;
+
       setStats({
         epitaphs: epitaphsCount,
         products: productsCount,
         campaigns: campaignsCount,
         blogs: blogsCount,
         works: worksCount,
+        fences: fencesCount,
       });
     } catch (err) {
       console.error("Failed to fetch stats:", err);
@@ -74,7 +79,7 @@ export default function AdminPage() {
       description: "Управление гранитными и металлическими оградами",
       icon: "🚧",
       color: "bg-amber-50 border-amber-200",
-      count: 0,
+      count: stats.fences
     },
     {
       href: "/admin/landscape",

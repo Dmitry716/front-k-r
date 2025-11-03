@@ -13,10 +13,35 @@ interface ProductCardProps {
 
 // Функция для формирования ссылки на товар в зависимости от категории
 const generateProductHref = (product: Product): string => {
+  // Отладка для всех памятников 
+  console.log('generateProductHref called for:', {
+    name: product.name,
+    category: product.category,
+    slug: product.slug
+  });
+  
   // Если это памятник
-  if (['Одиночные', 'Двойные', 'Эксклюзивные', 'Недорогие', 'В виде креста', 'В виде сердца', 'Составные', 'Европейские', 'Художественная  резка', 'В виде деревьев', 'Мемориальные Комплексы', 'Бюджетные'].includes(product.category)) {
+  const monumentCategories = [
+    // Русские названия
+    'Одиночные', 'Двойные', 'Эксклюзивные', 'Недорогие', 'В виде креста', 'В виде сердца', 
+    'Составные', 'Европейские', 'Художественная резка', 'В виде деревьев', 'Мемориальные комплексы', 'Бюджетные',
+    // Полные русские названия из админки
+    'Одиночные памятники', 'Двойные памятники', 'Недорогие памятники', 'Памятники в виде креста', 
+    'Памятники в виде сердца', 'Составные памятники', 'Европейские памятники', 'Художественная резка',
+    'Памятники в виде деревьев', 'Мемориальные комплексы', 'Эксклюзивные памятники',
+    // Английские ключи (которые сохраняются в БД)
+    'single', 'double', 'exclusive', 'cheap', 'cross', 'heart', 'composite', 'europe', 
+    'artistic', 'tree', 'complex', 'budget'
+  ];
+  
+  console.log('Checking if category matches:', product.category, 'in', monumentCategories);
+  console.log('Category match result:', monumentCategories.includes(product.category));
+  
+  if (monumentCategories.includes(product.category)) {
+    console.log('✓ Category matched, generating monument URL');
     // Маппим названия категорий в URL slugs
     const categoryMap: Record<string, string> = {
+      // Короткие русские названия
       'Одиночные': 'single',
       'Двойные': 'double',
       'Эксклюзивные': 'exclusive',
@@ -25,13 +50,38 @@ const generateProductHref = (product: Product): string => {
       'В виде сердца': 'heart',
       'Составные': 'composite',
       'Европейские': 'europe',
-      'Художественная  резка': 'artistic',
+      'Художественная резка': 'artistic',
       'В виде деревьев': 'tree',
-      'Мемориальные Комплексы': 'complex',
+      'Мемориальные комплексы': 'complex',
       'Бюджетные': 'budget',
+      // Полные русские названия из админки
+      'Одиночные памятники': 'single',
+      'Двойные памятники': 'double',
+      'Недорогие памятники': 'cheap',
+      'Памятники в виде креста': 'cross',
+      'Памятники в виде сердца': 'heart',
+      'Составные памятники': 'composite',
+      'Европейские памятники': 'europe',
+      'Памятники в виде деревьев': 'tree',
+      'Эксклюзивные памятники': 'exclusive',
+      // Английские ключи (те что приходят из БД)
+      'single': 'single',
+      'double': 'double',
+      'exclusive': 'exclusive',
+      'cheap': 'cheap',
+      'cross': 'cross',
+      'heart': 'heart',
+      'composite': 'composite',
+      'europe': 'europe',
+      'artistic': 'artistic',
+      'tree': 'tree',
+      'complex': 'complex',
+      'budget': 'budget',
     };
     const categorySlug = categoryMap[product.category] || 'single';
-    return `/monuments/${categorySlug}/${product.slug}`;
+    const finalUrl = `/monuments/${categorySlug}/${product.slug}`;
+    console.log('✓ Generated monument URL:', finalUrl);
+    return finalUrl;
   }
 
   // Если это ограда
@@ -60,17 +110,19 @@ const generateProductHref = (product: Product): string => {
   }
 
   // Если это ландшафт
-  if (['Столы и скамейки', 'Щебень декоративный', 'Металлические элементы'].includes(product.category)) {
+  if (['Столы и скамейки', 'Щебень декоративный', 'Щебень', 'Металлические элементы'].includes(product.category)) {
     const categoryMap: Record<string, string> = {
       'Столы и скамейки': 'benches',
       'Щебень декоративный': 'gravel',
+      'Щебень': 'gravel',
       'Металлические элементы': 'metal-elements',
     };
-    const categorySlug = categoryMap[product.category] || 'tables';
+    const categorySlug = categoryMap[product.category] || 'gravel';
     return `/landscape/${categorySlug}/${product.slug}`;
   }
 
   // Fallback
+  console.log('❌ No URL generated for product:', product.name, 'category:', product.category);
   return '';
 };
 
@@ -89,10 +141,15 @@ const ProductCard = ({
 
   useEffect(() => {
     setIsClient(true);
-    // Инициализация состояния из localStorage
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-    setIsFavorite(favorites.includes(product.id));
-  }, [product.id]);
+    // Инициализация состояния из localStorage используя slug
+    if (product.slug) {
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      // Проверяем как новый формат (slug), так и старый (ID)
+      const isFavoriteBySlug = favorites.includes(product.slug);
+      const isFavoriteById = favorites.includes(product.id);
+      setIsFavorite(isFavoriteBySlug || isFavoriteById);
+    }
+  }, [product.slug, product.id]);
 
   // Инициализация дефолтного цвета на планшете
   useEffect(() => {
@@ -107,9 +164,21 @@ const ProductCard = ({
   }
 
   // Проверяем, существуют ли цвета и есть ли в них хотя бы один элемент
-  const productColors: ColorOption[] = Array.isArray(product.colors)
-    ? product.colors
-    : [];
+  const productColors: ColorOption[] = (() => {
+    if (Array.isArray(product.colors)) {
+      return product.colors;
+    }
+    if (typeof product.colors === 'string') {
+      try {
+        const parsed = JSON.parse(product.colors);
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (e) {
+        console.warn('Failed to parse colors JSON:', product.colors);
+        return [];
+      }
+    }
+    return [];
+  })();
 
   const hasColors = productColors.length > 0;
 
@@ -127,8 +196,48 @@ const ProductCard = ({
 
   // Используем цену и скидку ТЕКУЩЕГО выбранного цвета (не дефолта!) с fallback на основные свойства продукта
   const currentPrice = currentColor?.price ?? product.price;
-  const currentOldPrice = currentColor?.oldPrice ?? product.oldPrice;
-  const currentDiscount = currentColor?.discount ?? product.discount;
+  
+  // Для oldPrice и discount используем умную логику:
+  // - Если нет цветов вообще - используем product.oldPrice
+  // - Если есть цвета, но у текущего цвета нет oldPrice И это эксклюзивный памятник - НЕ используем fallback
+  // - Если есть цвета, но у текущего цвета нет oldPrice И это НЕ эксклюзивный памятник - используем fallback на product.oldPrice
+  const isExclusiveMonument = product.category === 'Эксклюзивные' || product.category === 'exclusive';
+  
+  let currentOldPrice: number | null | undefined;
+  let currentDiscount: number | null | undefined;
+  
+  if (!hasColors) {
+    // Нет цветов - используем основные свойства продукта
+    currentOldPrice = product.oldPrice;
+    currentDiscount = product.discount;
+  } else if (currentColor?.oldPrice !== null && currentColor?.oldPrice !== undefined) {
+    // У цвета есть собственная старая цена
+    currentOldPrice = currentColor.oldPrice;
+    currentDiscount = currentColor.discount;
+  } else if (isExclusiveMonument) {
+    // Эксклюзивный памятник без скидки у цвета - НЕ показываем скидку
+    currentOldPrice = null;
+    currentDiscount = null;
+  } else {
+    // Обычный памятник без скидки у цвета - используем скидку продукта
+    currentOldPrice = product.oldPrice;
+    currentDiscount = product.discount;
+  }
+
+  // Временное логирование для отладки
+  if (product.name.includes("О-22") || product.name.includes("О-25")) {
+    console.log("Product debug:", {
+      name: product.name,
+      price: product.price,
+      oldPrice: product.oldPrice,
+      discount: product.discount,
+      currentPrice,
+      currentOldPrice,
+      currentDiscount,
+      hasColors,
+      currentColor
+    });
+  }
 
   // Функция для отображения цены
   const formatPriceDisplay = (price: number | null | undefined, description?: string | null): string | null => {
@@ -149,38 +258,61 @@ const ProductCard = ({
   const specialPrice = formatPriceDisplay(currentPrice, product.description);
   const shouldUseSpecialPrice = specialPrice !== null;
 
+  // Рассчитываем скидку автоматически, если она не задана явно
+  const calculateDiscount = (price: number | null | undefined, oldPrice: number | null | undefined): number | null => {
+    if (price && oldPrice && oldPrice > price) {
+      return Math.round(((oldPrice - price) / oldPrice) * 100);
+    }
+    return null;
+  };
+
   // Есть ли скидка на текущем выбранном/наведенном цвете
   const hasDiscount = (() => {
-    const result = (() => {
-      // Если нет цветов вообще, проверяем скидку основного товара
-      if (!hasColors) {
-        return product.discount !== null && product.discount !== undefined && product.discount > 0;
+    // Если нет цветов вообще, проверяем скидку основного товара
+    if (!hasColors) {
+      // Сначала проверяем явно заданную скидку
+      if (product.discount !== null && product.discount !== undefined && Number(product.discount) > 0) {
+        return true;
+      }
+      // Если явной скидки нет, рассчитываем из цен
+      const calculatedDiscount = calculateDiscount(product.price, product.oldPrice);
+      return calculatedDiscount !== null && calculatedDiscount > 0;
+    }
+    
+    // Если есть цвета, проверяем скидку у конкретного цвета
+    if (hasColors && currentColor) {
+      // Сначала проверяем явно заданную скидку цвета
+      const colorOriginalDiscount = currentColor.discount;
+      if (colorOriginalDiscount !== null && colorOriginalDiscount !== undefined && 
+          Number(colorOriginalDiscount) > 0) {
+        return true;
       }
       
-      // Если есть цвета, проверяем скидку у конкретного цвета
-      if (hasColors && currentColor) {
-        // Проверяем, есть ли у этого цвета собственная скидка в исходных данных
-        // Если discount у цвета null, undefined или 0 - значит у него нет скидки
-        const colorOriginalDiscount = currentColor.discount;
-        
-        // Если у цвета есть собственная скидка (не null/undefined и больше 0)
-        if (colorOriginalDiscount !== null && colorOriginalDiscount !== undefined && 
-            Number(colorOriginalDiscount) > 0) {
-          return true;
-        }
-        
-        // Если мы на первом цвете и у него нет собственной скидки,
-        // но есть скидка на основном товаре - показываем скидку основного товара
-        if (currentColorIndex === 0 && 
-            (colorOriginalDiscount === null || colorOriginalDiscount === undefined || Number(colorOriginalDiscount) === 0)) {
-          return product.discount !== null && product.discount !== undefined && Number(product.discount) > 0;
-        }
+      // Если явной скидки у цвета нет, рассчитываем из цен цвета
+      const calculatedColorDiscount = calculateDiscount(currentColor.price, currentColor.oldPrice);
+      if (calculatedColorDiscount !== null && calculatedColorDiscount > 0) {
+        return true;
       }
       
-      return false;
-    })();
-
-    return result;
+      // Для эксклюзивных памятников НЕ используем fallback к основному товару
+      if (isExclusiveMonument) {
+        return false;
+      }
+      
+      // Для обычных памятников проверяем скидку основного товара как fallback
+      // Сначала проверяем явно заданную скидку основного товара
+      if (product.discount !== null && product.discount !== undefined && Number(product.discount) > 0) {
+        return true;
+      }
+      
+      // Если явной скидки нет, рассчитываем из цен основного товара
+      const calculatedProductDiscount = calculateDiscount(product.price, product.oldPrice);
+      if (calculatedProductDiscount !== null && calculatedProductDiscount > 0) {
+        return true;
+      }
+    }
+    
+    return false;
   })();
 
   // Обработчик свайпа по изображению (адаптирован из вашего кода)
@@ -254,21 +386,43 @@ const ProductCard = ({
 
   // Обработчик клика на звезду (избранное)
   const toggleFavorite = () => {
+    if (!product.slug) {
+      console.warn('Товар не имеет slug, нельзя добавить в избранное');
+      return;
+    }
+
     const newIsFavorite = !isFavorite;
     setIsFavorite(newIsFavorite);
 
-    // Обновляем localStorage
-    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    // Получаем текущие избранные и очищаем от старых числовых ID
+    let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    
+    // Фильтруем только строки (slug'и), удаляя числовые ID
+    favorites = favorites.filter((item: any) => typeof item === 'string');
+    
+    console.log('toggleFavorite:', {
+      productSlug: product.slug,
+      productName: product.name,
+      newIsFavorite,
+      currentFavorites: favorites
+    });
+
     if (newIsFavorite) {
       // Добавляем в избранное
-      if (!favorites.includes(product.id)) {
-        favorites.push(product.id);
+      if (!favorites.includes(product.slug)) {
+        favorites.push(product.slug);
         localStorage.setItem('favorites', JSON.stringify(favorites));
+        console.log('Добавлен в избранное:', product.slug);
+        console.log('Новый список избранного:', favorites);
       }
     } else {
-      // Удаляем из избранного
-      const newFavorites = favorites.filter((id: number) => id !== product.id);
+      // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
+      const newFavorites = favorites.filter((item: any) => 
+        item !== product.slug && item !== product.id
+      );
       localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      console.log('Удалён из избранного:', product.slug);
+      console.log('Новый список избранного:', newFavorites);
     }
 
     window.dispatchEvent(new Event('favoritesChanged'));
@@ -282,7 +436,22 @@ const ProductCard = ({
       {/* Бейдж скидки */}
       {hasDiscount && (
         <div className="absolute top-2 left-2 z-20 bg-[#cd5554] text-white text-xs font-bold px-2.5 py-0.75 rounded-xl">
-          Сегодня -{(currentDiscount && currentDiscount > 0) ? currentDiscount : product.discount}%
+          Сегодня -{(() => {
+            // Пытаемся взять явную скидку
+            if (hasColors && currentColor && currentColor.discount && Number(currentColor.discount) > 0) {
+              return currentColor.discount;
+            }
+            if (product.discount && Number(product.discount) > 0) {
+              return product.discount;
+            }
+            // Если явной скидки нет, рассчитываем
+            if (hasColors && currentColor) {
+              const calculated = calculateDiscount(currentColor.price, currentColor.oldPrice);
+              if (calculated && calculated > 0) return calculated;
+            }
+            const calculated = calculateDiscount(currentPrice, currentOldPrice);
+            return calculated || 0;
+          })()}%
         </div>
       )}
       
@@ -387,20 +556,29 @@ const ProductCard = ({
                 {product.textPrice}
               </span>
             ) : currentPrice !== undefined && currentPrice !== null ? (
-              hasDiscount && currentOldPrice && currentOldPrice !== null ? (
-                <>
-                  <span className="font-bold text-xl text-[#cd5554]">
+              (() => {
+                // Проверяем есть ли скидка (как в эксклюзивных памятниках)
+                const hasCurrentDiscount = (hasColors && currentColor?.discount && Number(currentColor.discount) > 0) ||
+                                           (!hasColors && product.discount && Number(product.discount) > 0) ||
+                                           (currentOldPrice && Number(currentOldPrice) > Number(currentPrice));
+                
+                return hasCurrentDiscount ? (
+                  <>
+                    <span className="font-bold text-xl text-[#cd5554]">
+                      {product.category === 'Составные' ? 'от ' : ''}{currentPrice} руб.
+                    </span>
+                    {currentOldPrice && Number(currentOldPrice) > 0 && (
+                      <span className="text-[12px] text-gray-500 line-through">
+                        {currentOldPrice} руб.
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  <span className="text-xl font-bold text-[#2c3a54]">
                     {product.category === 'Составные' ? 'от ' : ''}{currentPrice} руб.
                   </span>
-                  <span className="text-[12px] text-gray-500 line-through">
-                    {currentOldPrice} руб.
-                  </span>
-                </>
-              ) : (
-                <span className="text-xl font-bold text-[#2c3a54]">
-                  {product.category === 'Составные' ? 'от ' : ''}{currentPrice} руб.
-                </span>
-              )
+                );
+              })()
             ) : null}
           </div>
 

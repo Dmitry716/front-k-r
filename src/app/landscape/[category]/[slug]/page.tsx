@@ -39,22 +39,31 @@ const SPEC_LABELS: Record<string, string> = {
   chair: "Стул",
   leg: "Ножка",
   height: "Высота",
+  weight: "Вес",
   material: "Материал",
   warranty: "Гарантия",
   fractionSize: "Размер фракции",
   composition: "Состав",
+  graveExpenses: "Расходы на могилу",
+  flowerBedExpenses: "Расходы на цветник",
+  graniteTypes: "Другие виды гранита",
+  secondarySize: "Другой размер",
+  storage: "Хранение",
+  antirain: "Антидождь"
 };
 
 // Статичные характеристики для каждой категории
 const STATIC_CHARACTERISTICS: Record<string, Record<string, string>> = {
   "Щебень": {
-    fractionSize: "5-20 мм",
-    composition: "Гранитный щебень высшего качества",
-    material: "Гранит",
-    warranty: "Не ограничена"
+    weight: "20 кг",
+    graveExpenses: "4-8 мешков",
+    flowerBedExpenses: "1-2 мешка"
   },
   "Столы и скамейки": {
-    material: "Гранит",
+    material: "Гранит Габбро Карелия",
+    graniteTypes: "Более 20",
+    secondarySize: "Возможно",
+    storage: "Бесплатно",
     warranty: "10 лет"
   }
 };
@@ -229,15 +238,15 @@ const LandscapeDetailPage = () => {
           <SidebarStickyHelp />
         </div>
 
-        <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+        <div className="w-full lg:ml-5 lg:max-w-[75%]">
           <PathPage />
 
-          <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">
+          <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">
             {landscapeItem.name}
           </h1>
 
           {/* Основной контент карточки */}
-          <div className={`mb-7.5 font-[600] ${isMobile ? 'block' : 'flex p-5'}`}>
+          <div className={`mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
             {/* Изображение */}
             <div className="relative max-w-[523px] md:w-7/12 mx-auto">
               {/* Звезда (избранное) */}
@@ -343,7 +352,7 @@ const LandscapeDetailPage = () => {
               </div>
 
               {/* Контент вкладок */}
-              <div className="mb-7.5 font-[600]">
+              <div className="mb-7.5 font-semibold">
                 {activeTab === "characteristics" && hasCharacteristics && (
                   <div>
                     <div className="space-y-1">

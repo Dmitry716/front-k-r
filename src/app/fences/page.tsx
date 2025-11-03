@@ -115,7 +115,7 @@ const FencesPage = () => {
 
                     <div className={`${isTablet ? 'container-centered' : ''}`}>
                         <PathPage />
-                        <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Гранитные памятники на могилу</h1>
+                        <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Ограды на кладбище</h1>
 
                         {/* Блок категорий */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">

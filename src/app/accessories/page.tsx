@@ -173,7 +173,7 @@ const AccessoriesPage = () => {
                         {isClient ? (
                             currentProducts.map((product: any) => (
                                 <ProductCard
-                                    key={product.id}
+                                    key={`accessories-${product.id}`}
                                     product={product}
                                     isTablet={isTablet}
                                     isMobile={isMobile}
@@ -182,7 +182,7 @@ const AccessoriesPage = () => {
                             ))
                         ) : (
                             currentProducts.map((product) => (
-                                <div key={product.id} className="invisible h-0" />
+                                <div key={`product-${product.id}`} className="invisible h-0" />
                             ))
                         )}
                     </div>

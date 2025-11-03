@@ -17,11 +17,14 @@ const StoreInfo = () => {
   const statusColor = isOpen ? "bg-green-500" : "bg-red-500";
 
   const slides = [
-    { id: 1, src: "/shop-slider/1.webp", alt: "Слайд 1" },
-    { id: 2, src: "/shop-slider/2.webp", alt: "Слайд 2" },
-    { id: 3, src: "/shop-slider/3.webp", alt: "Слайд 3" },
-    { id: 4, src: "/shop-slider/4.webp", alt: "Слайд 4" },
-    { id: 5, src: "/shop-slider/5.webp", alt: "Слайд 5" },
+    { id: 1, src: "/shop-slider/1.jpg", alt: "Слайд 1" },
+    { id: 2, src: "/shop-slider/2.jpg", alt: "Слайд 2" },
+    { id: 3, src: "/shop-slider/3.jpg", alt: "Слайд 3" },
+    { id: 4, src: "/shop-slider/4.jpg", alt: "Слайд 4" },
+    { id: 5, src: "/shop-slider/5.jpg", alt: "Слайд 5" },
+    { id: 6, src: "/shop-slider/6.jpg", alt: "Слайд 6" },
+    { id: 7, src: "/shop-slider/7.jpg", alt: "Слайд 7" },
+    { id: 8, src: "/shop-slider/8.jpg", alt: "Слайд 8" },
   ];
 
   // Состояние для каждого breakpoint'а — чтобы не было конфликтов
@@ -244,7 +247,7 @@ const StoreInfo = () => {
           {slides.map((slide, index) => (
             <div
               key={slide.id}
-              className="flex-shrink-0 px-2.5 cursor-pointer"
+              className="shrink-0 px-2.5 cursor-pointer"
               style={{ width: `${slideWidthPercent}%` }}
               onClick={() => openModal(index)} // Открываем модалку при клике
             >
@@ -253,8 +256,8 @@ const StoreInfo = () => {
                 alt={slide.alt}
                 className={
                   isSmallScreen
-                    ? "w-full h-[240px] rounded-lg object-cover"
-                    : "w-full h-full rounded-lg object-cover"
+                    ? "w-full h-60 rounded-lg object-cover"
+                    : "w-full h-full aspect-square rounded-lg object-cover"
                 }
               />
             </div>
