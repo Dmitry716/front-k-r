@@ -5,13 +5,15 @@ import { forwardRef } from "react";
 interface PhoneDropdownProps {
   isPhoneDropdownOpen: boolean;
   PHONE_MTS: string;
-  PHONE_A1: string; 
+  PHONE_A1: string;
+  onLinkClick?: () => void;
 }
 
 const PhoneDropdown = forwardRef<HTMLDivElement, PhoneDropdownProps> (({
   isPhoneDropdownOpen,
   PHONE_MTS,
   PHONE_A1,
+  onLinkClick,
 }, ref) => {
   if (!isPhoneDropdownOpen) return null;
 
@@ -21,6 +23,7 @@ const PhoneDropdown = forwardRef<HTMLDivElement, PhoneDropdownProps> (({
       id="phone-dropdown"
       role="menu"
       aria-label="Контактная информация"
+      onClick={onLinkClick}
       className="
         absolute top-[76px] right-0 left-0 
         z-50 

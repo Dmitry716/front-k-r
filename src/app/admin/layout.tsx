@@ -12,6 +12,7 @@ export default function AdminLayout({
 
   const menuItems = [
     { href: "/admin", label: "Панель управления", icon: "📊" },
+    { href: "/admin/pages", label: "Описания страниц", icon: "📄" },
     { href: "/admin/epitaphs", label: "Эпитафии", icon: "✝️" },
     { href: "/admin/campaigns", label: "Акции", icon: "🎯" },
     { href: "/admin/accessories", label: "Аксессуары", icon: "💎" },

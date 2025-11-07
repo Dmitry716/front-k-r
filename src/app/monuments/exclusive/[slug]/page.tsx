@@ -51,7 +51,7 @@ const ExclusiveProductPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedColor, setSelectedColor] = useState<ColorOption | null>(null);
-  const [activeTab, setActiveTab] = useState<"characteristics" | "description">(
+  const [activeTab, setActiveTab] = useState<"characteristics" | "description" | "granite">(
     "characteristics"
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -123,7 +123,10 @@ const ExclusiveProductPage = () => {
   useEffect(() => {
     if (product) {
       const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-      setIsFavorite(favorites.includes(product.id));
+      // Проверяем как по slug, так и по старому id для совместимости
+      const isFavoriteBySlug = favorites.includes(product.slug);
+      const isFavoriteById = favorites.includes(product.id);
+      setIsFavorite(isFavoriteBySlug || isFavoriteById);
       // Устанавливаем дефолтный цвет (первый в массиве)
       if (product.colors && product.colors.length > 0) {
         // Ищем цвет со скидкой или берем первый
@@ -185,18 +188,34 @@ const ExclusiveProductPage = () => {
 
   // Обработчики
   const toggleFavorite = () => {
+    if (!product.slug) {
+      console.warn('Товар не имеет slug, нельзя добавить в избранное');
+      return;
+    }
+
     const newIsFavorite = !isFavorite;
     setIsFavorite(newIsFavorite);
 
-    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    // Получаем текущие избранные и очищаем от старых числовых ID
+    let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    
+    // Фильтруем только строки (slug'и), удаляя числовые ID
+    favorites = favorites.filter((item: any) => typeof item === 'string');
+
     if (newIsFavorite) {
-      if (!favorites.includes(product.id)) {
-        favorites.push(product.id);
+      // Добавляем в избранное
+      if (!favorites.includes(product.slug)) {
+        favorites.push(product.slug);
         localStorage.setItem("favorites", JSON.stringify(favorites));
+        console.log('Добавлен в избранное:', product.slug);
       }
     } else {
-      const newFavorites = favorites.filter((id: number) => id !== product.id);
+      // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
+      const newFavorites = favorites.filter((item: any) => 
+        item !== product.slug && item !== product.id
+      );
       localStorage.setItem("favorites", JSON.stringify(newFavorites));
+      console.log('Удалён из избранного:', product.slug);
     }
 
     window.dispatchEvent(new Event("favoritesChanged"));
@@ -358,8 +377,8 @@ const ExclusiveProductPage = () => {
                 </div>
               )}
 
-              {/* Плашка ХИТ */}
-              {product.hit && (
+              {/* Плашка ХИТ - привязана к выбранному цвету */}
+              {selectedColor?.hit && (
                 <div className={`absolute left-2 z-20 bg-gray-600 text-white text-xs font-bold px-2.5 py-0.75 rounded-xl ${
                   selectedColor?.discount && selectedColor.discount > 0 ? 'top-12' : 'top-2'
                 }`}>
@@ -369,7 +388,15 @@ const ExclusiveProductPage = () => {
 
               {/* Звезда (избранное) */}
               <div
-                className={`absolute ${selectedColor?.discount && selectedColor.discount > 0 ? 'top-20' : product.hit ? 'top-12' : 'top-2'} left-2 z-10 w-11 h-11 text-center content-center flex-wrap text-2xl shadow-xs rounded-full hover:text-[#2c3a54] transition cursor-pointer ${
+                className={`absolute ${
+                  selectedColor?.discount && selectedColor.discount > 0 && selectedColor?.hit 
+                    ? 'top-20' 
+                    : selectedColor?.discount && selectedColor.discount > 0 
+                      ? 'top-12' 
+                      : selectedColor?.hit 
+                        ? 'top-12' 
+                        : 'top-2'
+                } left-2 z-10 w-11 h-11 text-center content-center flex-wrap text-2xl shadow-xs rounded-full hover:text-[#2c3a54] transition cursor-pointer ${
                   isFavorite ? "text-[#2c3a54]" : "text-gray-400"
                 }`}
                 onClick={toggleFavorite}
@@ -382,6 +409,8 @@ const ExclusiveProductPage = () => {
                 baseImagePath={(selectedColor ? selectedColor.image : product.image).replace(/\/frame_\d+\.jpg$/, '')} 
                 totalFrames={11}
                 frameDelay={500}
+                hasDiscount={!!(selectedColor?.discount && selectedColor.discount > 0)}
+                hasHit={!!selectedColor?.hit}
               />
             </div>
 
@@ -532,6 +561,16 @@ const ExclusiveProductPage = () => {
               >
                 Описание
               </button>
+              <button
+                onClick={() => setActiveTab("granite")}
+                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${
+                  activeTab === "granite"
+                    ? ""
+                    : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
+                }`}
+              >
+                Варианты гранита
+              </button>
             </div>
           </div>
 
@@ -600,6 +639,31 @@ const ExclusiveProductPage = () => {
                 </p>
               </div>
             )}
+
+            {activeTab === "granite" && (
+              <div>
+                <p className="text-[#2D4266] mb-5">
+                  Данный памятник можно изготовить более чем из 20 видов
+                  гранита.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-5">
+                  {graniteTypes.map((type, index) => (
+                    <div
+                      key={type.id}
+                      className="flex flex-col space-y-2 cursor-pointer px-2.5 hover:opacity-80 duration-500"
+                      onClick={() => openGraniteModal(index)}
+                    >
+                      <img
+                        src={type.image}
+                        alt={type.name}
+                        className="w-full h-auto object-cover rounded-lg"
+                      />
+                      <p className="text-[14px] text-[#6B809E]">{type.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -617,6 +681,54 @@ const ExclusiveProductPage = () => {
         onClose={closeModal}
         onSubmit={handleModalSubmit}
       />
+
+      {/* Модальное окно для вариантов гранита */}
+      {isGraniteModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+          onClick={closeGraniteModal}
+        >
+          <div
+            className="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">
+              {currentGraniteSlide + 1} / {graniteTypes.length}
+            </div>
+
+            <button
+              onClick={prevGraniteSlide}
+              className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            >
+              {"<"}
+            </button>
+
+            <button
+              onClick={nextGraniteSlide}
+              className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+            >
+              {">"}
+            </button>
+
+            {/* Изображение */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img
+                src={graniteTypes[currentGraniteSlide].image}
+                alt={graniteTypes[currentGraniteSlide].name}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+
+            {/* Подпись под изображением */}
+            <div className="text-center text-white text-lg font-medium mt-2">
+              {graniteTypes[currentGraniteSlide].name}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

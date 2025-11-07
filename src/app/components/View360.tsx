@@ -6,9 +6,11 @@ interface View360Props {
   baseImagePath: string;
   totalFrames?: number;
   frameDelay?: number;
+  hasDiscount?: boolean;
+  hasHit?: boolean;
 }
 
-export default function View360({ baseImagePath, totalFrames = 11, frameDelay = 500 }: View360Props) {
+export default function View360({ baseImagePath, totalFrames = 11, frameDelay = 500, hasDiscount = false, hasHit = false }: View360Props) {
   const [currentFrame, setCurrentFrame] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
@@ -190,7 +192,13 @@ export default function View360({ baseImagePath, totalFrames = 11, frameDelay = 
         title={isAnimating ? 'Остановить вращение' : 'Начать вращение'}
         className={`
           absolute
-          top-24
+          ${
+            hasDiscount && hasHit 
+              ? 'top-32' 
+              : hasDiscount || hasHit 
+                ? 'top-24' 
+                : 'top-16'
+          }
           left-2
           w-11
           h-11

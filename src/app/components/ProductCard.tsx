@@ -31,7 +31,7 @@ const generateProductHref = (product: Product): string => {
     'Памятники в виде деревьев', 'Мемориальные комплексы', 'Эксклюзивные памятники',
     // Английские ключи (которые сохраняются в БД)
     'single', 'double', 'exclusive', 'cheap', 'cross', 'heart', 'composite', 'europe', 
-    'artistic', 'tree', 'complex', 'budget'
+    'artistic', 'tree', 'complex'
   ];
   
   console.log('Checking if category matches:', product.category, 'in', monumentCategories);
@@ -53,7 +53,6 @@ const generateProductHref = (product: Product): string => {
       'Художественная резка': 'artistic',
       'В виде деревьев': 'tree',
       'Мемориальные комплексы': 'complex',
-      'Бюджетные': 'budget',
       // Полные русские названия из админки
       'Одиночные памятники': 'single',
       'Двойные памятники': 'double',
@@ -76,7 +75,6 @@ const generateProductHref = (product: Product): string => {
       'artistic': 'artistic',
       'tree': 'tree',
       'complex': 'complex',
-      'budget': 'budget',
     };
     const categorySlug = categoryMap[product.category] || 'single';
     const finalUrl = `/monuments/${categorySlug}/${product.slug}`;
@@ -456,7 +454,14 @@ const ProductCard = ({
       )}
       
       {/* Бейдж ХИТ */}
-      {product.hit && (
+      {(() => {
+        // Для эксклюзивных памятников показываем HIT только если у выбранного цвета hit = true
+        if (isExclusiveMonument && hasColors && currentColor) {
+          return currentColor.hit === true;
+        }
+        // Для остальных памятников используем старую логику
+        return product.hit === true;
+      })() && (
         <div className={`absolute left-2 z-20 bg-gray-600 text-white text-xs font-bold px-2.5 py-0.75 rounded-xl ${
           hasDiscount ? 'top-12' : 'top-2'
         }`}>

@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import FooterMenu from "./components/FooterMenu";
+import ScrollToTop from "./components/ScrollToTop";
 import { DropdownProvider } from "./context/DropDownContext";
 
 export const metadata: Metadata = {
@@ -20,6 +21,7 @@ export default function RootLayout({
     <html lang="ru">
       <body className="min-w-[360px]">
       <DropdownProvider>
+        <ScrollToTop />
         <Header />
         {children}
         <Footer />

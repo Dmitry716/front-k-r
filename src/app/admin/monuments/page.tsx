@@ -11,6 +11,7 @@ interface MonumentColor {
   price: number;
   oldPrice: number | null;
   discount: number | null;
+  hit?: boolean;
 }
 
 interface Monument {
@@ -25,6 +26,7 @@ interface Monument {
   image: string;
   popular?: boolean;
   hit?: boolean;
+  new?: boolean;
   height?: string;
   options?: string; // JSON строка с характеристиками
   colors?: string; // JSON строка с массивом цветов для эксклюзивных
@@ -66,12 +68,32 @@ export default function ProductsAdminPage() {
     description: "",
     popular: false,
     hit: false,
+    new: false,
     // Реальные динамические характеристики
     realOptions: {} as {[key: string]: string},
     customOptions: [] as Array<{key: string, value: string}>,
     // Цвета для эксклюзивных памятников
     colors: [] as MonumentColor[],
   });
+
+  // Вспомогательная функция для проверки хитов в цветах эксклюзивных памятников
+  const hasHitInColors = (monument: Monument): boolean => {
+    if (!monument.colors) return false;
+    
+    // Если colors это строка (JSON), парсим её
+    let colorsArray: any[] = [];
+    if (typeof monument.colors === 'string') {
+      try {
+        colorsArray = JSON.parse(monument.colors);
+      } catch (e) {
+        return false;
+      }
+    } else if (Array.isArray(monument.colors)) {
+      colorsArray = monument.colors;
+    }
+    
+    return colorsArray.some((color: any) => color.hit === true);
+  };
 
   // Категории памятников с реальными API endpoints и характеристиками
   const monumentCategories: MonumentCategory[] = [
@@ -204,7 +226,7 @@ export default function ProductsAdminPage() {
     }
   };
 
-  const updateMonumentStatus = async (id: number, hit?: boolean, popular?: boolean) => {
+  const updateMonumentStatus = async (id: number, hit?: boolean, popular?: boolean, isNew?: boolean) => {
     if (!selectedCategory) {
       setError("Выберите категорию");
       return;
@@ -217,6 +239,7 @@ export default function ProductsAdminPage() {
           id,
           hit,
           popular,
+          new: isNew,
           category: selectedCategory,
         });
       if (data.success) {
@@ -335,6 +358,7 @@ export default function ProductsAdminPage() {
       description: monument.description || "",
       popular: monument.popular || false,
       hit: monument.hit || false,
+      new: monument.new || false,
       realOptions: realOptions,
       customOptions: customOptions,
       colors: colors,
@@ -357,6 +381,7 @@ export default function ProductsAdminPage() {
       description: "",
       popular: false,
       hit: false,
+      new: false,
       realOptions: {},
       customOptions: [],
       colors: [],
@@ -379,6 +404,7 @@ export default function ProductsAdminPage() {
       description: "",
       popular: false,
       hit: false,
+      new: false,
       realOptions: {},
       customOptions: [],
       colors: [],
@@ -532,7 +558,8 @@ export default function ProductsAdminPage() {
           image: color.image || "",
           price: color.price ? parseFloat(String(color.price)) : 0,
           oldPrice: color.oldPrice ? parseFloat(String(color.oldPrice)) : null,
-          discount: color.discount ? parseInt(String(color.discount)) : null
+          discount: color.discount ? parseInt(String(color.discount)) : null,
+          hit: color.hit || false
         }));
         colorsJson = JSON.stringify(normalizedColors);
         console.log('Normalized colors for exclusive monument:', normalizedColors);
@@ -817,13 +844,17 @@ export default function ProductsAdminPage() {
             <h3 className="text-lg font-semibold mb-4">
               Статистика - {monumentCategories.find(c => c.key === selectedCategory)?.title}
             </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
               <div className="bg-white p-4 rounded">
                 <div className="text-2xl font-bold text-blue-600">{monuments.length}</div>
                 <div className="text-sm text-gray-600">Всего памятников</div>
               </div>
               <div className="bg-white p-4 rounded">
-                <div className="text-2xl font-bold text-red-600">{monuments.filter(p => p.hit).length}</div>
+                <div className="text-2xl font-bold text-red-600">
+                  {selectedCategory === "exclusive" 
+                    ? monuments.filter(p => hasHitInColors(p)).length
+                    : monuments.filter(p => p.hit).length}
+                </div>
                 <div className="text-sm text-gray-600">Хиты продаж</div>
               </div>
               <div className="bg-white p-4 rounded">
@@ -831,7 +862,15 @@ export default function ProductsAdminPage() {
                 <div className="text-sm text-gray-600">Популярные</div>
               </div>
               <div className="bg-white p-4 rounded">
-                <div className="text-2xl font-bold text-yellow-600">{monuments.filter(p => p.hit && p.popular).length}</div>
+                <div className="text-2xl font-bold text-purple-600">{monuments.filter(p => p.new).length}</div>
+                <div className="text-sm text-gray-600">Новинки</div>
+              </div>
+              <div className="bg-white p-4 rounded">
+                <div className="text-2xl font-bold text-yellow-600">
+                  {selectedCategory === "exclusive"
+                    ? monuments.filter(p => p.popular && hasHitInColors(p)).length
+                    : monuments.filter(p => p.hit && p.popular).length}
+                </div>
                 <div className="text-sm text-gray-600">Хит + Популярный</div>
               </div>
             </div>
@@ -901,21 +940,23 @@ export default function ProductsAdminPage() {
                     </div>
                     
                     <div className="flex items-center space-x-4">
-                      {/* Статус HIT */}
-                      <div className="flex items-center space-x-2">
-                        <label className="flex items-center space-x-1 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={monument.hit}
-                            onChange={(e) => updateMonumentStatus(monument.id, e.target.checked, undefined)}
-                            disabled={loading}
-                            className="w-4 h-4"
-                          />
-                          <span className={`text-sm font-medium ${monument.hit ? 'text-red-600' : 'text-gray-600'}`}>
-                            🔥 ХИТ
-                          </span>
-                        </label>
-                      </div>
+                      {/* Статус HIT - скрываем для эксклюзивных памятников */}
+                      {selectedCategory !== "exclusive" && (
+                        <div className="flex items-center space-x-2">
+                          <label className="flex items-center space-x-1 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={monument.hit}
+                              onChange={(e) => updateMonumentStatus(monument.id, e.target.checked, undefined, undefined)}
+                              disabled={loading}
+                              className="w-4 h-4"
+                            />
+                            <span className={`text-sm font-medium ${monument.hit ? 'text-red-600' : 'text-gray-600'}`}>
+                              🔥 ХИТ
+                            </span>
+                          </label>
+                        </div>
+                      )}
                       
                       {/* Статус ПОПУЛЯРНЫЙ */}
                       <div className="flex items-center space-x-2">
@@ -923,12 +964,28 @@ export default function ProductsAdminPage() {
                           <input
                             type="checkbox"
                             checked={monument.popular}
-                            onChange={(e) => updateMonumentStatus(monument.id, undefined, e.target.checked)}
+                            onChange={(e) => updateMonumentStatus(monument.id, undefined, e.target.checked, undefined)}
                             disabled={loading}
                             className="w-4 h-4"
                           />
                           <span className={`text-sm font-medium ${monument.popular ? 'text-green-600' : 'text-gray-600'}`}>
                             ⭐ ПОПУЛЯРНЫЙ
+                          </span>
+                        </label>
+                      </div>
+                      
+                      {/* Статус НОВИНКА */}
+                      <div className="flex items-center space-x-2">
+                        <label className="flex items-center space-x-1 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={monument.new}
+                            onChange={(e) => updateMonumentStatus(monument.id, undefined, undefined, e.target.checked)}
+                            disabled={loading}
+                            className="w-4 h-4"
+                          />
+                          <span className={`text-sm font-medium ${monument.new ? 'text-purple-600' : 'text-gray-600'}`}>
+                            🆕 НОВИНКА
                           </span>
                         </label>
                       </div>
@@ -965,8 +1022,9 @@ export default function ProductsAdminPage() {
                   </div>
                   
                   {/* Бейджи статуса */}
-                  <div className="mt-3 flex space-x-2">
-                    {monument.hit && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {/* Показываем ХИТ только для не-эксклюзивных памятников */}
+                    {selectedCategory !== "exclusive" && monument.hit && (
                       <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-medium">
                         🔥 ХИТ ПРОДАЖ
                       </span>
@@ -976,7 +1034,19 @@ export default function ProductsAdminPage() {
                         ⭐ ПОПУЛЯРНЫЙ
                       </span>
                     )}
-                    {!monument.hit && !monument.popular && (
+                    {monument.new && (
+                      <span className="bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs font-medium">
+                        🆕 НОВИНКА
+                      </span>
+                    )}
+                    {/* Для эксклюзивных памятников показываем "Эксклюзивный товар" */}
+                    {selectedCategory === "exclusive" && !monument.popular && !monument.new && (
+                      <span className="bg-indigo-100 text-indigo-800 px-2 py-1 rounded text-xs font-medium">
+                        💎 ЭКСКЛЮЗИВНЫЙ ТОВАР
+                      </span>
+                    )}
+                    {/* Для остальных памятников показываем "Обычный товар" если нет статусов */}
+                    {selectedCategory !== "exclusive" && !monument.hit && !monument.popular && !monument.new && (
                       <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs">
                         Обычный товар
                       </span>
@@ -1324,7 +1394,8 @@ export default function ProductsAdminPage() {
                                 image: "",
                                 price: 0,
                                 oldPrice: null,
-                                discount: null
+                                discount: null,
+                                hit: false
                               }]
                             }));
                           }}
@@ -1451,6 +1522,27 @@ export default function ProductsAdminPage() {
                                   }}
                                   className="w-full p-2 border border-gray-300 rounded"
                                 />
+                              </div>
+                              <div>
+                                <label className="block text-sm text-gray-600 mb-1">Статус ХИТ</label>
+                                <label className="flex items-center space-x-2 cursor-pointer">
+                                  <input
+                                    type="checkbox"
+                                    checked={color.hit || false}
+                                    onChange={(e) => {
+                                      setEditForm(prev => ({
+                                        ...prev,
+                                        colors: prev.colors.map((c, i) => 
+                                          i === index ? { ...c, hit: e.target.checked } : c
+                                        )
+                                      }));
+                                    }}
+                                    className="w-4 h-4"
+                                  />
+                                  <span className={`text-sm font-medium ${color.hit ? 'text-red-600' : 'text-gray-600'}`}>
+                                    🔥 ХИТ цвет
+                                  </span>
+                                </label>
                               </div>
                               <div className="flex items-end">
                                 <button

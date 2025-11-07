@@ -11,30 +11,22 @@ import SubcategoryDescription from "@/app/components/SubcategoryDescription";
 import Promo from "@/app/components/Promo";
 import { Product, ColorOption } from "@/app/types/types";
 import { apiClient } from "@/lib/api-client";
+import { PageBlocksRenderer } from "@/components/PageBlocksRenderer";
+import { getPageDescription, getPageSlugForCategory, PageDescription } from "@/lib/page-descriptions";
 
 export const categorySlugToName: Record<string, string> = {
-        'single': 'Одиночные',
-        'одиночные': 'Одиночные',
-        'double': 'Двойные',
-        'двойные': 'Двойные',
-        'cheap': 'Недорогие',
-        'недорогие': 'Недорогие',
-        'cross': 'В виде креста',
-        'в-виде-креста': 'В виде креста',
-        'heart': 'В виде сердца',
-        'в-виде-сердца': 'В виде сердца',
-        'composite': 'Составные',
-        'составные': 'Составные',
-        'europe': 'Европейские',
-        'европейские': 'Европейские',
-        'artistic': 'Художественная резка',
-        'художественная-резка': 'Художественная резка',
-        'tree': 'В виде деревьев',
-        'в-виде-деревьев': 'В виде деревьев',
-        'complex': 'Мемориальные комплексы',
-        'мемориальные-комплексы': 'Мемориальные комплексы',
-        'exclusive': 'Эксклюзивные',
-    };
+    'single': 'Одиночные',
+    'double': 'Двойные',
+    'cheap': 'Недорогие',
+    'cross': 'В виде креста',
+    'heart': 'В виде сердца',
+    'composite': 'Составные',
+    'europe': 'Европейские',
+    'artistic': 'Художественная резка',
+    'tree': 'В виде деревьев',
+    'complex': 'Мемориальные комплексы',
+    'exclusive': 'Эксклюзивные',
+};
 
 // Функция для конвертации товара из БД в формат ProductCard
 function convertExclusiveToProductFormat(dbProduct: Record<string, unknown>) {
@@ -80,6 +72,7 @@ function convertExclusiveToProductFormat(dbProduct: Record<string, unknown>) {
         options: parsedOptions, // Объект опций
         hit: Boolean(dbProduct.hit),
         popular: Boolean(dbProduct.popular),
+        new: Boolean(dbProduct.new),
     };
 }
 
@@ -106,262 +99,115 @@ interface DescriptionSection {
 const subcategoryData: Record<string, CategoryData> = {
     "single": {
         title: "Одиночные памятники",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Современный вертикальный памятник — это наиболее популярный формат монумента, который заказывают для обустройства одиночных могил. Одиночные памятники — это компактные надгробия, дизайн которых разрабатывается по индивидуальным 3D-эскизам."
-            },
-            {
-                type: 'paragraph',
-                content: "Если вам нужен качественный и долговечный одиночный памятник, обратите внимание на модели из гранита — наиболее прочного материала, используемого для производства монументов."
-            },
-            {
-                type: 'heading',
-                content: "Гранитный памятник имеет следующие преимущества перед изделиями из других материалов:"
-            },
-            {
-                type: 'unorderedList',
-                items: [
-                    "привлекательный внешний вид;",
-                    "износостойчивость;",
-                    "неприхотливость в уходе;",
-                    "прочность;",
-                    "защита от температурных перепадов и механических повреждений."
-                ]
-            },
-            {
-                type: 'heading',
-                content: "Гранитный вертикальный памятник может иметь разную форму:"
-            },
-            {
-                type: 'unorderedList',
-                items: [
-                    "простую (прямоугольную);",
-                    "фигурную (овальную, арочную, форму цветка или пламени);",
-                    "монумент в полный рост;",
-                    "эксклюзивную (к примеру, памятник с барельефом или элементами скульптурами). Монументы из гранита, которые можно заказать на нашем сайте, отличаются долгим сроком службы: на любой одиночный памятник из гранита распространяется гарантия 10 лет."
-                ]
-            },
-            {
-                type: 'paragraph',
-                content: "Для защиты от преждевременного износа одиночный монумент покрывается специальным составом «Антидождь», который предотвращает негативное влияние влаги на материал."
-            },
-            {
-                type: 'heading',
-                content: "Как заказать вертикальный памятник"
-            },
-            {
-                type: 'paragraph',
-                content: "Если вы хотите обустроить место захоронения близкого человека, закажите одиночный монумент в нашей компании, которая предлагает своим клиентам широкий ассортимент изделий из гранита по доступным ценам."
-            },
-            {
-                type: 'paragraph',
-                content: "В каталоге компании вы сможете выбрать подходящий памятник, дизайн которого будет разработан с учетом 3D эскиза."
-            },
-            {
-                type: 'paragraph',
-                content: "Вся продукция отличается безупречным качеством, а также разнообразием форм и дизайнов."
-            },
-            {
-                type: 'paragraph',
-                content: "В нашем каталоге вы сможете выбрать подходящий одиночный монумент, который прослужит не один десяток лет и сохранит свой безупречный внешний вид."
-            },
-        ],
         products: [], // Будет загружено через API
         otherCategories: [
             { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
             { title: "Памятники", image: "/section/single.webp", link: "/monuments" },
             { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
         ],
-        sortOptions: ["Со скидкой", "Строгие", "Фигурные", "С крестом"],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
     },
     "double": {
-        title: "Двойные памятники на могилу",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Двойной памятник — разновидность надгробного камня (также называемого \"стелой\"), который обычно устанавливается при захоронении двоих близких человек. Это могут быть супруги или родственники первой линии — родители, дети, внуки, бабушки или дедушки, а также кровные братья или сестры. Нередко парный монумент ставят на одиночную могилу, например, если муж умер раньше, а жена хочет, чтобы после смерти ее подзахоронили к супругу. Компания «Каменная роза» производит сдвоенные надгробия, которые можно купить с доставкой по Минску."
-            },
-            {
-                type: 'heading',
-                content: "Каким может быть памятник на двоих"
-            },
-            {
-                type: 'paragraph',
-                content: "Классификация двойных монументов возможна по нескольким параметрам:"
-            },
-            {
-                type: 'orderedList',
-                items: [
-                    "Ориентация композиции. Двойные памятники с общей стелой также называют горизонтальными памятниками, так как ширина могильной плиты обычно больше, чем высота. Стандартный двойной памятник имеет габариты 100x60 см (высота, ширина). Такие размеры позволяют проще разместить надписи, портреты успоших, эпитафии и элементы декора. Вертикальные модели более компактны, лучше заметны визуально в общем ландшафте кладбища (высота больше, чем ширина). Обычно портреты располагаются отдельно друг от друга, по краям стелы. Однако целая горизонтальная плита позволяет нанести общий портрет.",
-                    "Форма. Плита может быть прямоугольной или асимметричной, в виде сердца, розы, птицы, раскрытой книги. Большим успехом пользуются надгробия, разделенные на две части, например, воздушным крестом или стелой.",
-                    "Цвет. Двойные памятники на могилу из гранита могут иметь не только классический черный или серый оттенок: можно изготовить надгробие из розового, зеленого, терракотового или красного камня. Все зависит от сорта и места добычи породы."
-                ]
-            },
-            {
-                type: 'heading',
-                content: "Причины купить двойной памятник из гранита"
-            },
-            {
-                type: 'paragraph',
-                content: "Заказывать такое надгробие во многом выгоднее, чем устанавливать две отдельные плиты. Преимущества этого решения:"
-            },
-            {
-                type: 'unorderedList',
-                items: [
-                    "монумент занимает меньше места;",
-                    "более низкая цена изготовления;",
-                    "сокращаются траты времени на монтаж;",
-                    "большой выбор дизайнерских решений, возможностей оформления;",
-                    "уход за одним двойным памятником проще, чем за двумя отдельными;",
-                    "возможность нанесения общего портрета."
-                ]
-            },
-
-        ],
+        title: "Двойные памятники",
         products: [], // Будет загружено через API
         otherCategories: [
             { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
             { title: "Памятники", image: "/section/single.webp", link: "/monuments" },
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
         ],
-        sortOptions: ["Со скидкой", "Классические", "С крестом", "Составные"],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
     },
     "exclusive": {
         title: "Эксклюзивные памятники",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Эксклюзивные памятники — это уникальные надгробные композиции, созданные с использованием редких пород гранита и авторского дизайна. Каждый монумент отличается оригинальным оформлением и высочайшим качеством исполнения."
-            },
-            {
-                type: 'heading',
-                content: "Преимущества эксклюзивных памятников:"
-            },
-            {
-                type: 'unorderedList',
-                items: [
-                    "использование редких и ценных сортов гранита;",
-                    "авторское оформление и дизайн;",
-                    "высокое художественное исполнение;",
-                    "долговечность и надежность;",
-                    "гарантия качества на все изделия;",
-                    "индивидуальный подход к каждому проекту."
-                ]
-            },
-            {
-                type: 'paragraph',
-                content: "Каждый эксклюзивный памятник создается с учетом пожеланий клиента и может быть дополнен элементами скульптуры, барельефов и других художественных украшений."
-            },
-        ],
         products: [],
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
             { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
             { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
         ],
-        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки"],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
     },
-   
+
     "cheap": {
         title: "Недорогие памятники",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Недорогие памятники — это доступные по цене надгробные композиции, которые не уступают по качеству более дорогим аналогам. Мы предлагаем широкий выбор бюджетных решений для увековечивания памяти близких."
-            },
-        ],
         products: [], // Будет загружено через API
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
             { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
             { title: "Памятники", image: "/section/single.webp", link: "/monuments" },
         ],
-        sortOptions: ["Со скидкой", "По цене", "Классические", "Простые"],
-    },
-    "одиночные": {
-        title: "Одиночные памятники",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Современный вертикальный памятник — это наиболее популярный формат монумента, который заказывают для обустройства одиночных могил. Одиночные памятники — это компактные надгробия, дизайн которых разрабатывается по индивидуальным 3D-эскизам."
-            },
-        ],
-        products: [], // Будет загружено через API
-        otherCategories: [
-            { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
-            { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
-            { title: "Памятники", image: "/section/single.webp", link: "/monuments" },
-        ],
-        sortOptions: ["Со скидкой", "Строгие", "Фигурные", "С крестом"],
-    },
-    "двойные": {
-        title: "Двойные памятники на могилу",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Двойной памятник — разновидность надгробного камня, который обычно устанавливается при захоронении двоих близких человек."
-            },
-        ],
-        products: [], // Будет загружено через API
-        otherCategories: [
-            { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
-            { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
-            { title: "Памятники", image: "/section/single.webp", link: "/monuments" },
-        ],
-        sortOptions: ["Со скидкой", "Классические", "С крестом", "Составные"],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки"],
     },
     "composite": {
         title: "Составные памятники",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Составные памятники — это многокомпонентные мемориальные комплексы, состоящие из нескольких элементов: стелы, тумбы, цветника и других декоративных деталей. Такие памятники позволяют создать гармоничную композицию и подчеркнуть значимость увековечиваемой памяти."
-            },
-            {
-                type: 'heading',
-                content: "Преимущества составных памятников:"
-            },
-            {
-                type: 'unorderedList',
-                items: [
-                    "возможность создания уникальной композиции;",
-                    "гибкость в выборе размеров и форм элементов;",
-                    "сочетание различных текстур и обработок гранита;",
-                    "возможность поэтапной установки компонентов;",
-                    "долговечность и устойчивость конструкции;",
-                    "широкие возможности для художественного оформления."
-                ]
-            },
-            {
-                type: 'paragraph',
-                content: "Каждый составной памятник изготавливается с учетом индивидуальных пожеланий заказчика и особенностей места установки. Мы используем только качественный гранит и современные технологии обработки камня."
-            },
-        ],
         products: [], // Будет загружено через API
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
             { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
             { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
         ],
-        sortOptions: ["Со скидкой", "По цене", "По высоте", "Многокомпонентные"],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
     },
-    "составные": {
-        title: "Составные памятники",
-        description: [
-            {
-                type: 'paragraph',
-                content: "Составные памятники — это многокомпонентные мемориальные комплексы, состоящие из нескольких элементов: стелы, тумбы, цветника и других декоративных деталей. Такие памятники позволяют создать гармоничную композицию и подчеркнуть значимость увековечиваемой памяти."
-            },
-        ],
-        products: [], // Будет загружено через API
+    "cross": {
+        title: "В виде креста",
+        products: [],
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
             { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
-            { title: "Недорогие", image: "/section/cheap.webp", link: "/monuments/cheap" },
+            { title: "В виде сердца", image: "/section/single.webp", link: "/monuments/heart" },
         ],
-        sortOptions: ["Со скидкой", "По цене", "По высоте", "Многокомпонентные"],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
     },
+    "heart": {
+        title: "В виде сердца",
+        products: [],
+        otherCategories: [
+            { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
+            { title: "В виде креста", image: "/section/single.webp", link: "/monuments/cross" },
+            { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
+        ],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
+    },
+    "europe": {
+        title: "Европейские",
+        products: [],
+        otherCategories: [
+            { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
+            { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
+            { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
+        ],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
+    },
+    "artistic": {
+        title: "Художественная резка",
+        products: [],
+        otherCategories: [
+            { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
+            { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
+            { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
+        ],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
+    },
+    "tree": {
+        title: "В виде деревьев",
+        products: [],
+        otherCategories: [
+            { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
+            { title: "В виде креста", image: "/section/single.webp", link: "/monuments/cross" },
+            { title: "В виде сердца", image: "/section/single.webp", link: "/monuments/heart" },
+        ],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
+    },
+    "complex": {
+        title: "Мемориальные комплексы",
+        products: [],
+        otherCategories: [
+            { title: "Составные", image: "/section/single.webp", link: "/monuments/composite" },
+            { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
+            { title: "Двойные", image: "/section/double.webp", link: "/monuments/double" },
+        ],
+        sortOptions: ["Со скидкой", "По цене", "По высоте", "Новинки", "Популярные", "Хит"],
+    }
 };
 
 const MonumentsSubcategoryPage = () => {
@@ -375,6 +221,8 @@ const MonumentsSubcategoryPage = () => {
     const [isMobile, setIsMobile] = useState(false);
     const [isNarrowMobile, setIsNarrowMobile] = useState(false);
     const [categoryData, setCategoryData] = useState<Record<string, CategoryData>>(subcategoryData);
+    const [dynamicPageDescription, setDynamicPageDescription] = useState<PageDescription | null>(null);
+    const [loadingDescription, setLoadingDescription] = useState(false);
 
     // Получаем данные для текущей подкатегории
     const currentCategoryData = categoryData[categorySlug.toLowerCase()] || null;
@@ -395,16 +243,36 @@ const MonumentsSubcategoryPage = () => {
         return () => window.removeEventListener("resize", checkScreenSize);
     }, []);
 
+    // Загрузка динамического описания страницы
+    useEffect(() => {
+        const loadPageDescription = async () => {
+            if (!categorySlug) return;
+
+            setLoadingDescription(true);
+            try {
+                const pageSlug = getPageSlugForCategory(categorySlug.toLowerCase());
+                const description = await getPageDescription(pageSlug);
+                setDynamicPageDescription(description);
+            } catch (error) {
+                console.error("Ошибка загрузки описания страницы:", error);
+            } finally {
+                setLoadingDescription(false);
+            }
+        };
+
+        loadPageDescription();
+    }, [categorySlug]);
+
     // Загружаем памятники для текущей категории при монтировании компонента
     useEffect(() => {
         const loadMonuments = async () => {
             if (!categorySlug) return;
-            
+
             try {
                 // Определяем API endpoint в зависимости от категории
                 let apiEndpoint = "";
                 const lowerCategorySlug = categorySlug.toLowerCase();
-                
+
                 switch (lowerCategorySlug) {
                     case "одиночные":
                     case "single":
@@ -432,16 +300,45 @@ const MonumentsSubcategoryPage = () => {
                 }
 
                 const data = await apiClient.get(apiEndpoint);
-                
+
                 if (data.success && data.data) {
                     const convertedProducts = data.data.map(convertExclusiveToProductFormat);
-                    console.log(`Загружено ${convertedProducts.length} памятников для категории ${lowerCategorySlug}`);
                     
+                    // Сортируем памятники по порядку (О-1, О-2, Д-1, Д-2 и т.д.)
+                    const sortedProducts = convertedProducts.sort((a: Product, b: Product) => {
+                        const nameA = a.name.toLowerCase();
+                        const nameB = b.name.toLowerCase();
+                        
+                        // Извлекаем префикс (буквы) и номер из названия
+                        const matchA = nameA.match(/^([а-яё\-]+)(\d+)/) || nameA.match(/^(.+?)(\d+)/);
+                        const matchB = nameB.match(/^([а-яё\-]+)(\d+)/) || nameB.match(/^(.+?)(\d+)/);
+                        
+                        if (matchA && matchB) {
+                            const prefixA = matchA[1];
+                            const prefixB = matchB[1];
+                            const numberA = parseInt(matchA[2], 10);
+                            const numberB = parseInt(matchB[2], 10);
+                            
+                            // Сначала сортируем по префиксу
+                            if (prefixA !== prefixB) {
+                                return prefixA.localeCompare(prefixB, 'ru');
+                            }
+                            
+                            // Затем по номеру
+                            return numberA - numberB;
+                        }
+                        
+                        // Если не удалось извлечь номер, сортируем по алфавиту
+                        return nameA.localeCompare(nameB, 'ru');
+                    });
+                    
+                    console.log(`Загружено ${sortedProducts.length} памятников для категории ${lowerCategorySlug}`);
+
                     setCategoryData(prev => ({
                         ...prev,
                         [lowerCategorySlug]: {
                             ...prev[lowerCategorySlug],
-                            products: convertedProducts,
+                            products: sortedProducts,
                         }
                     }));
                 } else {
@@ -451,7 +348,7 @@ const MonumentsSubcategoryPage = () => {
                 console.error("Ошибка при загрузке памятников:", error);
             }
         };
-        
+
         loadMonuments();
     }, [categorySlug]);
 
@@ -480,13 +377,54 @@ const MonumentsSubcategoryPage = () => {
         setCurrentPage(1);
     };
 
-    // Функция для сортировки (пример: по скидке, по цене и т.д.)
+    // Функция для сортировки
     const sortedProducts = [...products].sort((a, b) => {
-        if (sortOption === "Со скидкой") {
-            return (b.discount || 0) - (a.discount || 0);
+        switch (sortOption) {
+            case "Со скидкой":
+                return (b.discount || 0) - (a.discount || 0);
+            
+            case "По цене":
+                // Сортировка от меньшей цены к большей
+                return (a.price || 0) - (b.price || 0);
+            
+            case "По высоте":
+                // Извлекаем числовое значение из строки высоты (например, "123 см" -> 123)
+                const heightA = parseInt(String(a.height || '0').match(/\d+/)?.[0] || '0', 10);
+                const heightB = parseInt(String(b.height || '0').match(/\d+/)?.[0] || '0', 10);
+                // Сортировка от большей высоты к меньшей
+                return heightB - heightA;
+            
+            case "Новинки":
+                // Сначала новые (new: true), потом остальные
+                if (a.new && !b.new) return -1;
+                if (!a.new && b.new) return 1;
+                return 0;
+            
+            case "Популярные":
+                // Сначала популярные (popular: true), потом остальные
+                if (a.popular && !b.popular) return -1;
+                if (!a.popular && b.popular) return 1;
+                return 0;
+            
+            case "Хит":
+                // Для эксклюзивных памятников проверяем хит в цветах
+                if (categorySlug.toLowerCase() === 'exclusive') {
+                    const aHasHit = a.colors && a.colors.some(color => color.hit === true);
+                    const bHasHit = b.colors && b.colors.some(color => color.hit === true);
+                    
+                    if (aHasHit && !bHasHit) return -1;
+                    if (!aHasHit && bHasHit) return 1;
+                    return 0;
+                } else {
+                    // Для остальных памятников проверяем хит на уровне продукта
+                    if (a.hit && !b.hit) return -1;
+                    if (!a.hit && b.hit) return 1;
+                    return 0;
+                }
+            
+            default:
+                return 0;
         }
-        // Добавьте другие условия сортировки по необходимости
-        return 0;
     });
 
     // Пересчитываем products и pages при изменении сортировки
@@ -582,9 +520,26 @@ const MonumentsSubcategoryPage = () => {
                             initialPage={1}
                         />
 
-                        {/* Описание страницы (если есть) */}
-                        {currentCategoryData.description && (
-                            <SubcategoryDescription sections={currentCategoryData.description} />
+                        {/* Описание страницы (динамическое или статическое) */}
+                        {dynamicPageDescription ? (
+                            <div className="mt-8">
+                                {dynamicPageDescription.blocks && dynamicPageDescription.blocks.length > 0 ? (
+                                    <PageBlocksRenderer 
+                                        blocks={dynamicPageDescription.blocks} 
+                                        className="prose prose-lg max-w-none"
+                                    />
+                                ) : null}
+                            </div>
+                        ) : (
+                            currentCategoryData.description && (
+                                <SubcategoryDescription sections={currentCategoryData.description} />
+                            )
+                        )}
+                        
+                        {loadingDescription && (
+                            <div className="mt-8 text-center text-gray-500">
+                                Загрузка описания...
+                            </div>
                         )}
 
                         {/* Блок "Другие категории" */}
@@ -593,28 +548,28 @@ const MonumentsSubcategoryPage = () => {
                                 <h2 className="text-[28px] font-bold text-[#2c3a54] ml-2.5 mb-3.5 lg:mb-5">Другие категории</h2>
                                 <div className={`flex flex-wrap ${isMobile ? 'flex-col space-y-2.5' : ''}`}>
                                     {currentCategoryData.otherCategories.map((cat) => (
-                                    <div
-                                        key={cat.title}
-                                        className={`px-1.25 md:px-2.5 max-w-1/3 flex-1/3 min-h-[60px] lg:min-h-[140px] ${isMobile ? 'max-w-full' : ''}`}
-                                    >
-                                        <a
-                                            href={cat.link}
-                                            className="block overflow-hidden rounded-lg hover:border-2 border-[#2c3a54] bg-[#f5f6fa] relative h-full items-center p-7.5"
+                                        <div
+                                            key={cat.title}
+                                            className={`px-1.25 md:px-2.5 max-w-1/3 flex-1/3 min-h-[60px] lg:min-h-[140px] ${isMobile ? 'max-w-full' : ''}`}
                                         >
-                                            <h2 className="text-[16px] font-bold text-[#222222] self-start">{cat.title}</h2>
-                                            <img
-                                                src={cat.image}
-                                                alt={cat.title}
-                                                className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
-                                                style={{
-                                                    position: 'absolute',
-                                                    top: '50%',
-                                                    right: '10px',
-                                                    transform: 'translateY(-50%)',
-                                                }}
-                                            />
-                                        </a>
-                                    </div>
+                                            <a
+                                                href={cat.link}
+                                                className="block overflow-hidden rounded-lg hover:border-2 border-[#2c3a54] bg-[#f5f6fa] relative h-full items-center p-7.5"
+                                            >
+                                                <h2 className="text-[16px] font-bold text-[#222222] self-start">{cat.title}</h2>
+                                                <img
+                                                    src={cat.image}
+                                                    alt={cat.title}
+                                                    className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
+                                                    style={{
+                                                        position: 'absolute',
+                                                        top: '50%',
+                                                        right: '10px',
+                                                        transform: 'translateY(-50%)',
+                                                    }}
+                                                />
+                                            </a>
+                                        </div>
                                     ))}
                                 </div>
                             </div>

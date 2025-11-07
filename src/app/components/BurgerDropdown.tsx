@@ -6,12 +6,14 @@ interface BurgerDropdownProps {
   isBurgerDropdownOpen: boolean;
   PHONE_MTS: string;
   PHONE_A1: string;
+  onLinkClick?: () => void;
 }
 
 const BurgerDropdown: React.FC<BurgerDropdownProps> = ({
   isBurgerDropdownOpen,
   PHONE_MTS,
   PHONE_A1,
+  onLinkClick,
 }) => {
   if (!isBurgerDropdownOpen) return null;
 
@@ -20,6 +22,7 @@ const BurgerDropdown: React.FC<BurgerDropdownProps> = ({
       id="burger-dropdown"
       role="menu"
       aria-label="Основное меню"
+      onClick={onLinkClick}
       className="
         absolute top-[76px] left-0 right-0
         z-50

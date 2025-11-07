@@ -5,12 +5,14 @@ interface FooterPhoneDropdownProps {
   isPhoneDropdownOpen: boolean;
   PHONE_MTS: string;
   PHONE_A1: string;
+  onLinkClick?: () => void;
 }
 
 const FooterPhoneDropdown: React.FC<FooterPhoneDropdownProps> = ({
   isPhoneDropdownOpen,
   PHONE_MTS,
   PHONE_A1,
+  onLinkClick,
 }) => {
   if (!isPhoneDropdownOpen) return null;
 
@@ -19,6 +21,7 @@ const FooterPhoneDropdown: React.FC<FooterPhoneDropdownProps> = ({
       id="footer-phone-dropdown"
       role="menu"
       aria-label="Контактная информация (футер)"
+      onClick={onLinkClick}
       className="
         fixed bottom-[60px] left-0 right-0 
         z-50 

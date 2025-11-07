@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useDropdown } from "../context/DropDownContext";
 import BurgerDropdown from "./BurgerDropdown";
 import FooterPhoneDropdown from "./FooterPhoneDropdown";
@@ -12,8 +13,14 @@ const PHONE_A1 = "+375 29 622-66-45";
 
 const FooterMenu = () => {
   const [isPhoneDropdownOpen, setPhoneDropdownOpen] = useState(false);
+  const pathname = usePathname();
   const { isBurgerDropdownOpen, toggleBurgerDropdown, closeBurgerDropdown } =
     useDropdown();
+
+  const handleDropdownLinkClick = () => {
+    setPhoneDropdownOpen(false);
+    closeBurgerDropdown();
+  };
 
   // Блокируем скролл при открытом меню
   useEffect(() => {
@@ -25,6 +32,13 @@ const FooterMenu = () => {
       document.body.style.touchAction = "";
     }
   }, [isPhoneDropdownOpen]);
+
+  // Закрываем меню при смене маршрута
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setPhoneDropdownOpen(false);
+    closeBurgerDropdown();
+  }, [pathname]);
 
   // Закрытие при клике вне
   useEffect(() => {
@@ -51,7 +65,7 @@ const FooterMenu = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isPhoneDropdownOpen, isBurgerDropdownOpen, closeBurgerDropdown]);
+  }, [isPhoneDropdownOpen, isBurgerDropdownOpen]);
 
   const PhoneDropdownClick = () => {
     setPhoneDropdownOpen((prev) => !prev);
@@ -160,6 +174,7 @@ const FooterMenu = () => {
         isPhoneDropdownOpen={isPhoneDropdownOpen}
         PHONE_MTS={PHONE_MTS}
         PHONE_A1={PHONE_A1}
+        onLinkClick={handleDropdownLinkClick}
       />
 
       {isBurgerDropdownOpen && (
@@ -167,6 +182,7 @@ const FooterMenu = () => {
           isBurgerDropdownOpen={isBurgerDropdownOpen}
           PHONE_MTS={PHONE_MTS}
           PHONE_A1={PHONE_A1}
+          onLinkClick={handleDropdownLinkClick}
         />
       )}
     </>

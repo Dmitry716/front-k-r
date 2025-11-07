@@ -9,6 +9,10 @@ const nextConfig: NextConfig = {
     domains: ['localhost'],
     unoptimized: true,
   },
+  // Отключаем восстановление скролла
+  experimental: {
+    scrollRestoration: false,
+  },
   // Добавляем поддержку статических файлов
   async rewrites() {
     return [

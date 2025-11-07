@@ -271,24 +271,6 @@ export const complexMonuments = pgTable("complex_monuments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Таблица для бюджетных памятников
-export const budgetMonuments = pgTable("budget_monuments", {
-  id: serial("id").primaryKey().notNull(),
-  slug: varchar("slug").notNull().unique(),
-  name: varchar("name").notNull(),
-  height: varchar("height"),
-  price: numeric("price", { precision: 10, scale: 2 }),
-  oldPrice: numeric("old_price", { precision: 10, scale: 2 }),
-  discount: numeric("discount", { precision: 10, scale: 2 }),
-  category: varchar("category").notNull(),
-  image: text("image").notNull(),
-  options: text("options").notNull(), // JSON строка
-  description: text("description"),
-  availability: varchar("availability").default("под заказ"), // в наличии / под заказ
-  hit: boolean("hit").default(false),
-  popular: boolean("popular").default(false),
-  createdAt: timestamp("created_at").defaultNow(),
-});
 
 export const works = pgTable("works", {
   id: serial("id").primaryKey().notNull(),

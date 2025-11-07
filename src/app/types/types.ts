@@ -5,6 +5,7 @@ export type ColorOption = {
   price?: number;
   oldPrice?: number;
   discount?: number;
+  hit?: boolean;
 };
 
 export type Product = {
@@ -23,6 +24,7 @@ export type Product = {
   options?: Record<string, string>;
   hit?: boolean;
   popular?: boolean;
+  new?: boolean;
 };
 
 export type Category = {

@@ -66,6 +66,9 @@ export const API_ENDPOINTS = {
   campaigns: '/campaigns',
   blogs: '/blogs',
   
+  // Page descriptions
+  pageDescriptions: '/page-descriptions',
+  
   // Admin endpoints
   admin: {
     epitaphs: '/admin/epitaphs',
@@ -77,6 +80,7 @@ export const API_ENDPOINTS = {
     campaigns: '/admin/campaigns',
     blogs: '/admin/blogs',
     works: '/admin/works',
+    pageDescriptions: '/admin/page-descriptions',
   }
 };
 

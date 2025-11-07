@@ -348,9 +348,14 @@ const ProductPage = () => {
     }, []);
 
     useEffect(() => {
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-        setIsFavorite(favorites.includes(product?.id));
-    }, [product?.id]);
+        if (product?.slug) {
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            // Проверяем как по slug, так и по старому id для совместимости
+            const isFavoriteBySlug = favorites.includes(product.slug);
+            const isFavoriteById = favorites.includes(product.id);
+            setIsFavorite(isFavoriteBySlug || isFavoriteById);
+        }
+    }, [product?.slug, product?.id]);
 
     // Используем useRef для хранения актуального значения tooltipOpen
     useEffect(() => {
@@ -410,18 +415,34 @@ const ProductPage = () => {
 
     // Обработчик клика на звезду (избранное)
     const toggleFavorite = () => {
+        if (!product.slug) {
+            console.warn('Товар не имеет slug, нельзя добавить в избранное');
+            return;
+        }
+
         const newIsFavorite = !isFavorite;
         setIsFavorite(newIsFavorite);
 
-        const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        // Получаем текущие избранные и очищаем от старых числовых ID
+        let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+        
+        // Фильтруем только строки (slug'и), удаляя числовые ID
+        favorites = favorites.filter((item: any) => typeof item === 'string');
+
         if (newIsFavorite) {
-            if (!favorites.includes(product.id)) {
-                favorites.push(product.id);
+            // Добавляем в избранное
+            if (!favorites.includes(product.slug)) {
+                favorites.push(product.slug);
                 localStorage.setItem('favorites', JSON.stringify(favorites));
+                console.log('Добавлен в избранное:', product.slug);
             }
         } else {
-            const newFavorites = favorites.filter((id: number) => id !== product.id);
+            // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
+            const newFavorites = favorites.filter((item: any) => 
+                item !== product.slug && item !== product.id
+            );
             localStorage.setItem('favorites', JSON.stringify(newFavorites));
+            console.log('Удалён из избранного:', product.slug);
         }
 
         // Отправляем кастомное событие
@@ -692,9 +713,25 @@ const ProductPage = () => {
                                 </div>
                             )}
 
+                            {/* Плашка ХИТ */}
+                            {product.hit && (
+                                <div className={`absolute left-2 z-20 bg-gray-600 text-white text-xs font-bold px-2.5 py-0.75 rounded-xl ${
+                                    product.discount && product.discount > 0 ? 'top-12' : 'top-2'
+                                }`}>
+                                    ХИТ
+                                </div>
+                            )}
 
                             <div
-                                className={`absolute top-12 left-2 z-10 w-11 h-11 text-center content-center flex-wrap text-2xl shadow-xs rounded-full hover:text-[#2c3a54] transition cursor-pointer ${isFavorite ? "text-[#2c3a54]" : "text-gray-400"
+                                className={`absolute ${
+                                    product.discount && product.discount > 0 && product.hit 
+                                        ? 'top-20' 
+                                        : product.discount && product.discount > 0 
+                                            ? 'top-12' 
+                                            : product.hit 
+                                                ? 'top-12' 
+                                                : 'top-2'
+                                } left-2 z-10 w-11 h-11 text-center content-center flex-wrap text-2xl shadow-xs rounded-full hover:text-[#2c3a54] transition cursor-pointer ${isFavorite ? "text-[#2c3a54]" : "text-gray-400"
                                     }`}
                                 onClick={toggleFavorite}
                             >

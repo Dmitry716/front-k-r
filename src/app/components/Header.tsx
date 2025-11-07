@@ -9,6 +9,7 @@ import {
 } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import { menuCategories } from "../mock/menuCategories";
 import { additionalMenuItems } from "../mock/menuCategories";
 import PhoneDropdown from "./PhoneDropdown";
@@ -29,6 +30,9 @@ const Header = () => {
   const phoneDropdownRef = useRef<HTMLDivElement>(null);
   const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
   const headerContainerRef = useRef<HTMLDivElement>(null);
+
+  const router = useRouter();
+  const pathname = usePathname();
 
   const { isBurgerDropdownOpen, toggleBurgerDropdown, closeBurgerDropdown } =
     useDropdown();
@@ -111,6 +115,14 @@ const Header = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Закрываем меню при смене маршрута
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    setPhoneDropdownOpen(false);
+    setActiveCategory(null);
+    closeBurgerDropdown();
+  }, [pathname]);
+
   // Закрытие dropdown при клике вне
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -138,17 +150,7 @@ const Header = () => {
       document.body.style.overflow = "";
       document.body.style.touchAction = "";
     }
-  }, [isPhoneDropdownOpen]);
-
-  useEffect(() => {
-  if (isBurgerDropdownOpen) {
-    document.body.style.overflow = "hidden";
-    document.body.style.touchAction = "none";
-  } else {
-    document.body.style.overflow = "";
-    document.body.style.touchAction = "";
-  }
-}, [isBurgerDropdownOpen]);
+  }, [isPhoneDropdownOpen, isBurgerDropdownOpen]);
 
   // Обработчики кликов по кнопкам
   const PhoneDropdownClick = () => {
@@ -159,6 +161,11 @@ const Header = () => {
   const BurgerDropdownClick = () => {
     toggleBurgerDropdown();
     if (isPhoneDropdownOpen) setPhoneDropdownOpen(false); // закрываем телефон, если открыт
+  };
+
+  const handleDropdownLinkClick = () => {
+    setPhoneDropdownOpen(false);
+    closeBurgerDropdown();
   };
 
   const [isClient, setIsClient] = useState(false);
@@ -534,6 +541,7 @@ if (!isClient) {
           isPhoneDropdownOpen={isPhoneDropdownOpen}
           PHONE_MTS={PHONE_MTS}
           PHONE_A1={PHONE_A1}
+          onLinkClick={handleDropdownLinkClick}
         />
       </div>
 
