@@ -10,6 +10,8 @@ import { categoriesMonuments } from "../mock/categories";
 import { apiClient, API_ENDPOINTS } from "../../lib/api-client";
 import { ColorOption } from "../types/types";
 
+export const dynamic = 'force-dynamic';
+
 // Функция для обработки данных памятника (парсинг JSON полей)
 function processMonumentData(dbProduct: Record<string, unknown>) {
     // Парсим цвета из БД
