@@ -210,9 +210,9 @@ const subcategoryData: Record<string, CategoryData> = {
     }
 };
 
-const MonumentsSubcategoryPageClient = () => {
+const MonumentsSubcategoryPage = () => {
     const params = useParams();
-    const categorySlug = params?.category as string | undefined;
+    const categorySlug = params?.category as string;
 
     const [isClient, setIsClient] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -223,11 +223,6 @@ const MonumentsSubcategoryPageClient = () => {
     const [categoryData, setCategoryData] = useState<Record<string, CategoryData>>(subcategoryData);
     const [dynamicPageDescription, setDynamicPageDescription] = useState<PageDescription | null>(null);
     const [loadingDescription, setLoadingDescription] = useState(false);
-
-    // Защита: если categorySlug undefined, вернём null
-    if (!categorySlug) {
-        return null;
-    }
 
     // Получаем данные для текущей подкатегории
     const currentCategoryData = categoryData[categorySlug.toLowerCase()] || null;
@@ -591,4 +586,4 @@ const MonumentsSubcategoryPageClient = () => {
     );
 };
 
-export default MonumentsSubcategoryPageClient;
+export default MonumentsSubcategoryPage;
