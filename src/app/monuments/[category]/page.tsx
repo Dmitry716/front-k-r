@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import PathPage from "@/app/components/PathPage";
@@ -210,7 +211,6 @@ const subcategoryData: Record<string, CategoryData> = {
 };
 
 const MonumentsSubcategoryPageClient = () => {
-    "use client";
     const params = useParams();
     const categorySlug = params?.category as string;
 
@@ -586,13 +586,4 @@ const MonumentsSubcategoryPageClient = () => {
     );
 };
 
-// Генерируем статические параметры для всех категорий
-export async function generateStaticParams() {
-    return Object.keys(subcategoryData).map((slug) => ({
-        category: slug,
-    }));
-}
-
-export default function MonumentsSubcategoryPage() {
-    return <MonumentsSubcategoryPageClient />;
-}
+export default MonumentsSubcategoryPageClient;
