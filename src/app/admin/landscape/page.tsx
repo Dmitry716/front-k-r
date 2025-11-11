@@ -179,7 +179,12 @@ export default function LandscapeAdminPage() {
         
         // Если есть SEO поля, сохраняем их
         if (createSeoFields.seo_title || createSeoFields.seo_description || createSeoFields.seo_keywords || createSeoFields.og_image) {
-          await saveSeoFields(newLandscapeId, createSeoFields);
+          await saveSeoFields(newLandscapeId, {
+            seoTitle: createSeoFields.seo_title,
+            seoDescription: createSeoFields.seo_description,
+            seoKeywords: createSeoFields.seo_keywords,
+            ogImage: createSeoFields.og_image,
+          });
         }
         
         setSuccess("✓ Товар добавлен");
@@ -489,10 +494,10 @@ export default function LandscapeAdminPage() {
                       entityType="landscape"
                       categoryName="Благоустройство"
                       initialData={{
-                        seo_title: item.seo_title || "",
-                        seo_description: item.seo_description || "",
-                        seo_keywords: item.seo_keywords || "",
-                        og_image: item.og_image || "",
+                        seoTitle: item.seo_title || "",
+                        seoDescription: item.seo_description || "",
+                        seoKeywords: item.seo_keywords || "",
+                        ogImage: item.og_image || "",
                       }}
                       onSave={handleSaveSeo}
                       isLoading={seoLoading}

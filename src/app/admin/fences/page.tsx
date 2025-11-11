@@ -488,10 +488,10 @@ export default function FencesAdminPage() {
       // Обновляем форму с новыми данными
       setEditForm(prev => ({ 
         ...prev, 
-        seo_title: data.seo_title,
-        seo_description: data.seo_description,
-        seo_keywords: data.seo_keywords,
-        og_image: data.og_image,
+        seo_title: data.seoTitle,
+        seo_description: data.seoDescription,
+        seo_keywords: data.seoKeywords,
+        og_image: data.ogImage,
       }));
       setTimeout(() => setSuccess(""), 3000);
     } catch (err) {
@@ -1007,10 +1007,10 @@ export default function FencesAdminPage() {
                       entityType="fences"
                       categoryName="Ограды"
                       initialData={{
-                        seo_title: editForm.seo_title,
-                        seo_description: editForm.seo_description,
-                        seo_keywords: editForm.seo_keywords,
-                        og_image: editForm.og_image,
+                        seoTitle: editForm.seo_title,
+                        seoDescription: editForm.seo_description,
+                        seoKeywords: editForm.seo_keywords,
+                        ogImage: editForm.og_image,
                       }}
                       onSave={handleSaveSeo}
                       isLoading={seoLoading}
