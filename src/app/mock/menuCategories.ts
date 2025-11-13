@@ -29,7 +29,7 @@ export const menuCategories = [
     icon: '/fences.webp',
     subcategories: [
       { name: 'Гранитные ограды', href: '/fences/granite', img: '/fences/granite.webp' },
-      { name: 'С полимерным покрытием', href: '/fences/polymer', img: '/fences/polymer.webp' },
+      { name: 'С полимерным покрытием', href: '/fences/polymer', img: '/fences/granite.webp' },
       { name: 'Металлические ограды', href: '/fences/metal', img: '/fences/metal.webp' },
     ],
   },

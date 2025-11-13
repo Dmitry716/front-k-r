@@ -24,32 +24,36 @@ interface Landscape {
 
 const LANDSCAPE_CATEGORIES = ["Щебень", "Столы и скамейки"];
 
+// Маппинг категорий на categoryKey для SEO шаблонов
+const CATEGORY_TO_KEY_MAP: {[key: string]: string} = {
+  "Щебень": "gravel",
+  "Столы и скамейки": "tables-benches"
+};
+
 export default function LandscapeAdminPage() {
   const [landscape, setLandscape] = useState<Landscape[]>([]);
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [price, setPrice] = useState("");
-  const [textPrice, setTextPrice] = useState("");
-  const [category, setCategory] = useState("");
-  const [image, setImage] = useState("");
-  const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editData, setEditData] = useState<Partial<Landscape>>({});
-  const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState("");
+  const [addingLandscape, setAddingLandscape] = useState(false);
+  const [editingLandscape, setEditingLandscape] = useState<Landscape | null>(null);
   
   // SEO хук
   const { saveSeoFields, isLoading: seoLoading, error: seoError } = useSeoSave('landscape');
   
-  // SEO state для create режима
-  const [createSeoFields, setCreateSeoFields] = useState({
-    seo_title: '',
-    seo_description: '',
-    seo_keywords: '',
-    og_image: ''
+  // Объединённая форма для create и edit
+  const [editForm, setEditForm] = useState({
+    name: "",
+    slug: "",
+    price: "",
+    textPrice: "",
+    category: "",
+    image: "",
+    specifications: {} as {[key: string]: string},
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: "",
+    og_image: "",
   });
   
   // Для характеристик
@@ -59,6 +63,10 @@ export default function LandscapeAdminPage() {
     leg: '',        // для столов и скамеек
     height: ''      // для столов и скамеек
   });
+  
+  const [availableImages, setAvailableImages] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   const fetchLandscape = async () => {
     try {
@@ -116,7 +124,7 @@ export default function LandscapeAdminPage() {
 
       const data = await response.json();
       if (data.success) {
-        setImage(data.data.path);
+        setEditForm(prev => ({ ...prev, image: data.data.path }));
         await fetchAvailableImages();
       } else {
         setUploadError(data.error || "Ошибка загрузки");
@@ -135,10 +143,13 @@ export default function LandscapeAdminPage() {
   }, []);
 
   useEffect(() => {
-    if (name && !editingId) {
-      setSlug(generateSlug(name));
+    if (editForm.name && !editingLandscape) {
+      setEditForm(prev => ({
+        ...prev,
+        slug: generateSlug(editForm.name)
+      }));
     }
-  }, [name, editingId]);
+  }, [editForm.name, editingLandscape]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,62 +161,106 @@ export default function LandscapeAdminPage() {
     setSuccess("");
 
     try {
-      const finalSlug = slug || generateSlug(name);
+      const finalSlug = editForm.slug || generateSlug(editForm.name);
       
       // Очищаем спецификации от пустых значений
       const cleanedSpecifications: any = {};
       
-      if (category === "Щебень") {
+      if (editForm.category === "Щебень") {
         if (specifications.color) cleanedSpecifications.color = specifications.color;
-      } else if (category === "Столы и скамейки") {
+      } else if (editForm.category === "Столы и скамейки") {
         if (specifications.chair) cleanedSpecifications.chair = specifications.chair;
         if (specifications.leg) cleanedSpecifications.leg = specifications.leg;
         if (specifications.height) cleanedSpecifications.height = specifications.height;
       }
       
+      // Загружаем SEO шаблон если все поля пусты
+      let seoTitle = editForm.seo_title;
+      let seoDescription = editForm.seo_description;
+      let seoKeywords = editForm.seo_keywords;
+      let ogImage = editForm.og_image;
+
+      console.log('[LANDSCAPE] Initial SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
+      const hasUserProvidedSeo = seoTitle || seoDescription || seoKeywords || ogImage;
+      console.log('[LANDSCAPE] hasUserProvidedSeo:', hasUserProvidedSeo);
+      
+      if (!hasUserProvidedSeo) {
+        // Только загружаем шаблон если все поля пусты
+        try {
+          const { fetchSeoTemplate } = await import('@/lib/hooks/use-seo-hierarchy');
+          const categoryKey = CATEGORY_TO_KEY_MAP[editForm.category] || editForm.category;
+          console.log('Fetching SEO template for landscape category:', editForm.category, 'key:', categoryKey);
+          const template = await fetchSeoTemplate("landscape", categoryKey);
+          console.log('Template received:', template);
+          
+          if (template) {
+            seoTitle = template.seoTitle || editForm.name;
+            seoDescription = template.seoDescription || `Благоустройство ${editForm.name}`;
+            seoKeywords = template.seoKeywords || editForm.name;
+            ogImage = template.ogImage || "";
+            console.log('Applied template SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+          } else {
+            // Если шаблона нет - используем данные как fallback
+            seoTitle = editForm.name;
+            seoDescription = `Благоустройство ${editForm.name}`;
+            seoKeywords = editForm.name;
+            console.log('No template found, using fallback:', { seoTitle, seoDescription, seoKeywords });
+          }
+        } catch (err) {
+          console.warn('Failed to load SEO template, using defaults:', err);
+          // Используем данные как fallback
+          seoTitle = editForm.name;
+          seoDescription = `Благоустройство ${editForm.name}`;
+          seoKeywords = editForm.name;
+          console.log('Template load error, using fallback:', { seoTitle, seoDescription, seoKeywords });
+        }
+      } else {
+        // Юзер вписал что-то - используем его значения, заполняя пропуски fallback'ом
+        console.log('User provided SEO, using user values:', { seoTitle, seoDescription, seoKeywords, ogImage });
+        seoTitle = seoTitle || editForm.name;
+        seoDescription = seoDescription || `Благоустройство ${editForm.name}`;
+        seoKeywords = seoKeywords || editForm.name;
+        ogImage = ogImage || "";
+      }
+      
       const body = {
         slug: finalSlug,
-        name,
-        price,
-        textPrice,
-        category,
-        image,
+        name: editForm.name,
+        price: editForm.price,
+        textPrice: editForm.textPrice,
+        category: editForm.category,
+        image: editForm.image,
         specifications: cleanedSpecifications,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
+        ogImage,
       };
 
       const data = await apiClient.post("/admin/landscape", body);
       if (data.success) {
-        const newLandscapeId = data.landscape.id;
-        
-        // Если есть SEO поля, сохраняем их
-        if (createSeoFields.seo_title || createSeoFields.seo_description || createSeoFields.seo_keywords || createSeoFields.og_image) {
-          await saveSeoFields(newLandscapeId, {
-            seoTitle: createSeoFields.seo_title,
-            seoDescription: createSeoFields.seo_description,
-            seoKeywords: createSeoFields.seo_keywords,
-            ogImage: createSeoFields.og_image,
-          });
-        }
-        
         setSuccess("✓ Товар добавлен");
-        setName("");
-        setSlug("");
-        setPrice("");
-        setTextPrice("");
-        setCategory("");
-        setImage("");
+        setEditForm({
+          name: "",
+          slug: "",
+          price: "",
+          textPrice: "",
+          category: "",
+          image: "",
+          specifications: {},
+          seo_title: "",
+          seo_description: "",
+          seo_keywords: "",
+          og_image: "",
+        });
         setSpecifications({
           color: "",
           chair: "",
           leg: "",
           height: ""
         });
-        setCreateSeoFields({
-          seo_title: '',
-          seo_description: '',
-          seo_keywords: '',
-          og_image: ''
-        });
+        setAddingLandscape(false);
         await fetchLandscape();
         setTimeout(() => setSuccess(""), 3000);
       } else {
@@ -238,10 +293,37 @@ export default function LandscapeAdminPage() {
     }
   };
 
+  const startEditing = (landscapeItem: Landscape) => {
+    console.log('Starting edit for landscape:', JSON.stringify(landscapeItem, null, 2));
+    
+    // Конвертируем API ответ (может быть camelCase или snake_case)
+    const seoTitle = landscapeItem.seo_title || (landscapeItem as any).seoTitle || "";
+    const seoDescription = landscapeItem.seo_description || (landscapeItem as any).seoDescription || "";
+    const seoKeywords = landscapeItem.seo_keywords || (landscapeItem as any).seoKeywords || "";
+    const ogImage = landscapeItem.og_image || (landscapeItem as any).ogImage || "";
+    
+    console.log('SEO data extracted:', { seoTitle, seoDescription, seoKeywords, ogImage });
+    
+    setEditingLandscape(landscapeItem);
+    setEditForm({
+      name: landscapeItem.name || "",
+      slug: landscapeItem.slug || "",
+      price: landscapeItem.price?.toString() || "",
+      textPrice: landscapeItem.textPrice || "",
+      category: landscapeItem.category || "",
+      image: landscapeItem.image || "",
+      specifications: (landscapeItem as any).specifications || {},
+      seo_title: seoTitle,
+      seo_description: seoDescription,
+      seo_keywords: seoKeywords,
+      og_image: ogImage,
+    });
+  };
+
   const handleSaveSeo = async (data: SeoFieldsData) => {
-    if (!editingId) return;
+    if (!editingLandscape) return;
     try {
-      await saveSeoFields(editingId, data);
+      await saveSeoFields(editingLandscape.id, data);
       setSuccess('✓ SEO успешно сохранено');
       await fetchLandscape();
       setTimeout(() => setSuccess(""), 3000);
@@ -250,15 +332,40 @@ export default function LandscapeAdminPage() {
     }
   };
 
-  const handleSaveEdit = async (id: number) => {
+  const handleSaveEdit = async () => {
+    if (!editingLandscape) return;
     if (!window.confirm("Вы уверены, что хотите сохранить изменения?")) return;
     
     try {
-      const data = await apiClient.put(`/admin/landscape/${id}`, editData);
+      // Очищаем спецификации от пустых значений
+      const cleanedSpecifications: any = {};
+      
+      if (editForm.category === "Щебень") {
+        if (specifications.color) cleanedSpecifications.color = specifications.color;
+      } else if (editForm.category === "Столы и скамейки") {
+        if (specifications.chair) cleanedSpecifications.chair = specifications.chair;
+        if (specifications.leg) cleanedSpecifications.leg = specifications.leg;
+        if (specifications.height) cleanedSpecifications.height = specifications.height;
+      }
+      
+      const body = {
+        name: editForm.name,
+        slug: editForm.slug,
+        price: editForm.price ? parseFloat(editForm.price) : undefined,
+        textPrice: editForm.textPrice,
+        category: editForm.category,
+        image: editForm.image,
+        specifications: cleanedSpecifications,
+        seoTitle: editForm.seo_title,
+        seoDescription: editForm.seo_description,
+        seoKeywords: editForm.seo_keywords,
+        ogImage: editForm.og_image,
+      };
+      
+      const data = await apiClient.put(`/admin/landscape/${editingLandscape.id}`, body);
       if (data.success) {
         setSuccess("✓ Товар обновлен");
-        setEditingId(null);
-        setEditData({});
+        setEditingLandscape(null);
         await fetchLandscape();
         setTimeout(() => setSuccess(""), 3000);
       } else {
@@ -279,46 +386,46 @@ export default function LandscapeAdminPage() {
           <input
             type="text"
             placeholder="Название"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={editForm.name}
+            onChange={(e) => setEditForm({...editForm, name: e.target.value})}
             required
             className="w-full px-4 py-2 border rounded"
           />
           <input
             type="text"
             placeholder="Slug (автогенерируется из названия)"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            value={editForm.slug}
+            onChange={(e) => setEditForm({...editForm, slug: e.target.value})}
             className="w-full px-4 py-2 border rounded text-gray-500"
           />
           <div className="grid grid-cols-2 gap-4">
             <input
               type="number"
               placeholder="Цена (число)"
-              value={price}
+              value={editForm.price}
               onChange={(e) => {
-                setPrice(e.target.value);
-                if (e.target.value) setTextPrice("");
+                setEditForm({...editForm, price: e.target.value});
+                if (e.target.value) setEditForm(prev => ({...prev, textPrice: ""}));
               }}
               step="0.01"
-              disabled={!!textPrice}
+              disabled={!!editForm.textPrice}
               className="px-4 py-2 border rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
             />
             <input
               type="text"
               placeholder="Цена (текст, напр. 'от 75 руб.')"
-              value={textPrice}
+              value={editForm.textPrice}
               onChange={(e) => {
-                setTextPrice(e.target.value);
-                if (e.target.value) setPrice("");
+                setEditForm({...editForm, textPrice: e.target.value});
+                if (e.target.value) setEditForm(prev => ({...prev, price: ""}));
               }}
-              disabled={!!price}
+              disabled={!!editForm.price}
               className="px-4 py-2 border rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
             />
           </div>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={editForm.category}
+            onChange={(e) => setEditForm({...editForm, category: e.target.value})}
             required
             className="w-full px-4 py-2 border rounded"
           >
@@ -331,8 +438,8 @@ export default function LandscapeAdminPage() {
             <label className="block text-sm font-medium mb-2">Выберите изображение</label>
             <div className="space-y-3">
               <select
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
+                value={editForm.image}
+                onChange={(e) => setEditForm({...editForm, image: e.target.value})}
                 required
                 className="w-full px-4 py-2 border rounded"
               >
@@ -356,10 +463,10 @@ export default function LandscapeAdminPage() {
                 {uploadError && <p className="text-red-600 text-sm mt-1">{uploadError}</p>}
               </div>
             </div>
-            {image && (
+            {editForm.image && (
               <div className="mt-3">
                 <p className="text-sm text-gray-600 mb-2">Превью:</p>
-                <img src={image} alt="Preview" className="h-24 w-24 object-cover rounded" />
+                <img src={editForm.image} alt="Preview" className="h-24 w-24 object-cover rounded" />
               </div>
             )}
           </div>
@@ -369,7 +476,7 @@ export default function LandscapeAdminPage() {
             <h3 className="text-lg font-semibold mb-3">Характеристики</h3>
             
             {/* Щебень: только Цвет */}
-            {category === "Щебень" && (
+            {editForm.category === "Щебень" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -382,7 +489,8 @@ export default function LandscapeAdminPage() {
             )}
             
             {/* Столы и скамейки: Стул, Ножка, Высота */}
-            {category === "Столы и скамейки" && (
+                        {/* Столы и скамейки */}
+            {editForm.category === "Столы и скамейки" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -419,8 +527,8 @@ export default function LandscapeAdminPage() {
                   <input
                     type="text"
                     placeholder="Заголовок для SEO"
-                    value={createSeoFields.seo_title}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, seo_title: e.target.value})}
+                    value={editForm.seo_title}
+                    onChange={(e) => setEditForm({...editForm, seo_title: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -429,8 +537,8 @@ export default function LandscapeAdminPage() {
                   <input
                     type="text"
                     placeholder="Описание для SEO"
-                    value={createSeoFields.seo_description}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, seo_description: e.target.value})}
+                    value={editForm.seo_description}
+                    onChange={(e) => setEditForm({...editForm, seo_description: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -439,8 +547,8 @@ export default function LandscapeAdminPage() {
                   <input
                     type="text"
                     placeholder="Ключевые слова для SEO"
-                    value={createSeoFields.seo_keywords}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, seo_keywords: e.target.value})}
+                    value={editForm.seo_keywords}
+                    onChange={(e) => setEditForm({...editForm, seo_keywords: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -449,8 +557,8 @@ export default function LandscapeAdminPage() {
                   <input
                     type="text"
                     placeholder="URL изображения для социальных сетей"
-                    value={createSeoFields.og_image}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, og_image: e.target.value})}
+                    value={editForm.og_image}
+                    onChange={(e) => setEditForm({...editForm, og_image: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -473,31 +581,61 @@ export default function LandscapeAdminPage() {
         <div className="grid gap-4">
           {landscape.map((item) => (
             <div key={item.id} className="border p-4 rounded bg-white">
-              {editingId === item.id ? (
+              {editingLandscape?.id === item.id ? (
                 <div className="space-y-3">
-                  <input
-                    type="text"
-                    value={editData.name || item.name}
-                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                    className="w-full px-3 py-2 border rounded"
-                  />
-                  <input
-                    type="text"
-                    value={editData.category || item.category}
-                    onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                    className="w-full px-3 py-2 border rounded"
-                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      placeholder="Название"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={editForm.category}
+                      onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                      placeholder="Категория"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={editForm.price}
+                      onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                      placeholder="Цена"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={editForm.textPrice}
+                      onChange={(e) => setEditForm({ ...editForm, textPrice: e.target.value })}
+                      placeholder="Текстовая цена"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                  
                   {/* SEO Fields */}
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-semibold mb-3 text-gray-800">SEO Данные</h4>
                     <SeoFieldsForm
+                      key={`${editingLandscape.id}-${addingLandscape}`}
                       entityType="landscape"
                       categoryName="Благоустройство"
                       initialData={{
-                        seoTitle: item.seo_title || "",
-                        seoDescription: item.seo_description || "",
-                        seoKeywords: item.seo_keywords || "",
-                        ogImage: item.og_image || "",
+                        seoTitle: editForm.seo_title,
+                        seoDescription: editForm.seo_description,
+                        seoKeywords: editForm.seo_keywords,
+                        ogImage: editForm.og_image,
+                      }}
+                      onChange={(data) => {
+                        console.log('SeoFieldsForm onChange:', data);
+                        setEditForm(prev => ({
+                          ...prev,
+                          seo_title: data.seoTitle,
+                          seo_description: data.seoDescription,
+                          seo_keywords: data.seoKeywords,
+                          og_image: data.ogImage,
+                        }));
                       }}
                       onSave={handleSaveSeo}
                       isLoading={seoLoading}
@@ -506,13 +644,13 @@ export default function LandscapeAdminPage() {
                   </div>
                   <div className="flex gap-2 mt-4">
                     <button
-                      onClick={() => handleSaveEdit(item.id)}
+                      onClick={handleSaveEdit}
                       className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
                     >
                       Сохранить
                     </button>
                     <button
-                      onClick={() => setEditingId(null)}
+                      onClick={() => setEditingLandscape(null)}
                       className="flex-1 bg-gray-400 text-white py-2 rounded hover:bg-gray-500"
                     >
                       Отмена
@@ -536,10 +674,7 @@ export default function LandscapeAdminPage() {
                   )}
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => {
-                        setEditingId(item.id);
-                        setEditData(item);
-                      }}
+                      onClick={() => startEditing(item)}
                       className="flex-1 bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600"
                     >
                       Редактировать

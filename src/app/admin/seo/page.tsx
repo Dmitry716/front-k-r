@@ -17,6 +17,8 @@ interface PageSEO {
 
 // Доступные страницы для редактирования SEO
 const AVAILABLE_PAGES = [
+  // Главная страница
+  { slug: 'home', title: 'Главная страница' },
   // Памятники
   { slug: 'monuments-catalog', title: 'Главный каталог памятников' },
   { slug: 'monuments-single', title: 'Одиночные памятники' },
@@ -289,7 +291,7 @@ export default function SEOAdminPage() {
                         {availableImages.map((img) => (
                           <div
                             key={img}
-                            className="p-1 bg-white rounded cursor-pointer hover:bg-blue-50"
+                            className="p-1 bg-white rounded cursor-pointer text-black hover:bg-blue-50"
                             onClick={() => updateSeoField("ogImage", img)}
                           >
                             {img.split("/").pop()}

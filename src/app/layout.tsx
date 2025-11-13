@@ -5,11 +5,15 @@ import Footer from "./components/Footer";
 import FooterMenu from "./components/FooterMenu";
 import ScrollToTop from "./components/ScrollToTop";
 import { DropdownProvider } from "./context/DropDownContext";
+import { AdminProtector } from "./components/AdminProtector";
 
+// Default metadata для корневого layout - используется как fallback
 export const metadata: Metadata = {
   title: "Каменная Роза в Витебске",
   description:
     "Производство и установка памятников, оград, аксессуаров из гранита.",
+  metadataBase: new URL("https://k-r.by"),
+  robots: "index, follow",
 };
 
 export default function RootLayout({
@@ -21,11 +25,13 @@ export default function RootLayout({
     <html lang="ru">
       <body className="min-w-[360px]">
       <DropdownProvider>
-        <ScrollToTop />
-        <Header />
-        {children}
-        <Footer />
-        <FooterMenu />
+        <AdminProtector>
+          <ScrollToTop />
+          <Header />
+          {children}
+          <Footer />
+          <FooterMenu />
+        </AdminProtector>
     </DropdownProvider>
       </body>
     </html>

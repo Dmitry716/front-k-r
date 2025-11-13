@@ -80,9 +80,17 @@ const getCategoriesForEntity = (entityType: string) => {
       return ACCESSORY_CATEGORIES;
     case 'landscape':
       return LANDSCAPE_CATEGORIES;
+    case 'campaigns':
+      return [{ key: 'campaigns', name: 'Акции (без категорий)' }];
+    case 'blogs':
+      return [{ key: 'blogs', name: 'Блоги (без категорий)' }];
     default:
       return [];
   }
+};
+
+const isCategoryRequired = (entityType: string) => {
+  return entityType !== 'campaigns' && entityType !== 'blogs';
 };
 
 export default function SeoTemplatesPage() {
@@ -107,6 +115,13 @@ export default function SeoTemplatesPage() {
   useEffect(() => {
     loadTemplates();
   }, []);
+
+  // Закрытие формы при смене типа сущности
+  useEffect(() => {
+    if (isFormOpen) {
+      setIsFormOpen(false);
+    }
+  }, [selectedEntityType]);
 
   const loadTemplates = async () => {
     try {
@@ -158,6 +173,10 @@ export default function SeoTemplatesPage() {
     setError(null);
 
     // Валидация
+    if (isCategoryRequired(formData.entityType) && (!formData.categoryKey || !formData.categoryName)) {
+      setError('Категория обязательна');
+      return;
+    }
     if (!formData.categoryKey || !formData.categoryName) {
       setError('Категория обязательна');
       return;
@@ -206,9 +225,12 @@ export default function SeoTemplatesPage() {
   };
 
   const handleAddNew = () => {
+    const categories = getCategoriesForEntity(selectedEntityType);
+    const defaultCategory = categories.length > 0 ? categories[0] : { key: '', name: '' };
+    
     setFormData({
-      categoryKey: '',
-      categoryName: '',
+      categoryKey: defaultCategory.key,
+      categoryName: defaultCategory.name,
       entityType: selectedEntityType,
       seoTitle: '',
       seoDescription: '',
@@ -281,7 +303,9 @@ export default function SeoTemplatesPage() {
 
               {/* Category Select */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Категория *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Категория {isCategoryRequired(formData.entityType) ? '*' : '(опционально)'}
+                </label>
                 <select
                   value={formData.categoryKey}
                   onChange={e => {
@@ -292,7 +316,7 @@ export default function SeoTemplatesPage() {
                       categoryName: selected?.name || '',
                     });
                   }}
-                  required
+                  required={isCategoryRequired(formData.entityType)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                 >
                   <option value="">Выберите категорию</option>

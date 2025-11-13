@@ -26,10 +26,10 @@ interface Blog {
   tags: string[];
   createdAt: string;
   updatedAt: string;
-  seo_title?: string;
-  seo_description?: string;
-  seo_keywords?: string;
-  og_image?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  ogImage?: string;
 }
 
 export default function BlogsAdminPage() {
@@ -38,8 +38,6 @@ export default function BlogsAdminPage() {
   const [slug, setSlug] = useState("");
   const [description, setDescription] = useState("");
   const [content, setContent] = useState("");
-  const [metaTitle, setMetaTitle] = useState("");
-  const [metaDescription, setMetaDescription] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
@@ -48,19 +46,30 @@ export default function BlogsAdminPage() {
   // SEO хук
   const { saveSeoFields, isLoading: seoLoading, error: seoError } = useSeoSave('blogs');
   
+  // SEO поля
+  const [seoTitle, setSeoTitle] = useState("");
+  const [seoDescription, setSeoDescription] = useState("");
+  const [seoKeywords, setSeoKeywords] = useState("");
+  const [ogImage, setOgImage] = useState("");
+
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
   const fetchBlogs = async () => {
     try {
       const data = await apiClient.get("/admin/blogs?limit=200");
+      console.log('Fetch blogs response:', data);
       if (data.success) {
-        setBlogs(data.blogs || []);
+        // Обрабатываем оба формата ответа
+        const blogs = data.blogs || data.data || [];
+        setBlogs(blogs);
+      } else {
+        console.error("Fetch failed:", data.error);
       }
     } catch (err) {
       console.error("Error fetching blogs:", err);
@@ -100,10 +109,10 @@ export default function BlogsAdminPage() {
 
   // Автогенерация slug при изменении названия
   useEffect(() => {
-    if (title && !editingId) {
+    if (title && !editingBlog) {
       setSlug(generateSlug(title));
     }
-  }, [title, editingId]);
+  }, [title, editingBlog]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -183,8 +192,74 @@ export default function BlogsAdminPage() {
     setBlocks(blocks.filter(block => block.id !== blockId));
   };
 
+  const startEditing = (blog: Blog) => {
+    console.log('Edit blog data:', blog);
+    setEditingBlog(blog);
+    setTitle(blog.title);
+    setSlug(blog.slug || '');
+    setDescription(blog.description || '');
+    setContent(blog.content);
+    setFeaturedImage(blog.featuredImage || '');
+    setTags(blog.tags || []);
+    setBlocks(blog.blocks || []);
+    // Load SEO fields
+    setSeoTitle(blog.seoTitle || '');
+    setSeoDescription(blog.seoDescription || '');
+    setSeoKeywords(blog.seoKeywords || '');
+    setOgImage(blog.ogImage || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingBlog) return;
+    
+    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const body = {
+        title,
+        slug,
+        description,
+        content,
+        featuredImage,
+        blocks,
+        tags,
+        seoTitle: seoTitle || undefined,
+        seoDescription: seoDescription || undefined,
+        seoKeywords: seoKeywords || undefined,
+        ogImage: ogImage || undefined,
+      };
+
+      const data = await apiClient.put(`/admin/blogs/${editingBlog.id}`, body);
+      console.log('Ответ сервера при обновлении:', data);
+
+      if (data.success) {
+        setSuccess('✓ Блог обновлен');
+        resetForm();
+        setEditingBlog(null);
+        await fetchBlogs();
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.error || 'Ошибка при обновлении блога');
+      }
+    } catch (err: any) {
+      setError('Ошибка: ' + err.message);
+      console.error('Update error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Если редактируем - используем handleSaveEdit
+    if (editingBlog) {
+      await handleSaveEdit();
+      return;
+    }
+
     setLoading(true);
     setError("");
     setSuccess("");
@@ -197,12 +272,14 @@ export default function BlogsAdminPage() {
         title,
         description,
         content,
-        metaTitle,
-        metaDescription,
         featuredImage,
         images: [], // Пока оставим пустым
         blocks,
-        tags
+        tags,
+        seoTitle: seoTitle || undefined,
+        seoDescription: seoDescription || undefined,
+        seoKeywords: seoKeywords || undefined,
+        ogImage: ogImage || undefined,
       };
 
       console.log('Отправляю данные блога:', body);
@@ -232,11 +309,13 @@ export default function BlogsAdminPage() {
     setSlug("");
     setDescription("");
     setContent("");
-    setMetaTitle("");
-    setMetaDescription("");
     setFeaturedImage("");
     setTags([]);
     setBlocks([]);
+    setSeoTitle("");
+    setSeoDescription("");
+    setSeoKeywords("");
+    setOgImage("");
   };
 
   const handleDelete = async (id: number) => {
@@ -516,7 +595,23 @@ export default function BlogsAdminPage() {
   return (
     <div className="space-y-8">
       <div className="text-black">
-        <h2 className="text-2xl font-bold mb-4">Добавить блог</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold">
+            {editingBlog ? `Редактировать: ${editingBlog.title}` : 'Добавить блог'}
+          </h2>
+          {editingBlog && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingBlog(null);
+                resetForm();
+              }}
+              className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400"
+            >
+              ✕ Отмена
+            </button>
+          )}
+        </div>
         {error && <div className="text-red-600 mb-4 p-2 bg-red-50">{error}</div>}
         {success && <div className="text-green-600 mb-4 p-2 bg-green-50">{success}</div>}
         
@@ -565,17 +660,30 @@ export default function BlogsAdminPage() {
             
             <input
               type="text"
-              placeholder="Meta Title"
-              value={metaTitle}
-              onChange={(e) => setMetaTitle(e.target.value)}
+              placeholder="SEO Заголовок (для поисковых систем)"
+              value={seoTitle}
+              onChange={(e) => setSeoTitle(e.target.value)}
               className="w-full px-4 py-2 border rounded"
             />
-            
             <textarea
-              placeholder="Meta Description"
-              value={metaDescription}
-              onChange={(e) => setMetaDescription(e.target.value)}
+              placeholder="SEO Описание (для поисковых систем)"
+              value={seoDescription}
+              onChange={(e) => setSeoDescription(e.target.value)}
               rows={2}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="SEO Ключевые слова"
+              value={seoKeywords}
+              onChange={(e) => setSeoKeywords(e.target.value)}
+              className="w-full px-4 py-2 border rounded"
+            />
+            <input
+              type="text"
+              placeholder="OG Изображение (URL для социальных сетей)"
+              value={ogImage}
+              onChange={(e) => setOgImage(e.target.value)}
               className="w-full px-4 py-2 border rounded"
             />
           </div>
@@ -695,7 +803,7 @@ export default function BlogsAdminPage() {
             disabled={loading}
             className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
           >
-            {loading ? "Добавление..." : "Добавить блог"}
+            {loading ? (editingBlog ? '⏳ Сохранение...' : '⏳ Добавление...') : (editingBlog ? '💾 Сохранить изменения' : '✅ Добавить блог')}
           </button>
         </form>
       </div>
@@ -728,6 +836,12 @@ export default function BlogsAdminPage() {
                   {blog.featuredImage && (
                     <img src={blog.featuredImage} alt={blog.title} className="w-16 h-16 object-cover rounded" />
                   )}
+                  <button
+                    onClick={() => startEditing(blog)}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  >
+                    Редактировать
+                  </button>
                   <button
                     onClick={() => handleDelete(blog.id)}
                     className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"

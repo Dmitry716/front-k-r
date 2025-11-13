@@ -30,6 +30,17 @@ const FRAME_DESCRIPTIONS = {
   "bronze": "Материал, производство, производитель: Бронза, Италия, Caggiati\n\nМонтаж: с помощью штырей на задней стороне\n\nВажно: розничная продажа не осуществляется. Образцы представлены для ознакомления перед заказом памятника."
 };
 
+// Маппинг категорий на categoryKey для SEO шаблонов
+const CATEGORY_TO_KEY_MAP: {[key: string]: string} = {
+  "Вазы": "vases",
+  "Лампады": "lamps",
+  "Скульптуры": "sculptures",
+  "Рамки": "frames",
+  "Изделия из бронзы": "bronze-items",
+  "Надгробные плиты": "tombstones",
+  "Гранитные таблички": "granite-tablets"
+};
+
 export default function AccessoriesAdminPage() {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [name, setName] = useState("");
@@ -39,16 +50,26 @@ export default function AccessoriesAdminPage() {
   const [category, setCategory] = useState("");
   const [image, setImage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [addingAccessory, setAddingAccessory] = useState(false);
+  const [editingAccessory, setEditingAccessory] = useState<Accessory | null>(null);
   
   // SEO хук
   const { saveSeoFields, isLoading: seoLoading, error: seoError } = useSeoSave('accessories');
   
-  // SEO state для create режима
-  const [createSeoFields, setCreateSeoFields] = useState({
-    seo_title: '',
-    seo_description: '',
-    seo_keywords: '',
-    og_image: ''
+  // Объединённая форма для create и edit
+  const [editForm, setEditForm] = useState({
+    name: "",
+    slug: "",
+    price: "",
+    textPrice: "",
+    category: "",
+    image: "",
+    description: "",
+    specifications: {} as {[key: string]: string},
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: "",
+    og_image: "",
   });
   
   // Для характеристик
@@ -64,8 +85,6 @@ export default function AccessoriesAdminPage() {
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [editData, setEditData] = useState<Partial<Accessory>>({});
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
@@ -121,10 +140,13 @@ export default function AccessoriesAdminPage() {
 
   // Автогенерация slug при изменении названия
   useEffect(() => {
-    if (name && !editingId) {
-      setSlug(generateSlug(name));
+    if (editForm.name && !editingAccessory) {
+      setEditForm(prev => ({
+        ...prev,
+        slug: generateSlug(editForm.name)
+      }));
     }
-  }, [name, editingId]);
+  }, [editForm.name, editingAccessory]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -168,68 +190,106 @@ export default function AccessoriesAdminPage() {
     setSuccess("");
 
     try {
-      const finalSlug = slug || generateSlug(name);
+      const finalSlug = editForm.slug || generateSlug(editForm.name);
       
       // Очищаем пустые спецификации
       const cleanedSpecs = Object.fromEntries(
-        Object.entries(specifications).filter(([, value]) => value?.trim())
+        Object.entries(editForm.specifications).filter(([, value]) => value?.trim())
       );
       
       // Определяем описание для рамок или изделий из бронзы
       let finalDescription = "";
-      if (category === "Рамки") {
+      if (editForm.category === "Рамки") {
         finalDescription = FRAME_DESCRIPTIONS[frameType as keyof typeof FRAME_DESCRIPTIONS];
-      } else if (category === "Изделия из бронзы") {
+      } else if (editForm.category === "Изделия из бронзы") {
         finalDescription = "Скульптура из полимербетона - отличный способ дополнить надгробие, придать ему индивидуальность. Они подходят для памятников, изготовленных из любого вида гранита.\n\nПри выборе скульптуры из полимербетона необходимо ориентироваться на размеры памятника, способ художественного оформления и вид гранита.\n\nБронзовые скульптуры хорошо сочетаются памятники, оформленными буквами из бронзы или позолоченным текстом. Скульптуры цвета белого мрамора хорошо дополняют белый гравированный текст. Модели цвета серебра и бронзы хорошо подходят под любой способ оформления.";
       } else {
-        finalDescription = description;
+        finalDescription = editForm.description;
+      }
+      
+      // Загружаем SEO шаблон если все поля пусты
+      let seoTitle = editForm.seo_title;
+      let seoDescription = editForm.seo_description;
+      let seoKeywords = editForm.seo_keywords;
+      let ogImage = editForm.og_image;
+
+      console.log('[ACCESSORIES] Initial SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
+      const hasUserProvidedSeo = seoTitle || seoDescription || seoKeywords || ogImage;
+      console.log('[ACCESSORIES] hasUserProvidedSeo:', hasUserProvidedSeo);
+      
+      if (!hasUserProvidedSeo) {
+        // Только загружаем шаблон если все поля пусты
+        try {
+          const { fetchSeoTemplate } = await import('@/lib/hooks/use-seo-hierarchy');
+          const categoryKey = CATEGORY_TO_KEY_MAP[editForm.category] || editForm.category;
+          console.log('Fetching SEO template for accessories category:', editForm.category, 'key:', categoryKey);
+          const template = await fetchSeoTemplate("accessories", categoryKey);
+          console.log('Template received:', template);
+          
+          if (template) {
+            seoTitle = template.seoTitle || editForm.name;
+            seoDescription = template.seoDescription || `Аксессуар ${editForm.name}`;
+            seoKeywords = template.seoKeywords || editForm.name;
+            ogImage = template.ogImage || "";
+            console.log('Applied template SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+          } else {
+            // Если шаблона нет - используем данные как fallback
+            seoTitle = editForm.name;
+            seoDescription = `Аксессуар ${editForm.name}`;
+            seoKeywords = editForm.name;
+            console.log('No template found, using fallback:', { seoTitle, seoDescription, seoKeywords });
+          }
+        } catch (err) {
+          console.warn('Failed to load SEO template, using defaults:', err);
+          // Используем данные как fallback
+          seoTitle = editForm.name;
+          seoDescription = `Аксессуар ${editForm.name}`;
+          seoKeywords = editForm.name;
+          console.log('Template load error, using fallback:', { seoTitle, seoDescription, seoKeywords });
+        }
+      } else {
+        // Юзер вписал что-то - используем его значения, заполняя пропуски fallback'ом
+        console.log('User provided SEO, using user values:', { seoTitle, seoDescription, seoKeywords, ogImage });
+        seoTitle = seoTitle || editForm.name;
+        seoDescription = seoDescription || `Аксессуар ${editForm.name}`;
+        seoKeywords = seoKeywords || editForm.name;
+        ogImage = ogImage || "";
       }
       
       const body = {
         slug: finalSlug,
-        name,
-        price,
-        textPrice,
-        category,
-        image,
+        name: editForm.name,
+        price: editForm.price,
+        textPrice: editForm.textPrice,
+        category: editForm.category,
+        image: editForm.image,
         specifications: cleanedSpecs,
         description: finalDescription,
+        seoTitle,
+        seoDescription,
+        seoKeywords,
+        ogImage,
       };
 
       const data = await apiClient.post("/admin/accessories", body);
       if (data.success) {
-        const newAccessoryId = data.accessory.id;
-        
-        // Если есть SEO поля, сохраняем их
-        if (createSeoFields.seo_title || createSeoFields.seo_description || createSeoFields.seo_keywords || createSeoFields.og_image) {
-          await saveSeoFields(newAccessoryId, {
-            seoTitle: createSeoFields.seo_title,
-            seoDescription: createSeoFields.seo_description,
-            seoKeywords: createSeoFields.seo_keywords,
-            ogImage: createSeoFields.og_image,
-          });
-        }
-        
         setSuccess("✓ Аксессуар добавлен");
-        setName("");
-        setSlug("");
-        setPrice("");
-        setTextPrice("");
-        setCategory("");
-        setImage("");
-        setSpecifications({
-          color: "",
-          height: "",
-          dimensions: ""
+        setEditForm({
+          name: "",
+          slug: "",
+          price: "",
+          textPrice: "",
+          category: "",
+          image: "",
+          description: "",
+          specifications: {},
+          seo_title: "",
+          seo_description: "",
+          seo_keywords: "",
+          og_image: "",
         });
-        setDescription("");
-        setFrameType("metal");
-        setCreateSeoFields({
-          seo_title: '',
-          seo_description: '',
-          seo_keywords: '',
-          og_image: ''
-        });
+        setAddingAccessory(false);
         await fetchAccessories();
         setTimeout(() => setSuccess(""), 3000);
       } else {
@@ -262,10 +322,38 @@ export default function AccessoriesAdminPage() {
     }
   };
 
+  const startEditing = (accessory: Accessory) => {
+    console.log('Starting edit for accessory:', JSON.stringify(accessory, null, 2));
+    
+    // Конвертируем API ответ (может быть camelCase или snake_case)
+    const seoTitle = accessory.seo_title || (accessory as any).seoTitle || "";
+    const seoDescription = accessory.seo_description || (accessory as any).seoDescription || "";
+    const seoKeywords = accessory.seo_keywords || (accessory as any).seoKeywords || "";
+    const ogImage = accessory.og_image || (accessory as any).ogImage || "";
+    
+    console.log('SEO data extracted:', { seoTitle, seoDescription, seoKeywords, ogImage });
+    
+    setEditingAccessory(accessory);
+    setEditForm({
+      name: accessory.name || "",
+      slug: accessory.slug || "",
+      price: accessory.price?.toString() || "",
+      textPrice: accessory.textPrice || "",
+      category: accessory.category || "",
+      image: accessory.image || "",
+      description: (accessory as any).description || "",
+      specifications: (accessory as any).specifications || {},
+      seo_title: seoTitle,
+      seo_description: seoDescription,
+      seo_keywords: seoKeywords,
+      og_image: ogImage,
+    });
+  };
+
   const handleSaveSeo = async (data: SeoFieldsData) => {
-    if (!editingId) return;
+    if (!editingAccessory) return;
     try {
-      await saveSeoFields(editingId, data);
+      await saveSeoFields(editingAccessory.id, data);
       setSuccess('✓ SEO успешно сохранено');
       await fetchAccessories();
       setTimeout(() => setSuccess(""), 3000);
@@ -274,15 +362,34 @@ export default function AccessoriesAdminPage() {
     }
   };
 
-  const handleSaveEdit = async (id: number) => {
+  const handleSaveEdit = async () => {
+    if (!editingAccessory) return;
     if (!window.confirm("Вы уверены, что хотите сохранить изменения?")) return;
     
     try {
-      const data = await apiClient.put(`/admin/accessories/${id}`, editData);
+      const cleanedSpecs = Object.fromEntries(
+        Object.entries(editForm.specifications).filter(([, value]) => value?.trim())
+      );
+      
+      const body = {
+        name: editForm.name,
+        slug: editForm.slug,
+        price: editForm.price ? parseFloat(editForm.price) : undefined,
+        textPrice: editForm.textPrice,
+        category: editForm.category,
+        image: editForm.image,
+        description: editForm.description,
+        specifications: cleanedSpecs,
+        seoTitle: editForm.seo_title,
+        seoDescription: editForm.seo_description,
+        seoKeywords: editForm.seo_keywords,
+        ogImage: editForm.og_image,
+      };
+      
+      const data = await apiClient.put(`/admin/accessories/${editingAccessory.id}`, body);
       if (data.success) {
         setSuccess("✓ Аксессуар обновлен");
-        setEditingId(null);
-        setEditData({});
+        setEditingAccessory(null);
         await fetchAccessories();
         setTimeout(() => setSuccess(""), 3000);
       } else {
@@ -303,46 +410,46 @@ export default function AccessoriesAdminPage() {
           <input
             type="text"
             placeholder="Название"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            value={editForm.name}
+            onChange={(e) => setEditForm({...editForm, name: e.target.value})}
             required
             className="w-full px-4 py-2 border rounded"
           />
           <input
             type="text"
             placeholder="Slug (автогенерируется из названия)"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
+            value={editForm.slug}
+            onChange={(e) => setEditForm({...editForm, slug: e.target.value})}
             className="w-full px-4 py-2 border rounded text-gray-500"
           />
           <div className="grid grid-cols-2 gap-4">
             <input
               type="number"
               placeholder="Цена (число)"
-              value={price}
+              value={editForm.price}
               onChange={(e) => {
-                setPrice(e.target.value);
-                if (e.target.value) setTextPrice(""); // Очищаем текстовую цену при заполнении числовой
+                setEditForm({...editForm, price: e.target.value});
+                if (e.target.value) setEditForm(prev => ({...prev, textPrice: ""})); // Очищаем текстовую цену при заполнении числовой
               }}
               step="0.01"
-              disabled={!!textPrice}
+              disabled={!!editForm.textPrice}
               className="px-4 py-2 border rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
             />
             <input
               type="text"
               placeholder="Цена (текст, напр. 'от 75 руб.')"
-              value={textPrice}
+              value={editForm.textPrice}
               onChange={(e) => {
-                setTextPrice(e.target.value);
-                if (e.target.value) setPrice(""); // Очищаем числовую цену при заполнении текстовой
+                setEditForm({...editForm, textPrice: e.target.value});
+                if (e.target.value) setEditForm(prev => ({...prev, price: ""})); // Очищаем числовую цену при заполнении текстовой
               }}
-              disabled={!!price}
+              disabled={!!editForm.price}
               className="px-4 py-2 border rounded disabled:bg-gray-200 disabled:cursor-not-allowed"
             />
           </div>
           <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            value={editForm.category}
+            onChange={(e) => setEditForm({...editForm, category: e.target.value})}
             required
             className="w-full px-4 py-2 border rounded"
           >
@@ -355,8 +462,8 @@ export default function AccessoriesAdminPage() {
             <label className="block text-sm font-medium mb-2">Выберите изображение</label>
             <div className="space-y-3">
               <select
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
+                value={editForm.image}
+                onChange={(e) => setEditForm({...editForm, image: e.target.value})}
                 required
                 className="w-full px-4 py-2 border rounded"
               >
@@ -380,10 +487,10 @@ export default function AccessoriesAdminPage() {
                 {uploadError && <p className="text-red-600 text-sm mt-1">{uploadError}</p>}
               </div>
             </div>
-            {image && (
+            {editForm.image && (
               <div className="mt-3">
                 <p className="text-sm text-gray-600 mb-2">Превью:</p>
-                <img src={image} alt="Preview" className="h-24 w-24 object-cover rounded" />
+                <img src={editForm.image} alt="Preview" className="h-24 w-24 object-cover rounded" />
               </div>
             )}
           </div>
@@ -393,7 +500,7 @@ export default function AccessoriesAdminPage() {
             <h3 className="text-lg font-semibold mb-3">Характеристики и описание</h3>
             
             {/* Вазы: Цвет и Высота */}
-            {category === "Вазы" && (
+            {editForm.category === "Вазы" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -413,7 +520,7 @@ export default function AccessoriesAdminPage() {
             )}
             
             {/* Лампады: Цвет и Габариты */}
-            {category === "Лампады" && (
+            {editForm.category === "Лампады" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -433,7 +540,7 @@ export default function AccessoriesAdminPage() {
             )}
             
             {/* Скульптуры: Цвет и Габариты */}
-            {category === "Скульптуры" && (
+            {editForm.category === "Скульптуры" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -453,7 +560,7 @@ export default function AccessoriesAdminPage() {
             )}
             
             {/* Рамки: Выбор типа описания */}
-            {category === "Рамки" && (
+            {editForm.category === "Рамки" && (
               <div className="space-y-3">
                 <label className="block text-sm font-medium mb-2">Тип рамки</label>
                 <select
@@ -468,7 +575,7 @@ export default function AccessoriesAdminPage() {
             )}
             
             {/* Надгробные плиты: Надгробная плита */}
-            {category === "Надгробные плиты" && (
+            {editForm.category === "Надгробные плиты" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -481,7 +588,7 @@ export default function AccessoriesAdminPage() {
             )}
             
             {/* Гранитные таблички: Табличка */}
-            {category === "Гранитные таблички" && (
+            {editForm.category === "Гранитные таблички" && (
               <div className="space-y-3">
                 <input
                   type="text"
@@ -494,7 +601,7 @@ export default function AccessoriesAdminPage() {
             )}
             
             {/* Изделия из бронзы: Описание уже предустановлено */}
-            {category === "Изделия из бронзы" && (
+            {editForm.category === "Изделия из бронзы" && (
               <div className="space-y-3">
                 <p className="text-sm text-gray-600">Описание будет автоматически добавлено для изделий из бронзы</p>
               </div>
@@ -511,8 +618,8 @@ export default function AccessoriesAdminPage() {
                   <input
                     type="text"
                     placeholder="Заголовок для SEO"
-                    value={createSeoFields.seo_title}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, seo_title: e.target.value})}
+                    value={editForm.seo_title}
+                    onChange={(e) => setEditForm({...editForm, seo_title: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -521,8 +628,8 @@ export default function AccessoriesAdminPage() {
                   <input
                     type="text"
                     placeholder="Описание для SEO"
-                    value={createSeoFields.seo_description}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, seo_description: e.target.value})}
+                    value={editForm.seo_description}
+                    onChange={(e) => setEditForm({...editForm, seo_description: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -531,8 +638,8 @@ export default function AccessoriesAdminPage() {
                   <input
                     type="text"
                     placeholder="Ключевые слова для SEO"
-                    value={createSeoFields.seo_keywords}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, seo_keywords: e.target.value})}
+                    value={editForm.seo_keywords}
+                    onChange={(e) => setEditForm({...editForm, seo_keywords: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -541,8 +648,8 @@ export default function AccessoriesAdminPage() {
                   <input
                     type="text"
                     placeholder="URL изображения для социальных сетей"
-                    value={createSeoFields.og_image}
-                    onChange={(e) => setCreateSeoFields({...createSeoFields, og_image: e.target.value})}
+                    value={editForm.og_image}
+                    onChange={(e) => setEditForm({...editForm, og_image: e.target.value})}
                     className="w-full px-4 py-2 border rounded"
                   />
                 </div>
@@ -565,31 +672,61 @@ export default function AccessoriesAdminPage() {
         <div className="grid gap-4">
           {accessories.map((item) => (
             <div key={item.id} className="border p-4 rounded bg-white">
-              {editingId === item.id ? (
+              {editingAccessory?.id === item.id ? (
                 <div className="space-y-3">
-                  <input
-                    type="text"
-                    value={editData.name || item.name}
-                    onChange={(e) => setEditData({ ...editData, name: e.target.value })}
-                    className="w-full px-3 py-2 border rounded"
-                  />
-                  <input
-                    type="text"
-                    value={editData.category || item.category}
-                    onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                    className="w-full px-3 py-2 border rounded"
-                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      value={editForm.name}
+                      onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                      placeholder="Название"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={editForm.category}
+                      onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                      placeholder="Категория"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={editForm.price}
+                      onChange={(e) => setEditForm({ ...editForm, price: e.target.value })}
+                      placeholder="Цена"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                    <input
+                      type="text"
+                      value={editForm.textPrice}
+                      onChange={(e) => setEditForm({ ...editForm, textPrice: e.target.value })}
+                      placeholder="Текстовая цена"
+                      className="w-full px-3 py-2 border rounded"
+                    />
+                  </div>
+                  
                   {/* SEO Fields */}
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-semibold mb-3 text-gray-800">SEO Данные</h4>
                     <SeoFieldsForm
+                      key={`${editingAccessory.id}-${addingAccessory}`}
                       entityType="accessories"
                       categoryName="Аксессуары"
                       initialData={{
-                        seoTitle: item.seo_title || "",
-                        seoDescription: item.seo_description || "",
-                        seoKeywords: item.seo_keywords || "",
-                        ogImage: item.og_image || "",
+                        seoTitle: editForm.seo_title,
+                        seoDescription: editForm.seo_description,
+                        seoKeywords: editForm.seo_keywords,
+                        ogImage: editForm.og_image,
+                      }}
+                      onChange={(data) => {
+                        console.log('SeoFieldsForm onChange:', data);
+                        setEditForm(prev => ({
+                          ...prev,
+                          seo_title: data.seoTitle,
+                          seo_description: data.seoDescription,
+                          seo_keywords: data.seoKeywords,
+                          og_image: data.ogImage,
+                        }));
                       }}
                       onSave={handleSaveSeo}
                       isLoading={seoLoading}
@@ -598,13 +735,13 @@ export default function AccessoriesAdminPage() {
                   </div>
                   <div className="flex gap-2 mt-4">
                     <button
-                      onClick={() => handleSaveEdit(item.id)}
+                      onClick={handleSaveEdit}
                       className="flex-1 bg-green-600 text-white py-2 rounded hover:bg-green-700"
                     >
                       Сохранить
                     </button>
                     <button
-                      onClick={() => setEditingId(null)}
+                      onClick={() => setEditingAccessory(null)}
                       className="flex-1 bg-gray-400 text-white py-2 rounded hover:bg-gray-500"
                     >
                       Отмена
@@ -620,10 +757,7 @@ export default function AccessoriesAdminPage() {
                   <div className="text-sm text-gray-500">ID: {item.id}</div>
                   <div className="flex gap-2 mt-2">
                     <button
-                      onClick={() => {
-                        setEditingId(item.id);
-                        setEditData(item);
-                      }}
+                      onClick={() => startEditing(item)}
                       className="flex-1 bg-yellow-500 text-white py-2 rounded hover:bg-yellow-600"
                     >
                       Редактировать

@@ -100,7 +100,7 @@ export const categoriesFences: Category[] = [
   {
     title: "С полимерным покрытием",
     price: "от 200 руб.",
-    img: "/section/granite2.webp",
+    img: "/section/granite1.webp",
     link: "/fences/polymer",
   },
   {

@@ -1,3 +1,5 @@
+import { Metadata } from 'next';
+import { getMetadataForPage } from '@/lib/seo-metadata';
 import HeroSlider from "./components/HeroSlider";
 import PopularCategories from "./components/PopularCategories";
 import StoreInfo from "./components/StoreInfo";
@@ -13,6 +15,15 @@ import ReviewsSlider from "./components/ReviewsSlider";
 import Promo from "./components/Promo";
 import Blog from "./components/Blog";
 import FAQ from "./components/FAQ";
+
+// Генерируем метаданные для SEO
+export async function generateMetadata(): Promise<Metadata> {
+  return await getMetadataForPage(
+    'home',
+    'Памятники и памятные комплексы из гранита | КР',
+    'Изготовление и продажа памятников из гранита, оград и памятных комплексов'
+  );
+}
 
 export default function Home() {
    return (

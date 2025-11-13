@@ -1,5 +1,6 @@
-"use client";
-import { useEffect, useState } from "react";
+'use client';
+
+import { useState, useEffect } from 'react';
 import OurWorksSlider from "../components/OurWorksSlider";
 import PathPage from "../components/PathPage";
 import SidebarCatalogMenu from "../components/Sidebar/SidebarCatalogMenu";
@@ -42,7 +43,7 @@ const getTotalPages = (totalProducts: number, productsPerPage: number) => {
     return Math.ceil(totalProducts / productsPerPage);
 };
 
-const FencesPage = () => {
+const FencesPageClient = () => {
     const [isClient, setIsClient] = useState(false);
     const [fences, setFences] = useState<FenceProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -112,11 +113,11 @@ const FencesPage = () => {
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
 
                     <div className={`${isTablet ? 'container-centered' : ''}`}>
                         <PathPage />
-                        <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Ограды на кладбище</h1>
+                        <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">Ограды на кладбище</h1>
 
                         {/* Блок категорий */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">
@@ -126,7 +127,7 @@ const FencesPage = () => {
                                     href={category.link}
                                     className="block overflow-hidden rounded-lg"
                                 >
-                                    <div className="relative flex h-[80px] lg:h-[120px] py-5 pl-3.75 pr-12.5 lg:pr-25 justify-between bg-[#f5f6fa] rounded-lg hover:border-2 border-[#2c3a54]">
+                                    <div className="relative flex h-20 lg:h-[120px] py-5 pl-3.75 pr-12.5 lg:pr-25 justify-between bg-[#f5f6fa] rounded-lg hover:border-2 border-[#2c3a54]">
                                         <div className="flex flex-col w-[70%] self-center z-10">
                                             <h2 className="text-[16px] font-bold text-[#222222] mb-2.5">{category.title}</h2>
                                             <p className="text-[12px] text-[#969ead]">{category.price}</p>
@@ -262,4 +263,4 @@ const FencesPage = () => {
     );
 };
 
-export default FencesPage;
+export default FencesPageClient;

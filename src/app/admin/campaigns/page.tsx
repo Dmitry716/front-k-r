@@ -26,10 +26,10 @@ interface Campaign {
   products: any[];
   createdAt: string;
   updatedAt: string;
-  seo_title?: string;
-  seo_description?: string;
-  seo_keywords?: string;
-  og_image?: string;
+  seoTitle?: string;
+  seoDescription?: string;
+  seoKeywords?: string;
+  ogImage?: string;
 }
 
 export default function AdminCampaignsNewPage() {
@@ -46,11 +46,15 @@ export default function AdminCampaignsNewPage() {
   const [slug, setSlug] = useState('');
   const [description, setDescription] = useState('');
   const [content, setContent] = useState('');
-  const [metaTitle, setMetaTitle] = useState('');
-  const [metaDescription, setMetaDescription] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
   const [tags, setTags] = useState<string[]>([]);
   const [blocks, setBlocks] = useState<CampaignBlock[]>([]);
+  
+  // SEO поля
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoKeywords, setSeoKeywords] = useState('');
+  const [ogImage, setOgImage] = useState('');
 
   // Управление изображениями
   const [availableImages, setAvailableImages] = useState<string[]>([]);
@@ -59,6 +63,9 @@ export default function AdminCampaignsNewPage() {
 
   // Управление тегами
   const [newTag, setNewTag] = useState('');
+
+  // Редактирование кампании
+  const [editingCampaign, setEditingCampaign] = useState<Campaign | null>(null);
 
   const fetchAvailableImages = async () => {
     try {
@@ -100,8 +107,13 @@ export default function AdminCampaignsNewPage() {
   const fetchCampaigns = async () => {
     try {
       const data = await apiClient.get('/admin/campaigns?limit=200');
+      console.log('Fetch campaigns response:', data);
       if (data.success) {
-        setCampaigns(data.campaigns || []);
+        // Обрабатываем оба формата ответа
+        const campaigns = data.campaigns || data.data || [];
+        setCampaigns(campaigns);
+      } else {
+        console.error("Fetch failed:", data.error);
       }
     } catch (error) {
       console.error('Ошибка загрузки кампаний:', error);
@@ -193,8 +205,74 @@ export default function AdminCampaignsNewPage() {
     setBlocks(blocks.filter(block => block.id !== blockId));
   };
 
+  const startEditing = (campaign: Campaign) => {
+    console.log('Edit campaign data:', campaign);
+    setEditingCampaign(campaign);
+    setTitle(campaign.title);
+    setSlug(campaign.slug);
+    setDescription(campaign.description || '');
+    setContent(campaign.content);
+    setFeaturedImage(campaign.featuredImage || '');
+    setTags(campaign.tags || []);
+    setBlocks(campaign.blocks || []);
+    console.log('SEO data:', { seoTitle: campaign.seoTitle, seoDescription: campaign.seoDescription, seoKeywords: campaign.seoKeywords, ogImage: campaign.ogImage });
+    setSeoTitle(campaign.seoTitle || '');
+    setSeoDescription(campaign.seoDescription || '');
+    setSeoKeywords(campaign.seoKeywords || '');
+    setOgImage(campaign.ogImage || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingCampaign) return;
+    
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const body = {
+        title,
+        slug,
+        description,
+        content,
+        featuredImage,
+        blocks,
+        tags,
+        seoTitle: seoTitle || undefined,
+        seoDescription: seoDescription || undefined,
+        seoKeywords: seoKeywords || undefined,
+        ogImage: ogImage || undefined,
+      };
+
+      const data = await apiClient.put(`/admin/campaigns/${editingCampaign.id}`, body);
+      console.log('Ответ сервера при обновлении:', data);
+
+      if (data.success) {
+        setSuccess('✓ Кампания обновлена');
+        resetForm();
+        setEditingCampaign(null);
+        await fetchCampaigns();
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        setError(data.error || 'Ошибка при обновлении кампании');
+      }
+    } catch (err: any) {
+      setError('Ошибка: ' + err.message);
+      console.error('Update error:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Если редактируем - используем handleSaveEdit
+    if (editingCampaign) {
+      await handleSaveEdit();
+      return;
+    }
+
     setLoading(true);
     setError('');
     setSuccess('');
@@ -207,13 +285,15 @@ export default function AdminCampaignsNewPage() {
         title,
         description,
         content,
-        metaTitle,
-        metaDescription,
         featuredImage,
         images: [], // Пока оставим пустым
         blocks,
         tags,
-        products: [] // Пока оставим пустым
+        products: [], // Пока оставим пустым
+        seoTitle: seoTitle || undefined,
+        seoDescription: seoDescription || undefined,
+        seoKeywords: seoKeywords || undefined,
+        ogImage: ogImage || undefined,
       };
 
       console.log('Отправляю данные кампании:', body);
@@ -243,11 +323,13 @@ export default function AdminCampaignsNewPage() {
     setSlug('');
     setDescription('');
     setContent('');
-    setMetaTitle('');
-    setMetaDescription('');
     setFeaturedImage('');
     setTags([]);
     setBlocks([]);
+    setSeoTitle('');
+    setSeoDescription('');
+    setSeoKeywords('');
+    setOgImage('');
   };
 
   const renderBlockEditor = (block: CampaignBlock) => {
@@ -551,9 +633,25 @@ export default function AdminCampaignsNewPage() {
           </div>
         )}
 
-        {/* Форма создания кампании */}
+        {/* Форма создания/редактирования кампании */}
         <form onSubmit={handleSubmit} className="space-y-6 bg-gray-50 p-6 rounded">
-          <h3 className="text-lg font-semibold">Создать новую кампанию</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">
+              {editingCampaign ? `Редактировать: ${editingCampaign.title}` : 'Создать новую кампанию'}
+            </h3>
+            {editingCampaign && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCampaign(null);
+                  resetForm();
+                }}
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+              >
+                ✕ Отмена
+              </button>
+            )}
+          </div>
           {/* Основная информация */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">Основная информация</h3>
@@ -601,18 +699,35 @@ export default function AdminCampaignsNewPage() {
           <div className="border-t pt-4">
             <h3 className="text-lg font-semibold mb-3">SEO настройки</h3>
             <div className="space-y-4">
+              <hr className="my-3" />
+              <h4 className="font-medium text-gray-700">SEO поля</h4>
+              
               <input
                 type="text"
-                placeholder="Meta Title"
-                value={metaTitle}
-                onChange={(e) => setMetaTitle(e.target.value)}
+                placeholder="SEO Заголовок (для поисковых систем)"
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
                 className="w-full px-4 py-2 border rounded"
               />
               <textarea
-                placeholder="Meta Description"
-                value={metaDescription}
-                onChange={(e) => setMetaDescription(e.target.value)}
+                placeholder="SEO Описание (для поисковых систем)"
+                value={seoDescription}
+                onChange={(e) => setSeoDescription(e.target.value)}
                 rows={2}
+                className="w-full px-4 py-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="SEO Ключевые слова"
+                value={seoKeywords}
+                onChange={(e) => setSeoKeywords(e.target.value)}
+                className="w-full px-4 py-2 border rounded"
+              />
+              <input
+                type="text"
+                placeholder="OG Изображение (URL для социальных сетей)"
+                value={ogImage}
+                onChange={(e) => setOgImage(e.target.value)}
                 className="w-full px-4 py-2 border rounded"
               />
             </div>
@@ -787,7 +902,7 @@ export default function AdminCampaignsNewPage() {
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold"
             >
-              {loading ? '⏳ Создание...' : '✅ Создать кампанию'}
+              {loading ? (editingCampaign ? '⏳ Сохранение...' : '⏳ Создание...') : (editingCampaign ? '💾 Сохранить изменения' : '✅ Создать кампанию')}
             </button>
         </form>
 
@@ -823,6 +938,12 @@ export default function AdminCampaignsNewPage() {
                     >
                       👁️ Просмотр
                     </a>
+                    <button
+                      onClick={() => startEditing(campaign)}
+                      className="px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                    >
+                      ✏️ Редактировать
+                    </button>
                     <button
                       onClick={() => deleteCampaign(campaign.id)}
                       className="px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700"
