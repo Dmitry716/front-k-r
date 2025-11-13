@@ -134,7 +134,7 @@ const ExclusiveProductPage = () => {
       const isFavoriteById = favorites.includes(product.id);
       setIsFavorite(isFavoriteBySlug || isFavoriteById);
       // Устанавливаем дефолтный цвет (первый в массиве)
-      if (product.colors && product.colors.length > 0) {
+      if (product.colors && Array.isArray(product.colors) && product.colors.length > 0) {
         // Ищем цвет со скидкой или берем первый
         const colorWithDiscount = product.colors.find(color => color.discount && color.discount > 0);
         setSelectedColor(colorWithDiscount || product.colors[0]);
@@ -164,7 +164,7 @@ const ExclusiveProductPage = () => {
 
   // Автоматическая прокрутка к выбранному цвету на мобильных устройствах
   useEffect(() => {
-    if (isMobile && selectedColor && colorScrollRef.current && product?.colors) {
+    if (isMobile && selectedColor && colorScrollRef.current && product?.colors && Array.isArray(product.colors)) {
       const selectedIndex = product.colors.findIndex(color => color.name === selectedColor.name);
       if (selectedIndex !== -1) {
         const colorContainer = colorScrollRef.current;
@@ -425,7 +425,7 @@ const ExclusiveProductPage = () => {
             <div className={`${isMobile ? "w-full" : "flex flex-col w-5/12"}`}>
               <div className={`${isMobile ? "mb-5" : "bg-[#f5f6fa] p-5 rounded-lg mb-5"}`}>
                 {/* Выбор материала */}
-                {product.colors && product.colors.length > 0 && (
+                {product.colors && Array.isArray(product.colors) && product.colors.length > 0 && (
                   <div className="mb-5">
                     <h3 className="text-[16px] text-[#222222]">
                       Выберите материал:
@@ -440,7 +440,7 @@ const ExclusiveProductPage = () => {
                         className={`${isMobile ? 'flex gap-2 pb-2' : 'grid grid-cols-4 gap-2'}`}
                       >
                         {/* Все материалы из массива (первый - дефолт) */}
-                        {product.colors.map((color, index) => (
+                        {product.colors && Array.isArray(product.colors) && product.colors.map((color, index) => (
                           <button
                             key={index}
                             onClick={() => setSelectedColor(color)}
