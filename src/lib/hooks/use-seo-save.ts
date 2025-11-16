@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SeoFieldsData } from '@/components/admin/SeoFieldsForm';
+import { SeoFieldsData } from '@/app/components/admin/SeoFieldsForm';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://k-r.by/api';
 

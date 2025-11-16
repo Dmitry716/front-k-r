@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { generateSlug } from "@/lib/slug-generator";
 import { apiClient } from "@/lib/api-client";
-import { SeoFieldsForm, SeoFieldsData } from "@/components/admin/SeoFieldsForm";
+import { SeoFieldsForm, SeoFieldsData } from "@/app/components/admin/SeoFieldsForm";
 import { useSeoSave } from "@/lib/hooks/use-seo-save";
 
 interface AdminUser {
