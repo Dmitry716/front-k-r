@@ -75,8 +75,12 @@ const MonumentsPage = () => {
     const [isMobile, setIsMobile] = useState(false);
     const [isNarrowMobile, setIsNarrowMobile] = useState(false);
     const [monuments, setMonuments] = useState<any[]>([]);
+    const [sortedMonuments, setSortedMonuments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState<any[]>([]);
+
+    // Категории в порядке приоритета для сортировки
+    const categoryOrder = ['Недорогие', 'Одиночные', 'Двойные', 'Эксклюзивные', 'Мемориальные комплексы'];
 
     // Загрузка данных памятников
     useEffect(() => {
@@ -100,16 +104,60 @@ const MonumentsPage = () => {
         fetchMonuments();
     }, []);
 
+    // Сортируем памятники по категориям (в порядке categoriesMonuments) и затем по названию внутри каждой категории
+    useEffect(() => {
+        if (monuments.length === 0) return;
+
+        const sorted = [...monuments].sort((a, b) => {
+            // Получаем индекс категории
+            const categoryA = a.category || 'Памятники';
+            const categoryB = b.category || 'Памятники';
+            
+            const indexA = categoryOrder.indexOf(categoryA);
+            const indexB = categoryOrder.indexOf(categoryB);
+            
+            // Если категория не найдена в порядке, ставим в конец
+            const posA = indexA === -1 ? 999 : indexA;
+            const posB = indexB === -1 ? 999 : indexB;
+            
+            // Сначала сортируем по категории
+            if (posA !== posB) {
+                return posA - posB;
+            }
+            
+            // Затем сортируем по названию внутри категории
+            return (a.name || '').localeCompare(b.name || '', 'ru');
+        });
+
+        setSortedMonuments(sorted);
+    }, [monuments]);
+
     // Загрузка цен для категорий
     useEffect(() => {
+        if (monuments.length === 0) return;
+        
         const loadCategoryPrices = async () => {
             try {
-                const cheapPrice = await fetchMinPrice(`${API_ENDPOINTS.monuments}/cheap`);
-                const singlePrice = await fetchMinPrice(`${API_ENDPOINTS.monuments}/single`);
-                const doublePrice = await fetchMinPrice(`${API_ENDPOINTS.monuments}/double`);
-                const exclusivePrice = await fetchMinPrice(`${API_ENDPOINTS.monuments}/exclusive`);
-                const complexPrice = await fetchMinPrice(`${API_ENDPOINTS.monuments}/complex`);
-                const monumentPrice = await fetchMinPrice(`${API_ENDPOINTS.monuments}`);
+                // Фильтруем памятники по категориям из уже загруженных данных
+                const getCategoryMinPrice = (categoryName: string) => {
+                    const categoryMonuments = monuments.filter(
+                        m => (m.category || 'Памятники') === categoryName
+                    );
+                    const prices = categoryMonuments
+                        .map((p: any) => {
+                            const price = typeof p.price === 'string' ? parseFloat(p.price) : p.price;
+                            return price;
+                        })
+                        .filter((p: any) => p && !isNaN(p) && p > 0);
+                    return prices.length > 0 ? Math.min(...prices) : 0;
+                };
+
+                const cheapPrice = getCategoryMinPrice('Недорогие');
+                const singlePrice = getCategoryMinPrice('Одиночные');
+                const doublePrice = getCategoryMinPrice('Двойные');
+                const exclusivePrice = getCategoryMinPrice('Эксклюзивные');
+                const complexPrice = getCategoryMinPrice('Мемориальные комплексы');
+                const monumentPrice = getCategoryMinPrice('Памятники');
 
                 const updatedCategories = categoriesMonuments.map((cat) => {
                     let price: string | undefined;
@@ -143,7 +191,7 @@ const MonumentsPage = () => {
             }
         };
         loadCategoryPrices();
-    }, []);
+    }, [monuments]);
 
     // Для адаптивности
     useEffect(() => {
@@ -160,10 +208,10 @@ const MonumentsPage = () => {
     }, []);
 
     // Получаем продукты для текущей страницы
-    const currentProducts = getProductsForPage(monuments, currentPage, productsPerPage);
+    const currentProducts = getProductsForPage(sortedMonuments, currentPage, productsPerPage);
 
     // Рассчитываем общее количество страниц
-    const totalPages = getTotalPages(monuments.length, productsPerPage);
+    const totalPages = getTotalPages(sortedMonuments.length, productsPerPage);
 
     // Обработчик изменения количества товаров на странице
     const handleProductsPerPageChange = (count: number) => {
@@ -226,8 +274,8 @@ const MonumentsPage = () => {
                             </button>
                         ))}
                         <button
-                            onClick={() => handleProductsPerPageChange(monuments.length)}
-                            className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${productsPerPage === monuments.length
+                            onClick={() => handleProductsPerPageChange(sortedMonuments.length)}
+                            className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${productsPerPage === sortedMonuments.length
                                 ? ""
                                 : "cursor-pointer underline underline-offset-3 hover:no-underline"
                                 }`}

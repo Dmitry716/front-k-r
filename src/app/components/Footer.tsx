@@ -111,8 +111,8 @@ const Footer = () => {
           </div>
 
           <div className="text-sm text-[#969ead] mt-2.5 space-y-1">
-            <div>Пн-пт с 10:00 до 19:00</div>
-            <div>Сб с 10:00 до 15:00</div>
+            <div>Пн-пт с 9:00 до 18:00 {'(Обед с 13:00 до 14:00)'}</div>
+            <div>Сб с 10:00 до 16:00</div>
             <div>Вскр выходной</div>
           </div>
 

@@ -124,7 +124,7 @@ const GraniteTypesPage = () => {
                             <img
                                 src={graniteTypes[currentModalSlide].image}
                                 alt={graniteTypes[currentModalSlide].name}
-                                className="max-w-full max-h-full object-contain"
+                                className="max-w-full max-h-[90vh] object-contain"
                             />
                         </div>
 

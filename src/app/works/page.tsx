@@ -242,7 +242,7 @@ const OurWorksPage = () => {
                             <img
                                 src={filteredWorks[currentModalSlide].image}
                                 alt={`Работа ${filteredWorks[currentModalSlide].id}`}
-                                className="max-w-full max-h-full object-contain"
+                                className="max-w-full max-h-[90vh] object-contain"
                             />
                         </div>
 

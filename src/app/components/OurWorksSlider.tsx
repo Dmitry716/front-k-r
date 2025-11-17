@@ -374,7 +374,7 @@ const OurWorksSlider = ({
                                 <img
                                     src={filteredWorks[currentModalSlide].image}
                                     alt={filteredWorks[currentModalSlide].alt}
-                                    className="max-w-full max-h-full object-contain"
+                                    className="max-w-full max-h-[90vh] object-contain"
                                 />
                             </div>
 

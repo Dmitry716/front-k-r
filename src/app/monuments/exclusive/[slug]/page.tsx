@@ -725,7 +725,7 @@ const ExclusiveProductPage = () => {
               <img
                 src={graniteTypes[currentGraniteSlide].image}
                 alt={graniteTypes[currentGraniteSlide].name}
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-[90vh] object-contain"
               />
             </div>
 

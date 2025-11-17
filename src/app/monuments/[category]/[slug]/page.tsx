@@ -1110,7 +1110,7 @@ const ProductPage = () => {
                             <img
                                 src={graniteTypes[currentGraniteSlide].image}
                                 alt={graniteTypes[currentGraniteSlide].name}
-                                className="max-w-full max-h-full object-contain"
+                                className="max-w-full max-h-[90vh] object-contain"
                             />
                         </div>
 
@@ -1162,7 +1162,7 @@ const ProductPage = () => {
                                 <img
                                     src={imageSlides[currentImageSlide].src}
                                     alt={imageSlides[currentImageSlide].alt}
-                                    className="max-w-full max-h-full object-contain"
+                                    className="max-w-full max-h-[90vh] object-contain"
                                 />
                             </div>
 

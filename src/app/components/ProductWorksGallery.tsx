@@ -207,7 +207,7 @@ const ProductWorksGallery = ({
                                 <img
                                     src={works[currentModalSlide].image}
                                     alt={works[currentModalSlide].title}
-                                    className="max-w-full max-h-full object-contain"
+                                    className="max-w-full max-h-[90vh] object-contain"
                                 />
                             </div>
 
