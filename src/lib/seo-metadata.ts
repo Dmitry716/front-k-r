@@ -43,8 +43,8 @@ export async function getPageSEOData(pageSlug: string): Promise<PageSEOData | nu
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://k-r.by/api'}/page-seo/by-slug/${pageSlug}`,
       {
-        // Кэшируем на 1 час
-        next: { revalidate: 3600 },
+        // Кэшируем на 5 минут + добавляем тег для инвалидации
+        next: { revalidate: 300, tags: [`seo-${pageSlug}`, 'seo-data'] },
       }
     );
 

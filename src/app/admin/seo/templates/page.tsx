@@ -138,10 +138,11 @@ export default function SeoTemplatesPage() {
       if (userData.role !== 'superadmin') {
         setCheckingAuth(false);
         setError('У вас нет доступа к SEO разделу. Только superadmin может управлять SEO.');
-        setTimeout(() => router.push('/admin'), 2000);
+        // НЕ вызываем loadTemplates() для non-superadmin
         return;
       }
 
+      // Если superadmin - загружаем данные
       setCheckingAuth(false);
       loadTemplates();
     } catch (e) {
@@ -149,29 +150,15 @@ export default function SeoTemplatesPage() {
     }
   }, [router]);
 
-  if (checkingAuth) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-gray-600">Проверка доступа...</p>
-        </div>
-      </div>
-    );
-  }
+  // Редирект на /admin если доступ запрещён (с задержкой чтобы пользователь увидел ошибку)
+  useEffect(() => {
+    if (error && user && user.role !== 'superadmin') {
+      const timeout = setTimeout(() => router.push('/admin'), 2000);
+      return () => clearTimeout(timeout);
+    }
+  }, [error, user, router]);
 
-  if (error && user?.role !== 'superadmin') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
-          <p className="text-red-700 font-semibold mb-2">⛔ Доступ запрещён</p>
-          <p className="text-red-600 text-sm">{error}</p>
-          <p className="text-gray-600 text-sm mt-4">Перенаправление на главную панель...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Закрытие формы при смене типа сущности
+  // Закрытие формы при смене типа сущности (это ОТДЕЛЬНЫЙ useEffect, всегда вызывается)
   useEffect(() => {
     if (isFormOpen) {
       setIsFormOpen(false);
@@ -297,6 +284,30 @@ export default function SeoTemplatesPage() {
   };
 
   const categories = getCategoriesForEntity(selectedEntityType);
+
+  // ВАЖНО: Все проверки доступа должны быть ПОСЛЕ всех hooks
+  if (checkingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">Проверка доступа...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Если есть ошибка (доступ запрещён), показываем ошибку
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
+          <p className="text-red-700 font-semibold mb-2">⛔ Доступ запрещён</p>
+          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-gray-600 text-sm mt-4">Перенаправление на главную панель...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">

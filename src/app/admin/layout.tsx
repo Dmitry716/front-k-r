@@ -54,6 +54,9 @@ export default function AdminLayout({
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === "/admin";
+    // Точная проверка: /admin/seo должен быть активен только на /admin/seo (не на /admin/seo/templates)
+    if (href === "/admin/seo") return pathname === "/admin/seo";
+    // Для остальных - стандартная проверка startsWith
     return pathname.startsWith(href);
   };
 

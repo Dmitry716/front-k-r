@@ -377,6 +377,10 @@ export default function ProductsAdminPage() {
   const startEditing = (monument: Monument) => {
     setEditingMonument(monument);
     
+    // ВАЖНО: Используем категорию из памятника, чтобы правильно отображать цвета
+    // Это исправляет ошибку когда selectedCategory был с предыдущего памятника
+    const monumentCategory = monument.category || selectedCategory;
+    
     // Парсим options (характеристики) из JSON
     let realOptions: {[key: string]: string} = {};
     let customOptions: Array<{key: string, value: string}> = [];
@@ -384,7 +388,7 @@ export default function ProductsAdminPage() {
     if (monument.options) {
       try {
         const allOptions = JSON.parse(monument.options);
-        const categoryConfig = monumentCategories.find(c => c.key === selectedCategory);
+        const categoryConfig = monumentCategories.find(c => c.key === monumentCategory);
         
         if (categoryConfig && categoryConfig.characteristics.length > 0) {
           // Разделяем на стандартные и кастомные характеристики
@@ -410,11 +414,20 @@ export default function ProductsAdminPage() {
     let colors: MonumentColor[] = [];
     if (monument.colors) {
       try {
-        colors = JSON.parse(monument.colors);
+        // API может возвращать colors как JSON-строку или как уже готовый массив
+        if (typeof monument.colors === 'string') {
+          colors = JSON.parse(monument.colors);
+        } else if (Array.isArray(monument.colors)) {
+          colors = monument.colors;
+        } else {
+          console.warn('Unexpected colors type:', typeof monument.colors, monument.colors);
+        }
       } catch (e) {
-        console.warn('Failed to parse colors:', monument.colors);
+        console.warn('Failed to parse colors:', monument.colors, e);
       }
     }
+    
+    console.log('Loaded colors in startEditing:', colors);
     
     // Определяем, используется ли "Цена по запросу" или обычная цена
     // Если price = 0/null - это значит "Цена по запросу"
@@ -1672,7 +1685,7 @@ export default function ProductsAdminPage() {
                   )}
 
                   {/* Управление цветами для эксклюзивных памятников */}
-                  {selectedCategory === "exclusive" && (
+                  {(editingMonument?.category === "exclusive" || selectedCategory === "exclusive") && (
                     <div>
                       <div className="flex items-center justify-between mb-3">
                         <label className="block text-sm font-medium text-gray-700">

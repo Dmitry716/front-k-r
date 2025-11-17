@@ -27,9 +27,11 @@ const Promo = () => {
       try {
         const data = await apiClient.get(API_ENDPOINTS.campaigns);
         // Ожидаем либо массив, либо объект { success, data }
-        const items: CampaignApiItem[] = Array.isArray(data)
+        let items: CampaignApiItem[] = Array.isArray(data)
           ? data
           : data?.data || [];
+        // На главной странице показываем только последние 4 акции
+        items = items.slice(-4);
         setCampaigns(items);
       } catch (e: any) {
         setError(e.message || "Ошибка загрузки акций");

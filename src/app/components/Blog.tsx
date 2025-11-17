@@ -41,7 +41,9 @@ const Blog = () => {
       setError(null);
       try {
         const data = await apiClient.get(API_ENDPOINTS.blogs);
-        const items: BlogItem[] = Array.isArray(data) ? data : data?.data || [];
+        let items: BlogItem[] = Array.isArray(data) ? data : data?.data || [];
+        // На главной странице показываем только последние 4 записи
+        items = items.slice(-4);
         setBlogs(items);
       } catch (e: any) {
         setError(e.message || "Ошибка загрузки блога");
@@ -106,7 +108,7 @@ const Blog = () => {
 
         <div className="ml-2.5 mt-6 md:mt-8 flex text-center">
           <Link
-            href={"/"}
+            href={"/blog"}
             className="font-bold w-full md:max-w-[338px] px-7.5 py-3 bg-[#2c3a54] border border-[#2c3a54] text-white rounded-full hover:bg-white hover:text-[#2c3a54] transition"
           >
             Смотреть все

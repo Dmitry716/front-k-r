@@ -89,55 +89,7 @@ export default function SEOAdminPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
 
-  useEffect(() => {
-    const userStr = localStorage.getItem('adminUser');
-    if (!userStr) {
-      router.push('/login');
-      return;
-    }
-
-    try {
-      const userData = JSON.parse(userStr);
-      setUser(userData);
-
-      // Проверяем доступ
-      if (userData.role !== 'superadmin') {
-        setCheckingAuth(false);
-        setError('У вас нет доступа к SEO разделу. Только superadmin может управлять SEO.');
-        setTimeout(() => router.push('/admin'), 2000);
-        return;
-      }
-
-      setCheckingAuth(false);
-      fetchPageSeoData();
-      fetchAvailableImages();
-    } catch (e) {
-      router.push('/login');
-    }
-  }, [router]);
-
-  if (checkingAuth) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <p className="text-gray-600">Проверка доступа...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error && user?.role !== 'superadmin') {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
-          <p className="text-red-700 font-semibold mb-2">⛔ Доступ запрещён</p>
-          <p className="text-red-600 text-sm">{error}</p>
-          <p className="text-gray-600 text-sm mt-4">Перенаправление на главную панель...</p>
-        </div>
-      </div>
-    );
-  }
-
+  // Объявляем функции ДО useEffect чтобы они были доступны при вызове
   const fetchPageSeoData = async () => {
     try {
       const data = await apiClient.get("/admin/page-seo");
@@ -159,6 +111,62 @@ export default function SEOAdminPage() {
       console.error("Ошибка загрузки изображений:", err);
     }
   };
+
+  useEffect(() => {
+    const userStr = localStorage.getItem('adminUser');
+    console.log('[/admin/seo] useEffect 1: checking auth, userStr:', userStr ? 'present' : 'missing');
+    
+    if (!userStr) {
+      console.log('[/admin/seo] No user found, redirecting to /login');
+      router.push('/login');
+      return;
+    }
+
+    try {
+      const userData = JSON.parse(userStr);
+      console.log('[/admin/seo] User data:', { role: userData.role, username: userData.username });
+      setUser(userData);
+      setCheckingAuth(false);
+      
+      // Если пользователь НЕ superadmin - устанавливаем ошибку, но НЕ редиректим в useEffect
+      // Редирект будет в return блоке компонента
+      if (userData.role !== 'superadmin') {
+        console.log('[/admin/seo] User is not superadmin, setting error');
+        setError('У вас нет доступа к SEO разделу. Только superadmin может управлять SEO.');
+        return; // НЕ загружаем данные для non-superadmin
+      }
+      
+      // Только если superadmin - загружаем данные
+      console.log('[/admin/seo] User is superadmin, loading data');
+      fetchPageSeoData();
+      fetchAvailableImages();
+    } catch (e) {
+      console.error('[/admin/seo] Error parsing user:', e);
+      router.push('/login');
+    }
+  }, [router]);
+
+  if (checkingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">Проверка доступа...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
+          <p className="text-red-700 font-semibold mb-2">⛔ Доступ запрещён</p>
+          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-gray-600 text-sm mt-4">Перенаправление на главную панель...</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -257,6 +265,20 @@ export default function SEOAdminPage() {
 
       if (data.success) {
         setSuccess("✓ SEO данные сохранены");
+        
+        // Инвалидируем кэш SEO для этой страницы
+        try {
+          await fetch("/api/revalidate-seo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pageSlug: seoData.pageSlug }),
+          });
+          console.log(`[Admin SEO] Кэш инвалидирован для ${seoData.pageSlug}`);
+        } catch (e) {
+          console.warn("[Admin SEO] Не удалось инвалидировать кэш:", e);
+          // Не ошибка - данные всё равно сохранены
+        }
+        
         await fetchPageSeoData();
         setTimeout(() => setSuccess(""), 3000);
       } else {
@@ -278,6 +300,29 @@ export default function SEOAdminPage() {
   };
 
   const stats = getSeoStats();
+
+  if (checkingAuth) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-gray-600">Проверка доступа...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Если есть ошибка (доступ запрещён), покажем ошибку
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center p-8 bg-red-50 rounded-lg border border-red-200">
+          <p className="text-red-700 font-semibold mb-2">⛔ Доступ запрещён</p>
+          <p className="text-red-600 text-sm">{error}</p>
+          <p className="text-gray-600 text-sm mt-4">Перенаправление на главную панель...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
