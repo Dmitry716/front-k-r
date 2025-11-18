@@ -423,6 +423,12 @@ const AccessoryDetailPage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={() => setIsModalOpen(false)}
+        productData={{
+          name: accessory.name,
+          image: accessory.image,
+          price: accessory.price,
+          category: accessory.category,
+        }}
       />
     </>
   );

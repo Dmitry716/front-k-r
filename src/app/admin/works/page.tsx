@@ -8,7 +8,7 @@ interface Work {
   description?: string;
   image: string;
   productId?: string;
-  productType: "monuments" | "fences";
+  productType: "monuments" | "fences" | "accessories" | "landscape" | "exclusive";
   category?: string;
   isActive?: boolean;
   createdAt: string;
@@ -26,6 +26,7 @@ interface Product {
 const WorksAdmin = () => {
   const [works, setWorks] = useState<Work[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
   const [availableImages, setAvailableImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingProducts, setLoadingProducts] = useState(false);
@@ -40,7 +41,7 @@ const WorksAdmin = () => {
     description: "",
     image: "",
     productId: "",
-    productType: "monuments" as "monuments" | "fences",
+    productType: "monuments" as "monuments" | "fences" | "accessories" | "landscape" | "exclusive",
     category: "",
   });
 
@@ -63,6 +64,19 @@ const WorksAdmin = () => {
       "Гранитные ограды",
       "С полимерным покрытием",
       "Металлические ограды"
+    ],
+    accessories: [
+      "Лавки и столики",
+      "Вазы для цветов",
+      "Фонари",
+      "Таблички"
+    ],
+    landscape: [
+      "Основания",
+      "Могильные плиты"
+    ],
+    exclusive: [
+      "Эксклюзивные"
     ]
   };
 
@@ -86,13 +100,73 @@ const WorksAdmin = () => {
     try {
       const data = await apiClient.get('/admin/works?limit=200');
       if (data.success) {
-        setWorks(data.data || []);
+        const worksData = data.data || [];
+        setWorks(worksData);
+        // Загружаем имена продуктов для всех работ
+        await loadProductNamesForWorks(worksData);
       }
     } catch (error) {
       console.error('Error loading works:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Загрузка имен продуктов для отображения в таблице
+  const loadProductNamesForWorks = async (worksData: Work[]) => {
+    const names: Record<string, string> = {};
+    
+    // Группируем работы по типу продукта и категории
+    const worksByTypeAndCategory: Record<string, Work[]> = {};
+    
+    worksData.forEach(work => {
+      if (work.productId && work.category) {
+        const key = `${work.productType}-${work.category}`;
+        if (!worksByTypeAndCategory[key]) {
+          worksByTypeAndCategory[key] = [];
+        }
+        worksByTypeAndCategory[key].push(work);
+      }
+    });
+
+    // Загружаем продукты для каждой группы
+    for (const [key, groupWorks] of Object.entries(worksByTypeAndCategory)) {
+      const [productType, category] = key.split('-');
+      const apiCategory = categoryToApiMap[category];
+      
+      if (!apiCategory) continue;
+
+      try {
+        let data;
+        switch (productType) {
+          case "monuments":
+            data = await apiClient.get(`/monuments/${apiCategory}`);
+            break;
+          case "fences":
+            data = await apiClient.get(`/fences/${apiCategory}`);
+            break;
+          case "accessories":
+            data = await apiClient.get(`/accessories/${apiCategory}`);
+            break;
+          case "landscape":
+            data = await apiClient.get(`/landscape/${apiCategory}`);
+            break;
+          case "exclusive":
+            data = await apiClient.get(`/monuments/exclusive`);
+            break;
+        }
+
+        if (data?.success && data.data) {
+          data.data.forEach((p: any) => {
+            names[p.id.toString()] = p.name;
+          });
+        }
+      } catch (error) {
+        console.error(`Error loading products for ${key}:`, error);
+      }
+    }
+
+    setProductNames(names);
   };
 
   // Маппинг категорий фронтенда к API endpoints
@@ -110,11 +184,17 @@ const WorksAdmin = () => {
     "Мемориальные комплексы": "complex",
     "Гранитные ограды": "granite",
     "С полимерным покрытием": "polymer",
-    "Металлические ограды": "metal"
+    "Металлические ограды": "metal",
+    "Лавки и столики": "benches-tables",
+    "Вазы для цветов": "vases",
+    "Фонари": "lamps",
+    "Таблички": "plates",
+    "Основания": "foundation",
+    "Могильные плиты": "graves"
   };
 
   // Загрузка продуктов для привязки (только когда выбран тип продукта и категория)
-  const loadProducts = async (productType: "monuments" | "fences", category?: string) => {
+  const loadProducts = async (productType: "monuments" | "fences" | "accessories" | "landscape" | "exclusive", category?: string) => {
     try {
       setLoadingProducts(true);
       setProducts([]); // Очищаем список перед загрузкой
@@ -130,18 +210,37 @@ const WorksAdmin = () => {
       }
 
       let data;
-      if (productType === "monuments") {
-        data = await apiClient.get(`/monuments/${apiCategory}`);
-      } else {
-        data = await apiClient.get(`/fences/${apiCategory}`);
+      let categoryLabel = "";
+      
+      switch (productType) {
+        case "monuments":
+          data = await apiClient.get(`/monuments/${apiCategory}`);
+          categoryLabel = "Памятники";
+          break;
+        case "fences":
+          data = await apiClient.get(`/fences/${apiCategory}`);
+          categoryLabel = "Ограды";
+          break;
+        case "accessories":
+          data = await apiClient.get(`/accessories/${apiCategory}`);
+          categoryLabel = "Аксессуары";
+          break;
+        case "landscape":
+          data = await apiClient.get(`/landscape/${apiCategory}`);
+          categoryLabel = "Благоустройство";
+          break;
+        case "exclusive":
+          data = await apiClient.get(`/monuments/exclusive`);
+          categoryLabel = "Эксклюзивные памятники";
+          break;
       }
 
-      if (data.success && data.data) {
+      if (data?.success && data.data) {
         const productsData = data.data.map((p: any, index: number) => ({
           id: p.id,
           slug: p.slug,
           name: p.name,
-          category: `${productType === "monuments" ? "Памятники" : "Ограды"} / ${category}`,
+          category: `${categoryLabel} / ${category}`,
           uniqueKey: `${productType}-${apiCategory}-${p.id}-${index}` // Уникальный ключ
         }));
 
@@ -363,7 +462,7 @@ const WorksAdmin = () => {
                 onChange={(e) => {
                   setFormData({
                     ...formData, 
-                    productType: e.target.value as "monuments" | "fences",
+                    productType: e.target.value as "monuments" | "fences" | "accessories" | "landscape" | "exclusive",
                     productId: "", // сброс выбора продукта при смене типа
                     category: "" // сброс категории при смене типа
                   });
@@ -372,6 +471,9 @@ const WorksAdmin = () => {
               >
                 <option value="monuments">Памятники</option>
                 <option value="fences">Ограды</option>
+                <option value="accessories">Аксессуары</option>
+                <option value="landscape">Благоустройство</option>
+                <option value="exclusive">Эксклюзивные памятники</option>
               </select>
             </div>
 
@@ -516,7 +618,7 @@ const WorksAdmin = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {work.productId ? 
-                      products.find(p => p.id.toString() === work.productId)?.name || 'Не найден'
+                      productNames[work.productId] || 'Не найден'
                       : '—'
                     }
                   </td>

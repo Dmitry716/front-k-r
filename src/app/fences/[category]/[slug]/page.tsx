@@ -436,6 +436,12 @@ const FenceDetailPage = () => {
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onSubmit={() => setIsModalOpen(false)}
+                productData={{
+                    name: fence.name,
+                    image: fence.image,
+                    price: fence.price,
+                    category: fence.category,
+                }}
             />
         </>
     );

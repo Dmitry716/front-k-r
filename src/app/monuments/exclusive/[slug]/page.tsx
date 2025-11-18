@@ -678,7 +678,7 @@ const ExclusiveProductPage = () => {
       {/* Галерея готовых работ с этим товаром */}
       <ProductWorksGallery 
         productId={product.id.toString()}
-        productType="monuments"
+        productType="exclusive"
         title="Готовые работы с этим товаром"
       />
 
@@ -687,6 +687,13 @@ const ExclusiveProductPage = () => {
         isOpen={isModalOpen}
         onClose={closeModal}
         onSubmit={handleModalSubmit}
+        productData={{
+          name: product.name,
+          image: product.image,
+          color: selectedColor?.name,
+          price: selectedColor?.price || product.price,
+          category: product.category,
+        }}
       />
 
       {/* Модальное окно для вариантов гранита */}

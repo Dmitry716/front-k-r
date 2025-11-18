@@ -400,6 +400,12 @@ const LandscapeDetailPage = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={() => setIsModalOpen(false)}
+        productData={{
+          name: landscapeItem.name,
+          image: landscapeItem.image,
+          price: landscapeItem.price,
+          category: landscapeItem.category,
+        }}
       />
     </>
   );

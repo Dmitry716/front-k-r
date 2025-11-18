@@ -2,11 +2,20 @@
 
 import React, { useEffect, useRef, useState } from "react";
 
+interface ProductData {
+  name?: string;
+  image?: string;
+  color?: string;
+  price?: number;
+  category?: string;
+}
+
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (formData: { name: string; phone: string }) => void;
   modalContentClassName?: string;
+  productData?: ProductData;
 }
 
 const ModalCommunication: React.FC<ModalProps> = ({
@@ -14,6 +23,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
   onClose,
   onSubmit,
   modalContentClassName = "",
+  productData,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
@@ -24,18 +34,11 @@ const ModalCommunication: React.FC<ModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-      document.body.style.pointerEvents = "none";
-      const modalBackdrop = backdropRef.current;
-      if (modalBackdrop) {
-        modalBackdrop.parentElement!.style.pointerEvents = "auto";
-      }
     } else {
       document.body.style.overflow = "";
-      document.body.style.pointerEvents = "";
     }
     return () => {
       document.body.style.overflow = "";
-      document.body.style.pointerEvents = "";
     };
   }, [isOpen]);
 
@@ -78,13 +81,17 @@ const ModalCommunication: React.FC<ModalProps> = ({
   // Обработчик отправки формы
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    console.log('🚀 Form submitted');
     
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
     const phone = formData.get('phone') as string;
 
+    console.log('📝 Form data:', { name, phone });
+
     // Валидация
     if (!name.trim() || !phone.trim()) {
+      console.log('❌ Validation failed');
       setMessage({ type: 'error', text: 'Пожалуйста, заполните все поля' });
       return;
     }
@@ -97,27 +104,105 @@ const ModalCommunication: React.FC<ModalProps> = ({
       const telegramBotToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
       const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
       
+      console.log('🔑 Telegram config:', { 
+        hasToken: !!telegramBotToken, 
+        hasChat: !!chatId,
+        productData 
+      });
+      
       if (!telegramBotToken || !chatId) {
         throw new Error('Telegram конфигурация не найдена');
       }
       
-      const messageText = `📞 Новый звонок\n\nИмя: ${name}\nТелефон: ${phone}`;
-      
-      const response = await fetch(
-        `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            chat_id: chatId,
-            text: messageText,
-            parse_mode: 'HTML',
-          }),
+      // Если есть фото товара, отправляем его отдельно
+      if (productData?.image) {
+        console.log('📤 Sending photo to Telegram');
+        
+        // Формируем подпись для фото
+        let caption = `📞 Новый заказ звонка\n\n`;
+        caption += `👤 Имя: ${name}\n`;
+        caption += `📱 Телефон: ${phone}\n`;
+        caption += `\n📦 Товар: ${productData.name || 'Не указан'}`;
+        
+        if (productData.category) {
+          caption += `\n📁 Категория: ${productData.category}`;
         }
-      );
+        
+        if (productData.color) {
+          caption += `\n🎨 Цвет: ${productData.color}`;
+        }
+        
+        if (productData.price) {
+          caption += `\n💰 Цена: ${productData.price} руб.`;
+        }
+        
+        const photoResponse = await fetch(
+          `https://api.telegram.org/bot${telegramBotToken}/sendPhoto`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              photo: productData.image,
+              caption: caption,
+            }),
+          }
+        );
 
-      if (!response.ok) {
-        throw new Error('Ошибка при отправке сообщения');
+        console.log('📥 Photo response status:', photoResponse.status);
+
+        if (!photoResponse.ok) {
+          const errorData = await photoResponse.json();
+          console.error('❌ Telegram photo API error:', errorData);
+          throw new Error('Ошибка при отправке фото');
+        }
+
+        console.log('✅ Photo sent successfully');
+      } else {
+        // Если нет фото, отправляем обычное текстовое сообщение
+        let messageText = `📞 Новый заказ звонка\n\n`;
+        messageText += `👤 Имя: ${name}\n`;
+        messageText += `📱 Телефон: ${phone}`;
+        
+        if (productData) {
+          messageText += `\n\n📦 Товар: ${productData.name || 'Не указан'}`;
+          
+          if (productData.category) {
+            messageText += `\n📁 Категория: ${productData.category}`;
+          }
+          
+          if (productData.color) {
+            messageText += `\n🎨 Цвет: ${productData.color}`;
+          }
+          
+          if (productData.price) {
+            messageText += `\n💰 Цена: ${productData.price} руб.`;
+          }
+        }
+        
+        console.log('📤 Sending text message to Telegram');
+        
+        const response = await fetch(
+          `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              chat_id: chatId,
+              text: messageText,
+            }),
+          }
+        );
+
+        console.log('📥 Response status:', response.status);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('❌ Telegram API error:', errorData);
+          throw new Error('Ошибка при отправке сообщения');
+        }
+
+        console.log('✅ Message sent successfully');
       }
 
       // Вызываем функцию обработки из props
@@ -131,7 +216,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
         setMessage(null);
       }, 2000);
     } catch (error) {
-      console.error('Ошибка отправки:', error);
+      console.error('❌ Ошибка отправки:', error);
       setMessage({ type: 'error', text: 'Ошибка при отправке. Попробуйте позже' });
     } finally {
       setLoading(false);
@@ -143,8 +228,8 @@ const ModalCommunication: React.FC<ModalProps> = ({
   return (
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+      className="fixed inset-0 z-2000 flex items-center justify-center p-4"
+      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div
         ref={modalRef}

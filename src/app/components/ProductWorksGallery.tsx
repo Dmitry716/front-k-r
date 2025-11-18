@@ -12,7 +12,7 @@ interface Work {
 
 interface ProductWorksGalleryProps {
     productId: string;
-    productType: "monuments" | "fences" | "accessories" | "landscape";
+    productType: "monuments" | "fences" | "accessories" | "landscape" | "exclusive";
     title?: string;
     className?: string;
 }

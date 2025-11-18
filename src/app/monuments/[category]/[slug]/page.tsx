@@ -308,15 +308,8 @@ const ProductPage = () => {
     useEffect(() => {
         if (isModalOpen) {
             document.body.style.overflow = "hidden";
-            document.body.style.pointerEvents = "none";
-
-            const modalBackdrop = document.querySelector(".modal-backdrop");
-            if (modalBackdrop) {
-                modalBackdrop.parentElement!.style.pointerEvents = "auto";
-            }
         } else {
             document.body.style.overflow = "";
-            document.body.style.pointerEvents = "";
         }
     }, [isModalOpen]);
 
@@ -1175,6 +1168,20 @@ const ProductPage = () => {
                         </div>
                     </div>
                 )}
+
+            {/* Модальное окно для заказа звонка */}
+            <ModalCommunication
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onSubmit={handleModalSubmit}
+                productData={{
+                    name: product.name,
+                    image: displayImage,
+                    color: selectedColor?.name,
+                    price: product.price,
+                    category: product.category,
+                }}
+            />
         </>
     );
 };

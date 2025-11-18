@@ -68,8 +68,10 @@ const getTotalPages = (totalProducts: number, productsPerPage: number) => {
 const FencesPageClient = () => {
     const [isClient, setIsClient] = useState(false);
     const [fences, setFences] = useState<FenceProduct[]>([]);
+    const [sortedFences, setSortedFences] = useState<FenceProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [productsPerPage, setProductsPerPage] = useState(60); // По умолчанию показываем 60 товаров
+    const [sortType, setSortType] = useState<'popular' | 'cheap' | 'expensive'>('popular');
     const [isTablet, setIsTablet] = useState(false);
     const [isMobile, setIsMobile] = useState(false);
     const [isNarrowMobile, setIsNarrowMobile] = useState(false);
@@ -96,6 +98,7 @@ const FencesPageClient = () => {
                     // Преобразуем в формат с colors для совместимости с ProductCard
                     const transformed = (data.data || []).map((item: any) => ({
                         ...item,
+                        popular: item.popular || false,
                         // Оборачиваем в один "цвет" с основным изображением
                         colors: [{
                             name: item.category,
@@ -104,6 +107,7 @@ const FencesPageClient = () => {
                         }],
                     }));
                     setFences(transformed);
+                    setSortedFences(transformed);
                 }
             } catch (error) {
                 console.error("Error fetching fences:", error);
@@ -116,6 +120,43 @@ const FencesPageClient = () => {
         
         return () => window.removeEventListener("resize", checkScreenSize);
     }, []);
+
+    // Сортировка оград при изменении типа сортировки или загрузке данных
+    useEffect(() => {
+        if (fences.length === 0) return;
+
+        let sorted = [...fences];
+
+        switch (sortType) {
+            case 'popular':
+                // Сначала популярные, затем остальные
+                sorted = sorted.sort((a, b) => {
+                    if (a.popular && !b.popular) return -1;
+                    if (!a.popular && b.popular) return 1;
+                    return 0;
+                });
+                break;
+            case 'cheap':
+                // Сначала дешевые (с ценой), затем без цены
+                sorted = sorted.sort((a, b) => {
+                    const priceA = a.price || 999999;
+                    const priceB = b.price || 999999;
+                    return priceA - priceB;
+                });
+                break;
+            case 'expensive':
+                // Сначала дорогие
+                sorted = sorted.sort((a, b) => {
+                    const priceA = a.price || 0;
+                    const priceB = b.price || 0;
+                    return priceB - priceA;
+                });
+                break;
+        }
+
+        setSortedFences(sorted);
+        setCurrentPage(1); // Сбрасываем на первую страницу при изменении сортировки
+    }, [sortType, fences]);
 
     // Загрузка цен для категорий
     useEffect(() => {
@@ -151,10 +192,10 @@ const FencesPageClient = () => {
     }, []);
 
     // Получаем продукты для текущей страницы
-    const currentProducts = getProductsForPage(fences, currentPage, productsPerPage);
+    const currentProducts = getProductsForPage(sortedFences, currentPage, productsPerPage);
 
     // Рассчитываем общее количество страниц
-    const totalPages = getTotalPages(fences.length, productsPerPage);
+    const totalPages = getTotalPages(sortedFences.length, productsPerPage);
 
     // Обработчик изменения количества товаров на странице
     const handleProductsPerPageChange = (count: number) => {
@@ -201,30 +242,68 @@ const FencesPageClient = () => {
                         </div>
                     </div>
 
-                    {/* Выбор количества товаров на страницу */}
-                    <div hidden={isTablet} className="flex justify-end mb-5">
-                        <span className="text-[14px] text-[#6B809E] mr-2 self-center">Выводить по:</span>
-                        {[60, 120].map((count) => (
+                    {/* Фильтры сортировки и количество товаров */}
+                    <div hidden={isTablet} className="flex justify-between mb-5">
+                        {/* Сортировка */}
+                        <div className="flex items-center">
+                            <span className="text-[14px] text-[#6B809E] mr-2">Сортировать:</span>
                             <button
-                                key={count}
-                                onClick={() => handleProductsPerPageChange(count)}
-                                className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${productsPerPage === count
+                                onClick={() => setSortType('popular')}
+                                className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${
+                                    sortType === 'popular'
+                                        ? "bg-[#2c3a54] text-white"
+                                        : "cursor-pointer underline underline-offset-3 hover:no-underline"
+                                }`}
+                            >
+                                Популярные
+                            </button>
+                            <button
+                                onClick={() => setSortType('cheap')}
+                                className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${
+                                    sortType === 'cheap'
+                                        ? "bg-[#2c3a54] text-white"
+                                        : "cursor-pointer underline underline-offset-3 hover:no-underline"
+                                }`}
+                            >
+                                Сначала дешевые
+                            </button>
+                            <button
+                                onClick={() => setSortType('expensive')}
+                                className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${
+                                    sortType === 'expensive'
+                                        ? "bg-[#2c3a54] text-white"
+                                        : "cursor-pointer underline underline-offset-3 hover:no-underline"
+                                }`}
+                            >
+                                Сначала дорогие
+                            </button>
+                        </div>
+
+                        {/* Количество товаров на странице */}
+                        <div className="flex items-center">
+                            <span className="text-[14px] text-[#6B809E] mr-2">Выводить по:</span>
+                            {[60, 120].map((count) => (
+                                <button
+                                    key={count}
+                                    onClick={() => handleProductsPerPageChange(count)}
+                                    className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${productsPerPage === count
+                                        ? ""
+                                        : "cursor-pointer underline underline-offset-3 hover:no-underline"
+                                        }`}
+                                >
+                                    {count}
+                                </button>
+                            ))}
+                            <button
+                                onClick={() => handleProductsPerPageChange(sortedFences.length)}
+                                className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${productsPerPage === sortedFences.length
                                     ? ""
                                     : "cursor-pointer underline underline-offset-3 hover:no-underline"
                                     }`}
                             >
-                                {count}
+                                Все
                             </button>
-                        ))}
-                        <button
-                            onClick={() => handleProductsPerPageChange(fences.length)}
-                            className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${productsPerPage === fences.length
-                                ? ""
-                                : "cursor-pointer underline underline-offset-3 hover:no-underline"
-                                }`}
-                        >
-                            Все
-                        </button>
+                        </div>
                     </div>
 
                     {/* Сетка продуктов */}
