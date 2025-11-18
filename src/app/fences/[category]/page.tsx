@@ -19,6 +19,7 @@ interface Fence {
   category: string;
   image: string;
   createdAt: string;
+  popular?: boolean;
 }
 
 interface CategoryData {
@@ -51,11 +52,14 @@ const FencesCategoryPage = () => {
   const [isNarrowMobile, setIsNarrowMobile] = useState(false);
   const [products, setProducts] = useState<Fence[]>([]);
   const [loading, setLoading] = useState(true);
-  const [sortOption, setSortOption] = useState("Со скидкой");
+  const [sortOption, setSortOption] = useState("Сначала популярные");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const categoryTitle = CATEGORY_MAP[categorySlug?.toLowerCase()] || (categorySlug
     ? categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)
     : "Ограды");
+
+  const sortOptions = ["Сначала популярные", "Сначала дешевые", "Сначала дорогие"];
 
   useEffect(() => {
     setIsClient(true);
@@ -112,10 +116,24 @@ const FencesCategoryPage = () => {
   };
 
   const sortedProducts = [...products].sort((a, b) => {
-    if (sortOption === "Со скидкой") {
-      return 0;
+    switch (sortOption) {
+      case "Сначала популярные":
+        // Сначала популярные (popular: true), потом остальные
+        if (a.popular && !b.popular) return -1;
+        if (!a.popular && b.popular) return 1;
+        return 0;
+      
+      case "Сначала дешевые":
+        // Сортировка от меньшей цены к большей
+        return (a.price || 999999) - (b.price || 999999);
+      
+      case "Сначала дорогие":
+        // Сортировка от большей цены к меньшей
+        return (b.price || 0) - (a.price || 0);
+      
+      default:
+        return 0;
     }
-    return 0;
   });
 
   const sortedCurrentProducts = sortedProducts.slice(
@@ -141,32 +159,65 @@ const FencesCategoryPage = () => {
               {categoryTitle}
             </h1>
 
-            {/* Выбор количества товаров на страницу */}
-            <div hidden={isTablet} className="flex justify-end mb-5">
-              <span className="text-[14px] text-[#6B809E] mr-2 self-center">Выводить по:</span>
-              {[60, 120].map((count) => (
+            {/* Блок сортировки и выбора количества товаров */}
+            <div hidden={isTablet} className="flex justify-between items-center mb-5">
+              {/* Сортировка слева */}
+              <div className="flex items-center gap-2 relative">
+                <span className="text-[14px] text-[#6B809E]">Показывать:</span>
+                <div className="relative">
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+                    className="text-[14px] text-[#2c3a54] bg-transparent cursor-pointer focus:outline-none underline decoration-dashed underline-offset-3 hover:no-underline"
+                  >
+                    {sortOption}
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded shadow-lg z-50 min-w-[200px]">
+                      {sortOptions.map((option) => (
+                        <button
+                          key={option}
+                          onClick={() => {
+                            setSortOption(option);
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-[14px] text-[#2c3a54] hover:bg-[#f5f6fa] transition-colors"
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Выбор количества справа */}
+              <div className="flex items-center">
+                <span className="text-[14px] text-[#6B809E] mr-2">Выводить по:</span>
+                {[60, 120].map((count) => (
+                  <button
+                    key={count}
+                    onClick={() => handleProductsPerPageChange(count)}
+                    className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${
+                      productsPerPage === count
+                        ? ""
+                        : "cursor-pointer underline underline-offset-3 hover:no-underline"
+                    }`}
+                  >
+                    {count}
+                  </button>
+                ))}
                 <button
-                  key={count}
-                  onClick={() => handleProductsPerPageChange(count)}
+                  onClick={() => handleProductsPerPageChange(products.length)}
                   className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${
-                    productsPerPage === count
+                    productsPerPage === products.length
                       ? ""
                       : "cursor-pointer underline underline-offset-3 hover:no-underline"
                   }`}
                 >
-                  {count}
+                  Все
                 </button>
-              ))}
-              <button
-                onClick={() => handleProductsPerPageChange(products.length)}
-                className={`px-2 py-1 mx-1 text-[14px] font-medium rounded text-[#2c3a54] ${
-                  productsPerPage === products.length
-                    ? ""
-                    : "cursor-pointer underline underline-offset-3 hover:no-underline"
-                }`}
-              >
-                Все
-              </button>
+              </div>
             </div>
 
             {/* Сетка продуктов */}

@@ -13,13 +13,6 @@ interface ProductCardProps {
 
 // Функция для формирования ссылки на товар в зависимости от категории
 const generateProductHref = (product: Product): string => {
-  // Отладка для всех памятников 
-  console.log('generateProductHref called for:', {
-    name: product.name,
-    category: product.category,
-    slug: product.slug
-  });
-  
   // Если это памятник
   const monumentCategories = [
     // Русские названия
@@ -34,11 +27,7 @@ const generateProductHref = (product: Product): string => {
     'artistic', 'tree', 'complex'
   ];
   
-  console.log('Checking if category matches:', product.category, 'in', monumentCategories);
-  console.log('Category match result:', monumentCategories.includes(product.category));
-  
   if (monumentCategories.includes(product.category)) {
-    console.log('✓ Category matched, generating monument URL');
     // Маппим названия категорий в URL slugs
     const categoryMap: Record<string, string> = {
       // Короткие русские названия
@@ -77,9 +66,7 @@ const generateProductHref = (product: Product): string => {
       'complex': 'complex',
     };
     const categorySlug = categoryMap[product.category] || 'single';
-    const finalUrl = `/monuments/${categorySlug}/${product.slug}`;
-    console.log('✓ Generated monument URL:', finalUrl);
-    return finalUrl;
+    return `/monuments/${categorySlug}/${product.slug}`;
   }
 
   // Если это ограда

@@ -77,16 +77,46 @@ export const categoriesMonuments: Category[] = [
     link: "/monuments/exclusive",
   },
   {
+    title: "В виде креста",
+    price: undefined,
+    img: "/section/monuments.webp",
+    link: "/monuments/cross",
+  },
+  {
+    title: "В виде сердца",
+    price: undefined,
+    img: "/monuments/heart.webp",
+    link: "/monuments/heart",
+  },
+  {
+    title: "Составные",
+    price: undefined,
+    img: "/section/monuments.webp",
+    link: "/monuments/composite",
+  },
+  {
+    title: "Европейские",
+    price: undefined,
+    img: "/section/monuments.webp",
+    link: "/monuments/europe",
+  },
+  {
+    title: "Художественная резка",
+    price: undefined,
+    img: "/section/monuments.webp",
+    link: "/monuments/artistic",
+  },
+  {
+    title: "В виде деревьев",
+    price: undefined,
+    img: "/section/monuments.webp",
+    link: "/monuments/tree",
+  },
+  {
     title: "Мемориальные комплексы",
     price: undefined,
     img: "/section/complex.webp",
     link: "/monuments/complex",
-  },
-  {
-    title: "Памятники",
-    price: "от 610 руб.",
-    img: "/section/monuments.webp",
-    link: "/monuments",
   },
 ];
 

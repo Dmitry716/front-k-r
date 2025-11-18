@@ -80,7 +80,7 @@ const MonumentsPage = () => {
     const [categories, setCategories] = useState<any[]>([]);
 
     // Категории в порядке приоритета для сортировки
-    const categoryOrder = ['Недорогие', 'Одиночные', 'Двойные', 'Эксклюзивные', 'Мемориальные комплексы'];
+    const categoryOrder = ['Недорогие', 'Одиночные', 'Двойные', 'Эксклюзивные', 'В виде креста', 'В виде сердца', 'Составные', 'Европейские', 'Художественная резка', 'В виде деревьев', 'Мемориальные комплексы'];
 
     // Загрузка данных памятников
     useEffect(() => {
@@ -156,8 +156,13 @@ const MonumentsPage = () => {
                 const singlePrice = getCategoryMinPrice('Одиночные');
                 const doublePrice = getCategoryMinPrice('Двойные');
                 const exclusivePrice = getCategoryMinPrice('Эксклюзивные');
+                const crossPrice = getCategoryMinPrice('В виде креста');
+                const heartPrice = getCategoryMinPrice('В виде сердца');
+                const compositePrice = getCategoryMinPrice('Составные');
+                const europePrice = getCategoryMinPrice('Европейские');
+                const artisticPrice = getCategoryMinPrice('Художественная резка');
+                const treePrice = getCategoryMinPrice('В виде деревьев');
                 const complexPrice = getCategoryMinPrice('Мемориальные комплексы');
-                const monumentPrice = getCategoryMinPrice('Памятники');
 
                 const updatedCategories = categoriesMonuments.map((cat) => {
                     let price: string | undefined;
@@ -174,11 +179,26 @@ const MonumentsPage = () => {
                         case "Эксклюзивные":
                             price = formatPrice(exclusivePrice);
                             break;
+                        case "В виде креста":
+                            price = formatPrice(crossPrice);
+                            break;
+                        case "В виде сердца":
+                            price = formatPrice(heartPrice);
+                            break;
+                        case "Составные":
+                            price = formatPrice(compositePrice);
+                            break;
+                        case "Европейские":
+                            price = formatPrice(europePrice);
+                            break;
+                        case "Художественная резка":
+                            price = formatPrice(artisticPrice);
+                            break;
+                        case "В виде деревьев":
+                            price = formatPrice(treePrice);
+                            break;
                         case "Мемориальные комплексы":
                             price = formatPrice(complexPrice);
-                            break;
-                        case "Памятники":
-                            price = formatPrice(monumentPrice);
                             break;
                     }
                     return { ...cat, price };
