@@ -690,7 +690,7 @@ const ExclusiveProductPage = () => {
         onSubmit={handleModalSubmit}
         productData={{
           name: product.name,
-          image: product.image,
+          image: selectedColor?.image || product.image,
           color: selectedColor?.name,
           price: selectedColor?.price || product.price,
           oldPrice: selectedColor?.oldPrice || product.oldPrice,
