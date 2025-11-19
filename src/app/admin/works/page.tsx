@@ -158,7 +158,9 @@ const WorksAdmin = () => {
 
         if (data?.success && data.data) {
           data.data.forEach((p: any) => {
-            names[p.id.toString()] = p.name;
+            // Используем уникальный ключ: productType-category-productId
+            const uniqueKey = `${productType}-${category}-${p.id}`;
+            names[uniqueKey] = p.name;
           });
         }
       } catch (error) {
@@ -617,8 +619,8 @@ const WorksAdmin = () => {
                     {work.category || '—'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {work.productId ? 
-                      productNames[work.productId] || 'Не найден'
+                    {work.productId && work.category ? 
+                      productNames[`${work.productType}-${work.category}-${work.productId}`] || 'Не найден'
                       : '—'
                     }
                   </td>

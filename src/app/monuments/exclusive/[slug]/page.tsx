@@ -38,7 +38,7 @@ interface Product {
 // Статические характеристики для памятников
 const STATIC_CHARACTERISTICS = {
   "Изготовление в других размерах": "Да",
-  "Изготовление в другом цвете": "Возможно", 
+  "Изготовление в другом цвете": "Возможно",
   "Оформление": "Не входит в стоимость",
   "Хранение": "Бесплатно в течении 1 года",
   "Установка": "Не входит в стоимость",
@@ -57,6 +57,7 @@ const ExclusiveProductPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
+  const [isNarrowMobile, setIsNarrowMobile] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
   const [tooltipContent, setTooltipContent] = useState({
@@ -71,6 +72,9 @@ const ExclusiveProductPage = () => {
   const colorScrollRef = useRef<HTMLDivElement>(null);
   const [isGraniteModalOpen, setIsGraniteModalOpen] = useState(false);
   const [currentGraniteSlide, setCurrentGraniteSlide] = useState(0);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [currentImageSlide, setCurrentImageSlide] = useState(0);
+  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
 
   // Получение данных товара
   useEffect(() => {
@@ -78,7 +82,7 @@ const ExclusiveProductPage = () => {
       try {
         const data = await apiClient.get(`/monuments/exclusive/${slug}`);
         const product = data.data;
-        
+
         // Парсим JSON строки в объекты
         if (typeof product.colors === 'string') {
           try {
@@ -87,7 +91,7 @@ const ExclusiveProductPage = () => {
             product.colors = [];
           }
         }
-        
+
         if (typeof product.options === 'string') {
           try {
             product.options = JSON.parse(product.options);
@@ -95,7 +99,7 @@ const ExclusiveProductPage = () => {
             product.options = {};
           }
         }
-        
+
         setProduct(product);
         console.log('Product loaded:', {
           id: product.id,
@@ -114,11 +118,34 @@ const ExclusiveProductPage = () => {
     fetchProduct();
   }, [slug]);
 
+  // Загрузка похожих товаров
+  useEffect(() => {
+    const loadSimilarProducts = async () => {
+      try {
+        const data = await apiClient.get('/monuments/exclusive');
+        if (data.success && data.data) {
+          // Фильтруем текущий товар и берем первые 6
+          const filtered = data.data
+            .filter((p: Product) => p.slug !== slug)
+            .slice(0, 6);
+          setSimilarProducts(filtered);
+        }
+      } catch (error) {
+        console.error('Error loading similar products:', error);
+      }
+    };
+
+    if (slug) {
+      loadSimilarProducts();
+    }
+  }, [slug]);
+
   // Проверка адаптивности
   useEffect(() => {
     const checkScreenSize = () => {
       setIsTablet(window.innerWidth < 1024);
       setIsMobile(window.innerWidth < 768);
+      setIsNarrowMobile(window.innerWidth < 480);
     };
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
@@ -162,6 +189,22 @@ const ExclusiveProductPage = () => {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [tooltipOpen]);
 
+  // Обработка клавиш для модального окна с примерами оформления
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!isImageModalOpen) return;
+      if (e.key === "Escape") {
+        closeImageModal();
+      } else if (e.key === "ArrowLeft") {
+        prevImageSlide();
+      } else if (e.key === "ArrowRight") {
+        nextImageSlide();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isImageModalOpen]);
+
   // Автоматическая прокрутка к выбранному цвету на мобильных устройствах
   useEffect(() => {
     if (isMobile && selectedColor && colorScrollRef.current && product?.colors && Array.isArray(product.colors)) {
@@ -171,7 +214,7 @@ const ExclusiveProductPage = () => {
         const buttonWidth = colorContainer.offsetWidth * 0.225; // 22.5vw
         const gap = 8; // gap-2 = 8px
         const scrollPosition = selectedIndex * (buttonWidth + gap);
-        
+
         colorContainer.scrollTo({
           left: scrollPosition,
           behavior: 'smooth'
@@ -204,7 +247,7 @@ const ExclusiveProductPage = () => {
 
     // Получаем текущие избранные и очищаем от старых числовых ID
     let favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
-    
+
     // Фильтруем только строки (slug'и), удаляя числовые ID
     favorites = favorites.filter((item: any) => typeof item === 'string');
 
@@ -217,7 +260,7 @@ const ExclusiveProductPage = () => {
       }
     } else {
       // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
-      const newFavorites = favorites.filter((item: any) => 
+      const newFavorites = favorites.filter((item: any) =>
         item !== product.slug && item !== product.id
       );
       localStorage.setItem("favorites", JSON.stringify(newFavorites));
@@ -257,6 +300,33 @@ const ExclusiveProductPage = () => {
     setCurrentGraniteSlide(index);
     setIsGraniteModalOpen(true);
     document.body.style.overflow = "hidden";
+  };
+
+  // Функции для модального окна с примерами оформления
+  const imageSlides = [
+    { id: 1, src: "/single/example1.webp", alt: "Пример оформления 1", caption: "Гравировка портрета A4, текста (ФИО, даты, памятная надпись), крестика" },
+    { id: 2, src: "/single/example2.webp", alt: "Пример оформления 2", caption: "Гравировка портрета, текст (ФИО, даты, памятная надпись), крест - сусальное золото или золотая краска+ бронзовые буквы" },
+    { id: 3, src: "/single/example3.webp", alt: "Пример оформления 3", caption: "Медальон в нише, текст (ФИО, даты, памятная надпись), крест - сусальное золото или золотая краска" },
+    { id: 4, src: "/single/example4.webp", alt: "Пример оформления 4", caption: "Медальон в рамке, текст (ФИО, даты), крест - итальянская бронза Caggiati" }
+  ];
+
+  const openImageModal = (index: number) => {
+    setCurrentImageSlide(index);
+    setIsImageModalOpen(true);
+    document.body.style.overflow = "hidden";
+  };
+
+  const closeImageModal = () => {
+    setIsImageModalOpen(false);
+    document.body.style.overflow = "auto";
+  };
+
+  const nextImageSlide = () => {
+    setCurrentImageSlide((prev) => (prev + 1) % imageSlides.length);
+  };
+
+  const prevImageSlide = () => {
+    setCurrentImageSlide((prev) => (prev - 1 + imageSlides.length) % imageSlides.length);
   };
 
   // Компонент для характеристик
@@ -334,9 +404,9 @@ const ExclusiveProductPage = () => {
   // Получить название дефолтного материала (русское)
   const getDefaultMaterialName = () => {
     if (!product) return "Дефолт";
-    
+
     const materialName = product.image.match(/K\d+_(\w+)/)?.[1] || "DYMOVSKY";
-    
+
     // Обратный поиск - найти русское название по английскому
     const reverseMapping: Record<string, string> = {
       DYMOVSKY: "Дымовский",
@@ -352,7 +422,7 @@ const ExclusiveProductPage = () => {
       AMADEUS: "Амадеус",
       MUGLAWHITE: "Мрамор",
     };
-    
+
     return reverseMapping[materialName] || "Дефолт";
   };
 
@@ -385,33 +455,30 @@ const ExclusiveProductPage = () => {
 
               {/* Плашка ХИТ - привязана к выбранному цвету */}
               {selectedColor?.hit && (
-                <div className={`absolute left-2 z-20 bg-gray-600 text-white text-xs font-bold px-2.5 py-0.75 rounded-xl ${
-                  selectedColor?.discount && selectedColor.discount > 0 ? 'top-12' : 'top-2'
-                }`}>
+                <div className={`absolute left-2 z-20 bg-gray-600 text-white text-xs font-bold px-2.5 py-0.75 rounded-xl ${selectedColor?.discount && selectedColor.discount > 0 ? 'top-12' : 'top-2'
+                  }`}>
                   ХИТ
                 </div>
               )}
 
               {/* Звезда (избранное) */}
               <div
-                className={`absolute ${
-                  selectedColor?.discount && selectedColor.discount > 0 && selectedColor?.hit 
-                    ? 'top-20' 
-                    : selectedColor?.discount && selectedColor.discount > 0 
-                      ? 'top-12' 
-                      : selectedColor?.hit 
-                        ? 'top-12' 
+                className={`absolute ${selectedColor?.discount && selectedColor.discount > 0 && selectedColor?.hit
+                    ? 'top-20'
+                    : selectedColor?.discount && selectedColor.discount > 0
+                      ? 'top-12'
+                      : selectedColor?.hit
+                        ? 'top-12'
                         : 'top-2'
-                } left-2 z-10 w-11 h-11 text-center content-center flex-wrap text-2xl shadow-xs rounded-full hover:text-[#2c3a54] transition cursor-pointer ${
-                  isFavorite ? "text-[#2c3a54]" : "text-gray-400"
-                }`}
+                  } left-2 z-10 w-11 h-11 text-center content-center flex-wrap text-2xl shadow-xs rounded-full hover:text-[#2c3a54] transition cursor-pointer ${isFavorite ? "text-[#2c3a54]" : "text-gray-400"
+                  }`}
                 onClick={toggleFavorite}
               >
                 ★
               </div>
 
               {/* View360 компонент - интерактивный просмотр с разных ракурсов */}
-              <View360 
+              <View360
                 baseImagePath={(selectedColor ? selectedColor.image : product.image).replace(/\/800x800\/frame_\d+\.(jpg|webp)$/, '/800x800')}
                 sourceImagePath={selectedColor ? selectedColor.image : product.image}
                 totalFrames={11}
@@ -435,7 +502,7 @@ const ExclusiveProductPage = () => {
                     </p>
 
                     <div className={`mt-3 ${isMobile ? 'overflow-x-auto scrollbar-hide' : ''}`}>
-                      <div 
+                      <div
                         ref={isMobile ? colorScrollRef : undefined}
                         className={`${isMobile ? 'flex gap-2 pb-2' : 'grid grid-cols-4 gap-2'}`}
                       >
@@ -444,11 +511,10 @@ const ExclusiveProductPage = () => {
                           <button
                             key={index}
                             onClick={() => setSelectedColor(color)}
-                            className={`${isMobile ? 'shrink-0 w-[calc(22.5vw-8px)] aspect-square' : 'aspect-square'} rounded-lg border-2 transition bg-cover bg-center ${
-                              selectedColor?.name === color.name
+                            className={`${isMobile ? 'shrink-0 w-[calc(22.5vw-8px)] aspect-square' : 'aspect-square'} rounded-lg border-2 transition bg-cover bg-center ${selectedColor?.name === color.name
                                 ? "border-[#2c3a54]"
                                 : "border-gray-300 hover:border-[#2c3a54]"
-                            }`}
+                              }`}
                             style={{
                               backgroundImage: `url(${color.image})`,
                             }}
@@ -550,31 +616,28 @@ const ExclusiveProductPage = () => {
             <div className="flex space-x-4 md:space-x-6 text-[14px] md:text-[16px]">
               <button
                 onClick={() => setActiveTab("characteristics")}
-                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${
-                  activeTab === "characteristics"
+                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${activeTab === "characteristics"
                     ? ""
                     : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
-                }`}
+                  }`}
               >
                 Характеристики
               </button>
               <button
                 onClick={() => setActiveTab("description")}
-                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${
-                  activeTab === "description"
+                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${activeTab === "description"
                     ? ""
                     : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
-                }`}
+                  }`}
               >
                 Описание
               </button>
               <button
                 onClick={() => setActiveTab("granite")}
-                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${
-                  activeTab === "granite"
+                className={`pb-2 font-bold text-[#2c3a54] hover:no-underline ${activeTab === "granite"
                     ? ""
                     : "decoration-dashed decoration-[0.5px] underline underline-offset-4"
-                }`}
+                  }`}
               >
                 Варианты гранита
               </button>
@@ -599,23 +662,23 @@ const ExclusiveProductPage = () => {
                         key === "Общая высота"
                           ? "/single/height.webp"
                           : key === "Общая ширина"
-                          ? "/single/width.webp"
-                          : key === "Стела"
-                          ? "/single/stela.webp"
-                          : undefined
+                            ? "/single/width.webp"
+                            : key === "Стела"
+                              ? "/single/stela.webp"
+                              : undefined
                       }
                       tooltipDescription={
                         key === "Общая высота"
                           ? "Высота от нижней до верхней точки памятника"
                           : key === "Общая ширина"
-                          ? "Ширина памятника по крайним точкам"
-                          : key === "Стела"
-                          ? "Размеры стелы памятника"
-                          : undefined
+                            ? "Ширина памятника по крайним точкам"
+                            : key === "Стела"
+                              ? "Размеры стелы памятника"
+                              : undefined
                       }
                     />
                   ))}
-                  
+
                   {/* Статические характеристики */}
                   {Object.entries(STATIC_CHARACTERISTICS).map(([key, value]) => (
                     <CharacteristicItem
@@ -624,7 +687,7 @@ const ExclusiveProductPage = () => {
                       value={value}
                     />
                   ))}
-                  
+
                   <Tooltip
                     isOpen={tooltipOpen}
                     image={tooltipContent.image}
@@ -640,7 +703,7 @@ const ExclusiveProductPage = () => {
             {activeTab === "description" && (
               <div>
                 <p className="text-[#2D4266]">
-                  {product.description || 
+                  {product.description ||
                     "Представленный эксклюзивный памятник станет идеальным решением оформления захоронения ваших родных и близких. В качестве художественного оформления рекомендуем использовать накладные бронзовые буквы и цифры итальянского производителя Caggiati, либо покрыть надпись сусальным золотом, а фото усопшего оформить в медальон в бронзовой рамке."
                   }
                 </p>
@@ -671,17 +734,76 @@ const ExclusiveProductPage = () => {
                 </div>
               </div>
             )}
+
+            {/* Галерея готовых работ с этим товаром */}
+            {product && (
+              <>
+                {console.log('Rendering ProductWorksGallery with:', {
+                  productId: product.id,
+                  productIdString: product.id.toString(),
+                  productType: 'exclusive',
+                  category: 'exclusive'
+                })}
+                <ProductWorksGallery
+                  productId={product.id.toString()}
+                  productType="exclusive"
+                  category="exclusive"
+                  title="Готовые работы с этим товаром"
+                />
+              </>
+            )}
+
+            {/* Примеры оформления */}
+            <div className="mb-7.5">
+              <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
+                Примеры оформления
+              </h2>
+              <p className="text-[#2D4266] mb-5">
+                На фото представлены классические варианты оформления памятников.
+                При оформлении договора можно выбрать любой из вариантов нанесения
+                портрета и текста (в том числе размер портрета, размер текста, тип
+                шрифта, дополнительные рисунки и т.д.).
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+                {[1, 2, 3, 4].map((id) => (
+                  <div
+                    key={id}
+                    className="cursor-pointer group overflow-hidden rounded-lg"
+                    onClick={() => openImageModal(id - 1)}
+                  >
+                    <img
+                      src={`/single/example${id}.webp`}
+                      alt={`Пример оформления ${id}`}
+                      className="w-full h-auto object-cover rounded-lg group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <p className="text-[12px] text-[#2D4266] mt-2 text-center">
+                      {imageSlides[id - 1]?.caption}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Похожие товары */}
+            <div className="mb-7.5">
+              <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
+                Похожие товары
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3">
+                {similarProducts.map((similarProduct) => (
+                  <ProductCard
+                    key={similarProduct.id}
+                    product={similarProduct}
+                    isTablet={isTablet}
+                    isMobile={isMobile}
+                    isNarrowMobile={isNarrowMobile}
+                  />
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
-
-      {/* Галерея готовых работ с этим товаром */}
-      <ProductWorksGallery 
-        productId={product.id.toString()}
-        productType="exclusive"
-        category="exclusive"
-        title="Готовые работы с этим товаром"
-      />
 
       {/* Модальные окна */}
       <ModalCommunication
@@ -716,7 +838,7 @@ const ExclusiveProductPage = () => {
             <button
               onClick={prevGraniteSlide}
               className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
-              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+              style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
             >
               {"<"}
             </button>
@@ -724,7 +846,7 @@ const ExclusiveProductPage = () => {
             <button
               onClick={nextGraniteSlide}
               className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
-              style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+              style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
             >
               {">"}
             </button>
@@ -741,6 +863,57 @@ const ExclusiveProductPage = () => {
             {/* Подпись под изображением */}
             <div className="text-center text-white text-lg font-medium mt-2">
               {graniteTypes[currentGraniteSlide].name}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно для примеров оформления */}
+      {isImageModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+          onClick={closeImageModal}
+        >
+          <div
+            className="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Индикатор текущего слайда */}
+            <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">
+              {currentImageSlide + 1} / {imageSlides.length}
+            </div>
+
+            {/* Стрелка влево */}
+            <button
+              onClick={prevImageSlide}
+              className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+              style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+            >
+              {"<"}
+            </button>
+
+            {/* Стрелка вправо */}
+            <button
+              onClick={nextImageSlide}
+              className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+              style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+            >
+              {">"}
+            </button>
+
+            {/* Изображение */}
+            <div className="relative w-full h-full flex items-center justify-center">
+              <img
+                src={imageSlides[currentImageSlide].src}
+                alt={imageSlides[currentImageSlide].alt}
+                className="max-w-full max-h-[90vh] object-contain"
+              />
+            </div>
+
+            {/* Подпись под изображением */}
+            <div className="text-center text-white text-lg font-medium mt-2">
+              {imageSlides[currentImageSlide].caption}
             </div>
           </div>
         </div>

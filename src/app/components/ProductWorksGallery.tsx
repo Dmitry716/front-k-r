@@ -72,13 +72,16 @@ const ProductWorksGallery = ({
     // Загрузка работ для конкретного товара
     useEffect(() => {
         loadWorks();
-    }, [productId, productType]);
+    }, [productId, productType, category]);
 
     const loadWorks = async () => {
         try {
+            // Для exclusive всегда ищем как monuments
+            const searchProductType = productType === 'exclusive' ? 'monuments' : productType;
+            
             const params = new URLSearchParams();
             params.append('productId', productId);
-            params.append('productType', productType);
+            params.append('productType', searchProductType);
             // Преобразуем slug категории в русское название
             const categoryName = categorySlugToName[category] || category;
             params.append('category', categoryName);
@@ -195,7 +198,7 @@ const ProductWorksGallery = ({
                 {/* Модальное окно */}
                 {isModalOpen && (
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80"
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.8)]"
                         onClick={closeModal}
                     >
                         <div

@@ -223,7 +223,7 @@ const OurWorksPage = () => {
                         <button
                             onClick={prevSlide}
                             className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
-                            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                            style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         >
                             {"<"}
                         </button>
@@ -232,7 +232,7 @@ const OurWorksPage = () => {
                         <button
                             onClick={nextSlide}
                             className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
-                            style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                            style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         >
                             {">"}
                         </button>
