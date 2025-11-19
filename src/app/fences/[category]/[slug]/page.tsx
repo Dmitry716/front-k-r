@@ -30,6 +30,7 @@ interface Fence {
     slug: string;
     name: string;
     price?: number;
+    oldPrice?: number;
     textPrice?: string;
     category: string;
     image: string;
