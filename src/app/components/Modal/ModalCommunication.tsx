@@ -6,7 +6,8 @@ interface ProductData {
   name?: string;
   image?: string;
   color?: string;
-  price?: number;
+  price?: number | string;
+  oldPrice?: number | string;
   category?: string;
 }
 
@@ -29,6 +30,8 @@ const ModalCommunication: React.FC<ModalProps> = ({
   const backdropRef = useRef<HTMLDivElement>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [countryCode, setCountryCode] = useState('+375');
+  const [phoneNumber, setPhoneNumber] = useState('');
 
   // Блокировка скролла
   useEffect(() => {
@@ -78,6 +81,52 @@ const ModalCommunication: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
+  // Форматирование номера телефона
+  const formatPhoneNumber = (value: string) => {
+    // Удаляем все нецифровые символы
+    const digits = value.replace(/\D/g, '');
+    
+    // Форматируем в зависимости от кода страны
+    if (countryCode === '+375') {
+      // Формат: +375 (XX) XXX-XX-XX (12 цифр)
+      if (digits.length <= 2) return digits;
+      if (digits.length <= 5) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
+      if (digits.length <= 8) return `(${digits.slice(0, 2)}) ${digits.slice(2, 5)}-${digits.slice(5)}`;
+      return `(${digits.slice(0, 2)}) ${digits.slice(2, 5)}-${digits.slice(5, 7)}-${digits.slice(7, 9)}`;
+    } else {
+      // Формат: +7 (XXX) XXX-XX-XX (11 цифр)
+      if (digits.length <= 3) return digits;
+      if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+      if (digits.length <= 8) return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 8)}-${digits.slice(8, 10)}`;
+    }
+  };
+
+  // Обработчик изменения номера телефона
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const digits = value.replace(/\D/g, '');
+    
+    // Ограничение по количеству цифр
+    const maxDigits = countryCode === '+375' ? 9 : 10;
+    if (digits.length <= maxDigits) {
+      setPhoneNumber(formatPhoneNumber(digits));
+    }
+  };
+
+  // Валидация номера телефона
+  const validatePhone = (phone: string): boolean => {
+    const digits = phone.replace(/\D/g, '');
+    
+    if (countryCode === '+375') {
+      // +375 должен содержать 9 цифр после кода (всего 12)
+      return digits.length === 9;
+    } else {
+      // +7 должен содержать 10 цифр после кода (всего 11)
+      return digits.length === 10;
+    }
+  };
+
   // Обработчик отправки формы
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -85,14 +134,22 @@ const ModalCommunication: React.FC<ModalProps> = ({
     
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
-    const phone = formData.get('phone') as string;
+    const fullPhone = countryCode + phoneNumber.replace(/\D/g, '');
 
-    console.log('📝 Form data:', { name, phone });
+    console.log('📝 Form data:', { name, phone: fullPhone });
 
-    // Валидация
-    if (!name.trim() || !phone.trim()) {
-      console.log('❌ Validation failed');
-      setMessage({ type: 'error', text: 'Пожалуйста, заполните все поля' });
+    // Валидация имени
+    if (!name.trim()) {
+      console.log('❌ Name validation failed');
+      setMessage({ type: 'error', text: 'Пожалуйста, введите ваше имя' });
+      return;
+    }
+
+    // Валидация телефона
+    if (!validatePhone(phoneNumber)) {
+      console.log('❌ Phone validation failed');
+      const expectedDigits = countryCode === '+375' ? '12 цифр' : '11 цифр';
+      setMessage({ type: 'error', text: `Пожалуйста, введите корректный номер телефона (${expectedDigits})` });
       return;
     }
 
@@ -117,11 +174,12 @@ const ModalCommunication: React.FC<ModalProps> = ({
       // Если есть фото товара, отправляем его отдельно
       if (productData?.image) {
         console.log('📤 Sending photo to Telegram');
+        console.log('📦 Product data:', JSON.stringify(productData, null, 2));
         
         // Формируем подпись для фото
         let caption = `📞 Новый заказ звонка\n\n`;
         caption += `👤 Имя: ${name}\n`;
-        caption += `📱 Телефон: ${phone}\n`;
+        caption += `📱 Телефон: ${fullPhone}\n`;
         caption += `\n📦 Товар: ${productData.name || 'Не указан'}`;
         
         if (productData.category) {
@@ -133,8 +191,33 @@ const ModalCommunication: React.FC<ModalProps> = ({
         }
         
         if (productData.price) {
-          caption += `\n💰 Цена: ${productData.price} руб.`;
+          const price = typeof productData.price === 'string' ? parseFloat(productData.price) : productData.price;
+          const oldPrice = productData.oldPrice ? (typeof productData.oldPrice === 'string' ? parseFloat(productData.oldPrice) : productData.oldPrice) : 0;
+          
+          console.log('💰 Price calculation:', { 
+            rawPrice: productData.price, 
+            rawOldPrice: productData.oldPrice,
+            parsedPrice: price, 
+            parsedOldPrice: oldPrice,
+            hasDiscount: oldPrice > 0 && oldPrice > price 
+          });
+          
+          if (oldPrice > 0 && oldPrice > price) {
+            caption += `\n💰 Цена со скидкой: ${price.toFixed(2)} руб.`;
+            caption += `\n💵 Старая цена: ${oldPrice.toFixed(2)} руб.`;
+          } else {
+            caption += `\n💰 Цена: ${price.toFixed(2)} руб.`;
+          }
         }
+        
+        console.log('📝 Caption to send:', caption);
+        
+        // Преобразуем относительный путь в абсолютный URL
+        const imageUrl = productData.image.startsWith('http') 
+          ? productData.image 
+          : `https://k-r.by${productData.image}`;
+        
+        console.log('🖼️ Image URL:', imageUrl);
         
         const photoResponse = await fetch(
           `https://api.telegram.org/bot${telegramBotToken}/sendPhoto`,
@@ -143,7 +226,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               chat_id: chatId,
-              photo: productData.image,
+              photo: imageUrl,
               caption: caption,
             }),
           }
@@ -162,7 +245,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
         // Если нет фото, отправляем обычное текстовое сообщение
         let messageText = `📞 Новый заказ звонка\n\n`;
         messageText += `👤 Имя: ${name}\n`;
-        messageText += `📱 Телефон: ${phone}`;
+        messageText += `📱 Телефон: ${fullPhone}`;
         
         if (productData) {
           messageText += `\n\n📦 Товар: ${productData.name || 'Не указан'}`;
@@ -176,7 +259,15 @@ const ModalCommunication: React.FC<ModalProps> = ({
           }
           
           if (productData.price) {
-            messageText += `\n💰 Цена: ${productData.price} руб.`;
+            const price = typeof productData.price === 'string' ? parseFloat(productData.price) : productData.price;
+            const oldPrice = productData.oldPrice ? (typeof productData.oldPrice === 'string' ? parseFloat(productData.oldPrice) : productData.oldPrice) : 0;
+            
+            if (oldPrice > 0 && oldPrice > price) {
+              messageText += `\n💰 Цена со скидкой: ${price.toFixed(2)} руб.`;
+              messageText += `\n💵 Старая цена: ${oldPrice.toFixed(2)} руб.`;
+            } else {
+              messageText += `\n💰 Цена: ${price.toFixed(2)} руб.`;
+            }
           }
         }
         
@@ -206,7 +297,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
       }
 
       // Вызываем функцию обработки из props
-      onSubmit({ name, phone });
+      onSubmit({ name, phone: fullPhone });
       
       setMessage({ type: 'success', text: '✓ Спасибо! Мы свяжемся с вами в ближайшее время' });
       
@@ -214,6 +305,8 @@ const ModalCommunication: React.FC<ModalProps> = ({
       setTimeout(() => {
         onClose();
         setMessage(null);
+        // Очищаем форму
+        setPhoneNumber('');
       }, 2000);
     } catch (error) {
       console.error('❌ Ошибка отправки:', error);
@@ -291,17 +384,41 @@ const ModalCommunication: React.FC<ModalProps> = ({
             <label htmlFor="callback-phone" className="block text-sm font-bold text-[#2c3a54] mb-1.25">
               Телефон
             </label>
-            <input
-              id="callback-phone"
-              name="phone"
-              type="tel"
-              placeholder="+375 (__) ___-__-__"
-              maxLength={19}
-              className="w-full h-11 px-3.75 py-2 text-sm text-black leading-5.5 border-2 border-[#2c3a5499] rounded-3xl focus:outline-none focus:border-[#2c3a54] bg-white"
-              style={{
-                transition: "all 0.25s",
-              }}
-            />
+            <div className="flex gap-2">
+              {/* Выбор кода страны */}
+              <select
+                value={countryCode}
+                onChange={(e) => {
+                  setCountryCode(e.target.value);
+                  setPhoneNumber(''); // Очищаем номер при смене кода
+                }}
+                className="h-11 w-[70px] px-2 text-sm text-black border-2 border-[#2c3a5499] rounded-3xl focus:outline-none focus:border-[#2c3a54] bg-white cursor-pointer appearance-none text-center"
+                style={{
+                  transition: "all 0.25s",
+                  backgroundImage: "none",
+                }}
+              >
+                <option value="+375">+375</option>
+                <option value="+7">+7</option>
+              </select>
+              
+              {/* Поле ввода номера */}
+              <input
+                id="callback-phone"
+                name="phone"
+                type="tel"
+                value={phoneNumber}
+                onChange={handlePhoneChange}
+                placeholder={countryCode === '+375' ? '(29) 123-45-67' : '(812) 234-56-78'}
+                className="flex-1 h-11 px-3.75 py-2 text-sm text-black leading-5.5 border-2 border-[#2c3a5499] rounded-3xl focus:outline-none focus:border-[#2c3a54] bg-white"
+                style={{
+                  transition: "all 0.25s",
+                }}
+              />
+            </div>
+            <div className="mt-1 text-xs text-gray-500">
+              {countryCode === '+375' ? 'Формат: +375 (XX) XXX-XX-XX' : 'Формат: +7 (XXX) XXX-XX-XX'}
+            </div>
           </div>
 
           {/* Кнопка отправки */}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import ModalCommunication from "./Modal/ModalCommunication";
@@ -21,60 +21,16 @@ const OrderStepsSection = () => {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // Блокировка скролла при открытии модалки
+  // Блокировка скролла при открытии модалки (убираем pointer-events)
   useEffect(() => {
     if (isModalOpen) {
       document.body.style.overflow = "hidden";
-      document.body.style.pointerEvents = "none";
-
-      const modalBackdrop = document.querySelector(".modal-backdrop");
-      if (modalBackdrop) {
-        modalBackdrop.parentElement!.style.pointerEvents = "auto";
-      }
     } else {
       document.body.style.overflow = "";
-      document.body.style.pointerEvents = "";
     }
   }, [isModalOpen]);
 
-  // Закрытие по Esc
-  useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsModalOpen(false);
-      }
-    };
-    if (isModalOpen) {
-      window.addEventListener("keydown", handleEsc);
-    }
-    return () => {
-      window.removeEventListener("keydown", handleEsc);
-    };
-  }, [isModalOpen]);
 
-  // Закрытие по клику вне модалки
-  const modalRef = useRef<HTMLDivElement>(null);
-  const backdropRef = useRef<HTMLDivElement>(null);
-
-  const handleClickOutside = (e: MouseEvent) => {
-    if (
-      modalRef.current &&
-      !modalRef.current.contains(e.target as Node) &&
-      backdropRef.current &&
-      e.target === backdropRef.current
-    ) {
-      setIsModalOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    if (isModalOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isModalOpen]);
 
   // Функция для открытия модалки
   const openModal = () => {

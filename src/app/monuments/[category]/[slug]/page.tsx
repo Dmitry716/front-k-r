@@ -1180,6 +1180,7 @@ const ProductPage = () => {
                     image: displayImage,
                     color: selectedColor?.name,
                     price: product.price,
+                    oldPrice: product.oldPrice,
                     category: product.category,
                 }}
             />

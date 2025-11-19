@@ -3,10 +3,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useRef, useEffect } from "react";
 import { footerMenu } from "../mock/footerMenu";
+import ModalCommunication from "./Modal/ModalCommunication";
 
 const Footer = () => {
   const [openMenus, setOpenMenus] = useState<string[]>([]);
   const contentRefs = useRef<{ [key: string]: HTMLUListElement | null }>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const toggleMenu = (menu: string) => {
     if (openMenus.includes(menu)) {
@@ -95,7 +97,10 @@ const Footer = () => {
             <div className="text-[#2c3a54]">+375 29 622-66-45 A1</div>
           </div>
           <div className="flex mt-1">
-            <button className="bg-white border border-[#2c3a54] text-[#2c3a54] px-3.5 py-1 mr-4.25 md:px-3.75 md:py-2.25 rounded-full font-bold hover:bg-[#2c3a54] hover:text-white transition">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-white border border-[#2c3a54] text-[#2c3a54] px-3.5 py-1 mr-4.25 md:px-3.75 md:py-2.25 rounded-full font-bold hover:bg-[#2c3a54] hover:text-white transition"
+            >
               Заказать звонок
             </button>
 
@@ -220,6 +225,13 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {/* Модальное окно для заказа звонка */}
+      <ModalCommunication
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={() => setIsModalOpen(false)}
+      />
     </footer>
   );
 };

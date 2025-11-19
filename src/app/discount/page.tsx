@@ -221,7 +221,7 @@ const DiscountPage = () => {
                         </h1>
 
                         {/* Блок сортировки и выбора количества товаров */}
-                        <div hidden={isTablet} className="flex justify-between items-center mb-5">
+                        <div className="flex justify-between items-center mb-5">
                             {/* Сортировка слева */}
                             <div className="flex items-center gap-2 relative">
                                 <span className="text-[14px] text-[#6B809E]">Показывать:</span>
@@ -251,9 +251,9 @@ const DiscountPage = () => {
                                     )}
                                 </div>
                             </div>
-                            
+
                             {/* Выбор количества товаров справа */}
-                            <div className="flex items-center">
+                            <div className="flex items-center" hidden={isTablet}>
                                 <span className="text-[14px] text-[#6B809E] mr-2">Выводить по:</span>
                                 {[60, 120].map((count) => (
                                     <button

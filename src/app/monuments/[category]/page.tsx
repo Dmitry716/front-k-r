@@ -152,7 +152,7 @@ const subcategoryData: Record<string, CategoryData> = {
         sortOptions: ["Сначала популярные", "Сначала дешевые", "Сначала дорогие"],
     },
     "cross": {
-        title: "В виде креста",
+        title: "Памятники в виде креста",
         products: [],
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
@@ -162,7 +162,7 @@ const subcategoryData: Record<string, CategoryData> = {
         sortOptions: ["Сначала популярные", "Сначала дешевые", "Сначала дорогие"],
     },
     "heart": {
-        title: "В виде сердца",
+        title: "Памятники в виде сердца",
         products: [],
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
@@ -172,7 +172,7 @@ const subcategoryData: Record<string, CategoryData> = {
         sortOptions: ["Сначала популярные", "Сначала дешевые", "Сначала дорогие"],
     },
     "europe": {
-        title: "Европейские",
+        title: "Европейские памятники",
         products: [],
         otherCategories: [
             { title: "Одиночные", image: "/section/single.webp", link: "/monuments/single" },
@@ -182,7 +182,7 @@ const subcategoryData: Record<string, CategoryData> = {
         sortOptions: ["Сначала популярные", "Сначала дешевые", "Сначала дорогие"],
     },
     "artistic": {
-        title: "Художественная резка",
+        title: "Памятники с художественной резкой",
         products: [],
         otherCategories: [
             { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
@@ -192,7 +192,7 @@ const subcategoryData: Record<string, CategoryData> = {
         sortOptions: ["Сначала популярные", "Сначала дешевые", "Сначала дорогие"],
     },
     "tree": {
-        title: "В виде деревьев",
+        title: "Памятники в виде деревьев",
         products: [],
         otherCategories: [
             { title: "Эксклюзивные", image: "/section/single.webp", link: "/monuments/exclusive" },
@@ -447,7 +447,7 @@ const MonumentsSubcategoryPage = () => {
                         */}
 
                         {/* Блок сортировки и выбора количества товаров */}
-                        <div hidden={isTablet} className="flex justify-between items-center mb-5">
+                        <div className="flex justify-between items-center mb-5">
                             {/* Сортировка слева */}
                             {currentCategoryData.sortOptions && (
                                 <div className="flex items-center gap-2 relative">
@@ -481,7 +481,7 @@ const MonumentsSubcategoryPage = () => {
                             )}
                             
                             {/* Выбор количества товаров справа */}
-                            <div className="flex items-center">
+                            <div className="flex items-center" hidden={isTablet}>
                                 <span className="text-[14px] text-[#6B809E] mr-2">Выводить по:</span>
                                 {[60, 120].map((count) => (
                                     <button

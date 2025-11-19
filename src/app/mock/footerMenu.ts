@@ -29,9 +29,9 @@ export const footerMenu = {
     ],
     useful: [
         { name: "Контакты", href: "/contacts" },
-        { name: "Наши работы", href: "/portfolio" },
+        { name: "Наши работы", href: "/works" },
         { name: "Блог", href: "/blog" },
         { name: "Избранное", href: "/favorites" },
-        { name: "Акции", href: "/promotions" },
+        { name: "Акции", href: "/sales" },
     ],
 };

@@ -693,6 +693,7 @@ const ExclusiveProductPage = () => {
           image: product.image,
           color: selectedColor?.name,
           price: selectedColor?.price || product.price,
+          oldPrice: selectedColor?.oldPrice || product.oldPrice,
           category: product.category,
         }}
       />

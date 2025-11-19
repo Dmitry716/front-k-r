@@ -188,7 +188,7 @@ const OurWorksSlider = ({
                 <img
                     src={work.image}
                     alt={work.alt || work.title || `Работа ${work.id}`}
-                    className="w-full h-auto rounded-xl hover:opacity-80 duration-500"
+                    className="w-full h-auto aspect-square object-cover rounded-xl hover:opacity-80 duration-500"
                 />
                 {work.title && (
                     <div className="mt-2 text-sm text-gray-700 text-center">

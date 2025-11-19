@@ -572,16 +572,27 @@ export default function ProductsAdminPage() {
   const handleDiscountChange = (discount: string) => {
     const newDiscount = parseFloat(discount) || 0;
     const currentPrice = parseFloat(editForm.price) || 0;
+    const oldPrice = parseFloat(editForm.oldPrice) || 0;
     
     setEditForm(prev => {
       const updatedForm = { ...prev, discount, priceByRequest: false }; // Очищаем priceByRequest при вводе числовой цены
       
-      // Если есть текущая цена и скидка, рассчитываем старую цену
+      // Если есть текущая цена и скидка, переносим текущую цену в старую (если старой нет), и пересчитываем новую цену
       if (currentPrice > 0 && newDiscount > 0 && newDiscount < 100) {
-        const calculatedOldPrice = Math.round((currentPrice * 100) / (100 - newDiscount));
-        updatedForm.oldPrice = calculatedOldPrice.toString();
+        // Если старой цены нет, текущая цена становится старой
+        if (oldPrice === 0) {
+          updatedForm.oldPrice = currentPrice.toString();
+        }
+        // Пересчитываем текущую цену с учетом скидки от старой цены
+        const priceBase = oldPrice > 0 ? oldPrice : currentPrice;
+        const calculatedPrice = Math.round(priceBase * (100 - newDiscount) / 100);
+        updatedForm.price = calculatedPrice.toString();
       } else if (newDiscount <= 0) {
-        updatedForm.oldPrice = "";
+        // Если скидка 0 или очистили, возвращаем старую цену в текущую
+        if (oldPrice > 0) {
+          updatedForm.price = oldPrice.toString();
+          updatedForm.oldPrice = "";
+        }
       }
       
       return updatedForm;

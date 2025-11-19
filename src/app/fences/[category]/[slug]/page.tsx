@@ -441,6 +441,7 @@ const FenceDetailPage = () => {
                     name: fence.name,
                     image: fence.image,
                     price: fence.price,
+                    oldPrice: fence.oldPrice,
                     category: fence.category,
                 }}
             />
