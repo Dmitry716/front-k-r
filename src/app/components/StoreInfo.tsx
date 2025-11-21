@@ -492,9 +492,9 @@ const StoreInfo = () => {
               </div>
             </div>
 
-            <button className="w-max mt-4 px-6 py-2 font-bold border-1 border-[#2c3a54] rounded-full text-[#2c3a54] hover:bg-[#2c3a54] hover:text-white transition-colors">
+            <Link href="/contacts" className="w-max mt-4 px-6 py-2 font-bold border-1 border-[#2c3a54] rounded-full text-[#2c3a54] hover:bg-[#2c3a54] hover:text-white transition-colors">
               Подробнее
-            </button>
+            </Link>
           </div>
         </div>
 

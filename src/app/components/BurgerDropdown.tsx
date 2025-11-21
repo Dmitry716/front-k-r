@@ -210,7 +210,7 @@ const BurgerDropdown: React.FC<BurgerDropdownProps> = ({
         </div>
 
         <div className="mt-5 leading-4.5">
-          <p>Пн-пт 09:00 до 18:00</p>
+          <p>Пн-пт 09:00 до 18:00 обед 12:00 - 13:00</p>
           <p>Сб 10:00 до 16:00</p>
           <p>Вскр выходной</p>
         </div>

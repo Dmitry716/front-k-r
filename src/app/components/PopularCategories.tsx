@@ -1,6 +1,7 @@
 'use client'
 import React, { useEffect, useState } from "react";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
+import Link from "next/link";
 
 interface CategoryWithPrice {
   title: string;
@@ -161,9 +162,9 @@ export default function PopularCategories() {
               ))}
             </ul>
 
-            <button className="mt-6 w-full bg-[#2c3a54] text-white text-lg font-bold py-3 rounded-4xl">
+            <Link href="/monuments" className="mt-6 w-full bg-[#2c3a54] text-white text-lg font-bold py-3 rounded-4xl">
               Смотреть весь каталог
-            </button>
+            </Link>
           </div>
 
           {/* Сетка для экранов >=768px (md и выше) */}

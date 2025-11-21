@@ -117,7 +117,7 @@ const FooterPhoneDropdown: React.FC<FooterPhoneDropdownProps> = ({
               className="self-start pt-0.75"
             />
             <div className="leading-4.25 space-y-0.5">
-              <p>Пн–Пт: 09:00 – 18:00</p>
+              <p>Пн–Пт: 09:00 – 18:00 обед 12:00 - 13:00</p>
               <p>Сб: 10:00 – 16:00</p>
               <p>Вск: выходной</p>
             </div>
