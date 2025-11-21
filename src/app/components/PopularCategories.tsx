@@ -162,7 +162,7 @@ export default function PopularCategories() {
               ))}
             </ul>
 
-            <Link href="/monuments" className="mt-6 w-full bg-[#2c3a54] text-white text-lg font-bold py-3 rounded-4xl">
+            <Link href="/monuments" className="mt-6 max-w-[250px] justify-center flex bg-[#2c3a54] text-white text-lg font-bold py-3 rounded-4xl">
               Смотреть весь каталог
             </Link>
           </div>
