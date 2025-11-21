@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Pool } from 'pg';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
