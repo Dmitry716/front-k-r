@@ -6,7 +6,16 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
   images: {
-    domains: ['localhost', 'k-r.by'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'k-r.by',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+    ],
     unoptimized: false,
     formats: ['image/avif', 'image/webp'],
   },

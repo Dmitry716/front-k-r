@@ -45,6 +45,8 @@ export async function getPageSEOData(pageSlug: string): Promise<PageSEOData | nu
       {
         // Кэшируем на 5 минут + добавляем тег для инвалидации
         next: { revalidate: 300, tags: [`seo-${pageSlug}`, 'seo-data'] },
+        // Timeout для избежания зависаний при build-time
+        signal: AbortSignal.timeout(10000),
       }
     );
 
@@ -60,7 +62,12 @@ export async function getPageSEOData(pageSlug: string): Promise<PageSEOData | nu
     }
 
     return null;
-  } catch (error) {
+  } catch (error: any) {
+    // Сетевые ошибки при build-time - используем fallback
+    if (error?.code === 'ENOTFOUND' || error?.cause?.code === 'ENOTFOUND' || error?.name === 'AbortError') {
+      console.warn(`Сетевая ошибка при загрузке SEO для ${pageSlug}, используем fallback`);
+      return null;
+    }
     console.error(`Ошибка загрузки SEO данных для ${pageSlug}:`, error);
     return null;
   }
