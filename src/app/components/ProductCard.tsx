@@ -481,21 +481,27 @@ const ProductCard = ({
         onTouchStart={handleTouchStartImage}
       >
         <Link href={generateProductHref(product)}>
-        <img
-          src={displayImage}
-          srcSet={(() => {
-            // Only generate srcSet for monument images (800x800)
-            if (displayImage.includes('/800x800/')) {
+        {displayImage.includes('/800x800/') ? (
+          <img
+            src={displayImage}
+            srcSet={(() => {
               const ext = displayImage.split('.').pop() || 'webp';
               const pathWithoutExt = displayImage.substring(0, displayImage.lastIndexOf('.'));
               return `${pathWithoutExt}-256w.${ext} 256w, ${pathWithoutExt}-512w.${ext} 512w, ${displayImage} 800w`;
-            }
-            return undefined;
-          })()}
-          sizes="256px"
-          alt={product.name}
-          className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105" loading="lazy"
-        />
+            })()}
+            sizes="256px"
+            alt={product.name}
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        ) : (
+          <img
+            src={displayImage}
+            alt={product.name}
+            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+          />
+        )}
         </Link>
         {/* Индикаторы цветов для десктопа */}
         {!isTablet && hasColors && (

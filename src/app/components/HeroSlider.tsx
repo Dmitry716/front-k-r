@@ -185,7 +185,8 @@ const HeroSlider = () => {
               fill
               className="rounded-xl object-cover -z-10"
               priority={index === 0}
-              quality={75}
+              fetchPriority={index === 0 ? "high" : "auto"}
+              quality={80}
               sizes="(max-width: 768px) 100vw, 1300px"
             />
             {/* Контент слайда */}
@@ -245,7 +246,8 @@ const HeroSlider = () => {
                     fill
                     className="rounded-xl object-cover"
                     priority={index === 0}
-                    quality={75}
+                    fetchPriority={index === 0 ? "high" : "auto"}
+                    quality={80}
                     sizes="100vw"
                   />
                 </div>
