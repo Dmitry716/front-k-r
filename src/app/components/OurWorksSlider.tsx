@@ -185,10 +185,15 @@ const OurWorksSlider = ({
                 className={`relative flex-shrink-0 cursor-pointer ${cardBasis} px-1.5`}
                 onClick={() => openModal(index)}
             >
-                <img
+                <Image
                     src={work.image}
                     alt={work.alt || work.title || `Работа ${work.id}`}
-                    className="w-full h-auto aspect-square object-cover rounded-xl hover:opacity-80 duration-500" loading="lazy"
+                    width={301}
+                    height={401}
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                    className="w-full h-auto aspect-square object-cover rounded-xl hover:opacity-80 duration-500"
+                    quality={75}
+                    priority={index < 4}
                 />
                 {work.title && (
                     <div className="mt-2 text-sm text-gray-700 text-center">
@@ -270,7 +275,7 @@ const OurWorksSlider = ({
                             {!isTablet && (
                                 <button
                                     onClick={scrollLeft}
-                                    className="absolute left-[-8px] border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                                    className="absolute -left-2 border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -305,7 +310,7 @@ const OurWorksSlider = ({
                             {!isTablet && (
                                 <button
                                     onClick={scrollRight}
-                                    className="absolute right-[-8px] border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                                    className="absolute -right-2 border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -371,10 +376,13 @@ const OurWorksSlider = ({
 
                             {/* Изображение */}
                             <div className="relative w-full h-full flex items-center justify-center">
-                                <img
+                                <Image
                                     src={filteredWorks[currentModalSlide].image}
-                                    alt={filteredWorks[currentModalSlide].alt}
-                                    className="max-w-full max-h-[90vh] object-contain" loading="lazy"
+                                    alt={filteredWorks[currentModalSlide].alt || "Работа"}
+                                    width={1200}
+                                    height={1200}
+                                    className="max-w-full max-h-[90vh] object-contain"
+                                    quality={85}
                                 />
                             </div>
 

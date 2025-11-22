@@ -6,8 +6,9 @@ const nextConfig: NextConfig = {
     root: path.resolve(__dirname),
   },
   images: {
-    domains: ['localhost'],
-    unoptimized: true,
+    domains: ['localhost', 'k-r.by'],
+    unoptimized: false,
+    formats: ['image/avif', 'image/webp'],
   },
   // Отключаем восстановление скролла
   experimental: {

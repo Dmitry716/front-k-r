@@ -290,14 +290,17 @@ const StoreInfo = () => {
               style={{ width: `${slideWidthPercent}%` }}
               onClick={() => openModal(index)} // Открываем модалку при клике
             >
-              <img
+              <Image
                 src={slide.src}
                 alt={slide.alt}
                 className={
                   isSmallScreen
                     ? "w-full h-60 rounded-lg object-cover"
                     : "w-full h-full aspect-square rounded-lg object-cover"
-                } loading="lazy"
+                }
+                width={400}
+                height={400}
+                quality={80}
               />
             </div>
           ))}
@@ -722,10 +725,13 @@ const StoreInfo = () => {
 
             {/* Изображение */}
             <div className="relative w-full h-full flex items-center justify-center">
-              <img
+              <Image
                 src={slides[currentModalSlide].src}
                 alt={slides[currentModalSlide].alt}
-                className="max-w-full max-h-[90vh] object-contain" loading="lazy"
+                className="max-w-full max-h-[90vh] object-contain"
+                width={1200}
+                height={1200}
+                quality={85}
               />
             </div>
           </div>

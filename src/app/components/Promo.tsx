@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import React from "react";
 import { useEffect, useState } from "react";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
@@ -63,11 +64,13 @@ const Promo = () => {
                 const imgSrc = campaign.featuredImage || campaign.image || campaign.images?.[0];
                 if (!imgSrc) return null;
                 return (
-                  <img
+                  <Image
                     src={imgSrc}
                     alt={campaign.title}
                     className="w-full h-auto object-cover rounded-lg"
-                    loading="lazy"
+                    width={400}
+                    height={250}
+                    quality={80}
                   />
                 );
               })()}

@@ -52,6 +52,21 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
+        {/* Preload critical fonts */}
+        <link
+          rel="preload"
+          href="/fonts/LatoRegular.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/LatoBold.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
         <SchemaOrg schema={schemaOrganization} />
       </head>
       <body className="min-w-[360px]">

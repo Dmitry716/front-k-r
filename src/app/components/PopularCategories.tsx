@@ -1,5 +1,6 @@
 'use client'
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import Link from "next/link";
 
@@ -147,11 +148,10 @@ export default function PopularCategories() {
                     href={link}
                     className="flex items-center bg-[#f5f6fa] rounded-lg px-4 py-3 text-gray-800 "
                   >
-                    <img
+                    <Image
                       src={img}
                       alt={title}
                       className="w-8 h-8 object-contain mr-4"
-                      loading="lazy"
                       width={32}
                       height={32}
                     />
@@ -175,11 +175,10 @@ export default function PopularCategories() {
                   href={link}
                   className="flex flex-col bg-[#f5f6fa] rounded-2xl px-2.5 pb-5 pt-0.75 text-[20px] text-center transition-shadow hover:shadow-md min-h-80"
                 >
-                  <img
+                  <Image
                     src={img}
                     alt={title}
                     className="mx-auto mb-4.5 object-contain"
-                    loading="lazy"
                     width={198}
                     height={198}
                   />
