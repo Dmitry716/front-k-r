@@ -2,17 +2,15 @@ import type { Metadata } from "next";
 import dynamic from "next/dynamic";
 import "./globals.css";
 import Header from "./components/Header";
+import Footer from "./components/Footer";
+import FooterMenu from "./components/FooterMenu";
+import ScrollToTop from "./components/ScrollToTop";
 import { DropdownProvider } from "./context/DropDownContext";
 import { AdminProtector } from "./components/AdminProtector";
+import YandexMetrika from "./components/YandexMetrika";
+import CookieConsent from "./components/CookieConsent";
 import SchemaOrg from "./components/SchemaOrg";
 import { schemaOrganization } from "@/lib/seo-schema";
-
-// Ленивая загрузка некритических компонентов
-const Footer = dynamic(() => import("./components/Footer"), { ssr: true });
-const FooterMenu = dynamic(() => import("./components/FooterMenu"), { ssr: true });
-const ScrollToTop = dynamic(() => import("./components/ScrollToTop"), { ssr: false });
-const YandexMetrika = dynamic(() => import("./components/YandexMetrika"), { ssr: false });
-const CookieConsent = dynamic(() => import("./components/CookieConsent"), { ssr: false });
 
 // Default metadata для корневого layout - используется как fallback
 export const metadata: Metadata = {
