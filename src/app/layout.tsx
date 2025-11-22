@@ -52,19 +52,26 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Preconnect to external domains - before other resources */}
+        {/* Preload LCP image FIRST - highest priority */}
+        <link
+          rel="preload"
+          as="image"
+          href="/sliders/single.webp"
+          fetchPriority="high"
+        />
+        
+        {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://mc.yandex.ru" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         
-        {/* Preload critical fonts with fetchpriority */}
+        {/* Preload critical fonts - убираем fetchPriority для снижения конкуренции с LCP */}
         <link
           rel="preload"
           href="/fonts/LatoRegular.ttf"
           as="font"
           type="font/ttf"
           crossOrigin="anonymous"
-          fetchPriority="high"
         />
         <link
           rel="preload"
@@ -72,10 +79,7 @@ export default function RootLayout({
           as="font"
           type="font/ttf"
           crossOrigin="anonymous"
-          fetchPriority="high"
         />
-        {/* Inline critical CSS hint */}
-        <link rel="preload" as="style" href="/_next/static/css/app/layout.css" />
         <SchemaOrg schema={schemaOrganization} />
       </head>
       <body className="min-w-[360px]">

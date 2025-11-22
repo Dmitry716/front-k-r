@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
   experimental: {
     scrollRestoration: false,
     optimizeCss: true, // Оптимизация CSS для уменьшения критического пути
+    optimizePackageImports: ['react-icons'], // Tree-shaking для иконок
   },
   // Настройка компилятора для современных браузеров
   compiler: {
@@ -31,6 +32,8 @@ const nextConfig: NextConfig = {
   // Оптимизация для production
   poweredByHeader: false,
   compress: true,
+  // Минимизация и оптимизация
+  productionBrowserSourceMaps: false,
   // Добавляем поддержку статических файлов
   async rewrites() {
     return [

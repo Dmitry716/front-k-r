@@ -213,8 +213,9 @@ const HeroSlider = () => {
                 alt={slide.title}
                 fill
                 className="rounded-xl object-cover -z-10"
-                priority={index === 0}
-                fetchPriority={index === 0 ? "high" : "auto"}
+                priority={index === currentSlide}
+                fetchPriority={index === currentSlide ? "high" : "auto"}
+                loading={index === currentSlide ? "eager" : "lazy"}
                 quality={85}
                 sizes="(max-width: 768px) 100vw, 1300px"
               />
