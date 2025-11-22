@@ -52,12 +52,14 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Critical inline styles to prevent CLS */}
+        {/* Critical inline styles to prevent CLS and optimize rendering */}
         <style dangerouslySetInnerHTML={{__html: `
-          body{font-size:16px;line-height:1.5;margin:0;padding:0}
-          main{min-height:100vh;display:block}
+          *{box-sizing:border-box}
+          body{font-size:16px;line-height:1.5;margin:0;padding:0;contain:layout style}
+          main{min-height:100vh;display:block;contain:layout style}
           .min-h-screen{min-height:100vh}
           section:first-of-type{min-height:clamp(226px,29.5vw,400px);aspect-ratio:1300/400;contain:layout style paint}
+          img{content-visibility:auto;contain-intrinsic-size:auto 400px}
         `}} />
         
         {/* Preconnect FIRST for early connection establishment */}
