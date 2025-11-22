@@ -57,13 +57,14 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         <link rel="preconnect" href="https://cdn.jsdelivr.net" crossOrigin="anonymous" />
         
-        {/* Preload critical fonts */}
+        {/* Preload critical fonts with fetchpriority */}
         <link
           rel="preload"
           href="/fonts/LatoRegular.ttf"
           as="font"
           type="font/ttf"
           crossOrigin="anonymous"
+          fetchPriority="high"
         />
         <link
           rel="preload"
@@ -71,6 +72,7 @@ export default function RootLayout({
           as="font"
           type="font/ttf"
           crossOrigin="anonymous"
+          fetchPriority="high"
         />
         <SchemaOrg schema={schemaOrganization} />
       </head>

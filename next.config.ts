@@ -22,11 +22,15 @@ const nextConfig: NextConfig = {
   // Отключаем восстановление скролла
   experimental: {
     scrollRestoration: false,
+    optimizeCss: true, // Оптимизация CSS для уменьшения критического пути
   },
   // Настройка компилятора для современных браузеров
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
+  // Оптимизация для production
+  poweredByHeader: false,
+  compress: true,
   // Добавляем поддержку статических файлов
   async rewrites() {
     return [

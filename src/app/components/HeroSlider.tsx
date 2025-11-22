@@ -6,7 +6,9 @@ import Link from "next/link";
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(0);
+  const [windowWidth, setWindowWidth] = useState(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  );
 
   // Адаптивная высота
   const getSliderHeight = () => {
@@ -71,12 +73,21 @@ const HeroSlider = () => {
     }
   };
 
-  // Отслеживаем ширину окна
+  // Отслеживаем ширину окна с debounce для уменьшения принудительной компоновки
   useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    handleResize();
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setWindowWidth(window.innerWidth);
+      }, 150); // Debounce 150ms
+    };
+    
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
+    return () => {
+      clearTimeout(timeoutId);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const slides = [
@@ -165,7 +176,10 @@ const HeroSlider = () => {
   return (
     <section
       className="relative"
-      style={{ height: getSliderHeight() }}
+      style={{
+        height: getSliderHeight(),
+        minHeight: 'clamp(226px, 29.5vw, 400px)' // Резервируем минимальную высоту
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -173,170 +187,168 @@ const HeroSlider = () => {
       <div className="max-w-[1300px] container-centered h-full relative">
         {slides.map((slide, index) => {
           // Рендерим только текущий слайд и соседние для плавного перехода
-          const shouldRender = index === currentSlide || 
-                               index === (currentSlide - 1 + slides.length) % slides.length ||
-                               index === (currentSlide + 1) % slides.length;
-          
-          if (!shouldRender) return null;
-          
-          return (
-          <div
-            key={slide.id}
-            className={`absolute rounded-xl inset-0 transition-opacity duration-500 ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
-            }`}
-            style={{ aspectRatio: '1300/400' }}
-          >
-            {/* Фоновое изображение */}
-            <Image
-              src={slide.image}
-              alt={slide.title}
-              fill
-              className="rounded-xl object-cover -z-10"
-              priority={index === 0}
-              fetchPriority={index === 0 ? "high" : "auto"}
-              quality={85}
-              sizes="(max-width: 768px) 100vw, 1300px"
-            />
-            {/* Контент слайда */}
-            {windowWidth >= 768 ? (
-              // Десктопная версия - текст слева, изображение справа
-              <div
-                className="relative z-10"
-                style={{
-                  paddingLeft: padding.x,
-                  paddingRight: padding.x,
-                  paddingTop: padding.y,
-                  paddingBottom: padding.y,
-                  minWidth: "45vw",
-                  maxWidth: "54vw",
-                  color: "#2c3a54",
-                }}
-              >
-                <h2
-                  className="font-bold mb-2"
-                  style={{ fontSize: fontSize.title, paddingInlineEnd: "300px" }}
-                >
-                  {slide.title}
-                </h2>
-                <p
-                  style={{
-                    fontSize: fontSize.subtitle,
-                    marginBottom: windowWidth > 1200 ? "56px" : "20px",
-                  }}
-                >
-                  {slide.subtitle}
-                </p>
-                <Link
-                  href={slide.button.href}
-                  target="_blank"
-                  className="inline-block bg-transparent text-[#2c3a54] border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54]! hover:text-white! transition-all duration-300 relative z-20"
-                  style={{
-                    fontSize: fontSize.button,
-                    padding: windowWidth > 1280 ? "11px 24px" : "10px 20px",
-                  }}
-                >
-                  {slide.button.text}
-                </Link>
-              </div>
-            ) : (
-              // Мобильная версия - изображение сверху, текст снизу
-              <div className="flex flex-col h-full">
-                {/* Верхняя часть - изображение */}
-                <div
-                  className="w-full mb-5.5 rounded-xl relative"
-                  style={{
-                    height: "clamp(200px, 50vh, 300px)",
-                  }}
-                >
-                  <Image
-                    src={slide.image}
-                    alt={slide.title}
-                    fill
-                    className="rounded-xl object-cover"
-                    priority={index === 0}
-                    fetchPriority={index === 0 ? "high" : "auto"}
-                    quality={80}
-                    sizes="100vw"
-                  />
-                </div>
+          const shouldRender = index === currentSlide ||
+            index === (currentSlide - 1 + slides.length) % slides.length ||
+            index === (currentSlide + 1) % slides.length;
 
-                {/* Нижняя часть - текст и кнопка на белом фоне */}
-                <div className="bg-white text-[#2c3a54]">
+          if (!shouldRender) return null;
+
+          return (
+            <div
+              key={slide.id}
+              className={`absolute rounded-xl inset-0 transition-opacity duration-500 ${index === currentSlide ? "opacity-100" : "opacity-0"
+                }`}
+              style={{ aspectRatio: '1300/400' }}
+            >
+              {/* Фоновое изображение */}
+              <Image
+                src={slide.image}
+                alt={slide.title}
+                fill
+                className="rounded-xl object-cover -z-10"
+                priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                quality={85}
+                sizes="(max-width: 768px) 100vw, 1300px"
+              />
+              {/* Контент слайда */}
+              {windowWidth >= 768 ? (
+                // Десктопная версия - текст слева, изображение справа
+                <div
+                  className="relative z-10"
+                  style={{
+                    paddingLeft: padding.x,
+                    paddingRight: padding.x,
+                    paddingTop: padding.y,
+                    paddingBottom: padding.y,
+                    minWidth: "45vw",
+                    maxWidth: "54vw",
+                    color: "#2c3a54",
+                  }}
+                >
                   <h2
-                    className="font-bold mb-4"
-                    style={{ fontSize: fontSize.title }}
+                    className="font-bold mb-2"
+                    style={{ fontSize: fontSize.title, paddingInlineEnd: "300px" }}
                   >
                     {slide.title}
                   </h2>
-                  <p className="mb-6" style={{ fontSize: fontSize.subtitle }}>
+                  <p
+                    style={{
+                      fontSize: fontSize.subtitle,
+                      marginBottom: windowWidth > 1200 ? "56px" : "20px",
+                    }}
+                  >
                     {slide.subtitle}
                   </p>
                   <Link
                     href={slide.button.href}
                     target="_blank"
-                    className="bg-transparent text-[#2c3a54] border-2 border-[#2c3a54] px-6 py-2.75 rounded-full font-medium hover:bg-[#2c3a54]! hover:text-white! transition-all duration-300 block text-center w-max relative z-20"
+                    className="inline-block bg-transparent text-[#2c3a54] border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54]! hover:text-white! transition-all duration-300 relative z-20"
                     style={{
                       fontSize: fontSize.button,
+                      padding: windowWidth > 1280 ? "11px 24px" : "10px 20px",
                     }}
                   >
                     {slide.button.text}
                   </Link>
                 </div>
-              </div>
-            )}
-          </div>
-        );
+              ) : (
+                // Мобильная версия - изображение сверху, текст снизу
+                <div className="flex flex-col h-full">
+                  {/* Верхняя часть - изображение */}
+                  <div
+                    className="w-full mb-5.5 rounded-xl relative"
+                    style={{
+                      height: "clamp(200px, 50vh, 300px)",
+                    }}
+                  >
+                    <Image
+                      src={slide.image}
+                      alt={slide.title}
+                      fill
+                      className="rounded-xl object-cover"
+                      priority={index === 0}
+                      fetchPriority={index === 0 ? "high" : "auto"}
+                      quality={80}
+                      sizes="100vw"
+                    />
+                  </div>
+
+                  {/* Нижняя часть - текст и кнопка на белом фоне */}
+                  <div className="bg-white text-[#2c3a54]">
+                    <h2
+                      className="font-bold mb-4"
+                      style={{ fontSize: fontSize.title }}
+                    >
+                      {slide.title}
+                    </h2>
+                    <p className="mb-6" style={{ fontSize: fontSize.subtitle }}>
+                      {slide.subtitle}
+                    </p>
+                    <Link
+                      href={slide.button.href}
+                      target="_blank"
+                      className="bg-transparent text-[#2c3a54] border-2 border-[#2c3a54] px-6 py-2.75 rounded-full font-medium hover:bg-[#2c3a54]! hover:text-white! transition-all duration-300 block text-center w-max relative z-20"
+                      style={{
+                        fontSize: fontSize.button,
+                      }}
+                    >
+                      {slide.button.text}
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
         })}
 
-      {/* Кнопки навигации */}
-      {windowWidth >= 768 && (
-        <>
-          <button
-            onClick={prevSlide}
-            className="absolute -left-4 border-1 border-[#2c3a54] top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#2c3a54"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+        {/* Кнопки навигации */}
+        {windowWidth >= 768 && (
+          <>
+            <button
+              onClick={prevSlide}
+              className="absolute -left-4 border-1 border-[#2c3a54] top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
             >
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute -right-4 border-1 border-[#2c3a54] top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#2c3a54"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#2c3a54"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <button
+              onClick={nextSlide}
+              className="absolute -right-4 border-1 border-[#2c3a54] top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
             >
-              <path d="M9 6l6 6-6 6" />
-            </svg>
-          </button>
-        </>
-      )}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#2c3a54"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+          </>
+        )}
       </div>
 
       {/* Индикаторы */}
       <div
-        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 ${
-          windowWidth < 768 ? "my-3" : "bottom-4"
-        }`}
+        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 ${windowWidth < 768 ? "my-3" : "bottom-4"
+          }`}
       >
         {slides.map((_, index) => (
           <button
