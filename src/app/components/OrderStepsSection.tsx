@@ -165,11 +165,14 @@ const OrderStepsSection = () => {
               </p>
             </div>
             <div className="flex justify-center">
-              <img
+              <Image
                 src="/order/1.webp"
                 alt="Менеджер"
-                className="rounded-lg max-w-[185px] max-h-[170px]"
-               loading="lazy"/>
+                width={185}
+                height={170}
+                className="rounded-lg"
+                loading="lazy"
+              />
             </div>
           </div>
 
@@ -196,11 +199,14 @@ const OrderStepsSection = () => {
               </p>
             </div>
             <div className="flex justify-center">
-              <img
+              <Image
                 src="/order/2.webp"
                 alt="Калькулятор"
-                className="rounded-lg max-w-[185px] max-h-[170px]"
-               loading="lazy"/>
+                width={185}
+                height={170}
+                className="rounded-lg"
+                loading="lazy"
+              />
             </div>
           </div>
 
@@ -226,11 +232,14 @@ const OrderStepsSection = () => {
               </p>
             </div>
             <div className="flex justify-center">
-              <img
+              <Image
                 src="/order/3.webp"
                 alt="Договор"
-                className="rounded-lg max-w-[185px] max-h-[170px]"
-               loading="lazy"/>
+                width={185}
+                height={170}
+                className="rounded-lg"
+                loading="lazy"
+              />
             </div>
           </div>
         </div>

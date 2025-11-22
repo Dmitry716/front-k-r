@@ -74,6 +74,8 @@ export default function RootLayout({
           crossOrigin="anonymous"
           fetchPriority="high"
         />
+        {/* Inline critical CSS hint */}
+        <link rel="preload" as="style" href="/_next/static/css/app/layout.css" />
         <SchemaOrg schema={schemaOrganization} />
       </head>
       <body className="min-w-[360px]">

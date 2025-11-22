@@ -4,17 +4,25 @@
     font-family: LatoBold;
     src: url(/fonts/LatoBold.ttf) format("truetype");
     font-display: optional;
+    font-weight: 700;
 }
 
 @font-face {
     font-family: LatoRegular;
     src: url(/fonts/LatoRegular.ttf) format("truetype");
     font-display: optional;
+    font-weight: 400;
 }
 
 :root {
   --background: #ffffff;
   --foreground: #ffffff;
+}
+
+/* Prevent layout shift from fonts */
+body {
+  font-size: 16px;
+  line-height: 1.5;
 }
 
 @theme inline {
@@ -27,7 +35,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: LatoRegular, Arial, sans-serif;
+  font-family: LatoRegular, -apple-system, BlinkMacSystemFont, Arial, sans-serif;
 }
 
 .font-bold, strong {

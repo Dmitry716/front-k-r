@@ -6,9 +6,8 @@ import Link from "next/link";
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(
-    typeof window !== 'undefined' ? window.innerWidth : 1024
-  );
+  const [windowWidth, setWindowWidth] = useState(1024); // Значение по умолчанию для SSR
+  const [mounted, setMounted] = useState(false);
 
   // Адаптивная высота
   const getSliderHeight = () => {
@@ -73,8 +72,16 @@ const HeroSlider = () => {
     }
   };
 
+  // Устанавливаем начальное значение после монтирования
+  useEffect(() => {
+    setMounted(true);
+    setWindowWidth(window.innerWidth);
+  }, []);
+
   // Отслеживаем ширину окна с debounce для уменьшения принудительной компоновки
   useEffect(() => {
+    if (!mounted) return;
+    
     let timeoutId: NodeJS.Timeout;
     const handleResize = () => {
       clearTimeout(timeoutId);
@@ -88,7 +95,7 @@ const HeroSlider = () => {
       clearTimeout(timeoutId);
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [mounted]);
 
   const slides = [
     {

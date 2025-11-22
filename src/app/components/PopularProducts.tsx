@@ -1,53 +1,27 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import { Product } from "../types/types";
+import { useProductsCache } from "@/hooks/useProductsCache";
 
 const PopularProducts = () => {
   const [activeCategory, setActiveCategory] = useState("Все");
   const [isTablet, setIsTablet] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isNarrowMobile, setIsNarrowMobile] = useState(false);
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
 
-  // Функция для загрузки популярных товаров из всех API
-  const fetchPopularProducts = async () => {
-    setLoading(true);
-    const endpoints = [
-      'https://k-r.by/api/monuments',
-      'https://k-r.by/api/fences'
-    ];
+  // Используем кешированные данные
+  const { products, loading } = useProductsCache([
+    'https://k-r.by/api/monuments',
+    'https://k-r.by/api/fences'
+  ]);
 
-    let allPopularProducts: Product[] = [];
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(endpoint);
-        if (response.ok) {
-          const data = await response.json();
-          const products = data.data || [];
-          
-          // Фильтруем только популярные товары
-          const popularProducts = products.filter((product: any) => product.popular === true);
-          allPopularProducts = [...allPopularProducts, ...popularProducts];
-        }
-      } catch (error) {
-        console.warn(`Error fetching from ${endpoint}:`, error);
-      }
-    }
-
-    console.log('Загружено популярных товаров:', allPopularProducts.length);
-    setAllProducts(allPopularProducts);
-    setLoading(false);
-  };
-
-  // Загрузка популярных товаров при монтировании компонента
-  useEffect(() => {
-    fetchPopularProducts();
-  }, []);
+  // Фильтруем только популярные товары
+  const allProducts = useMemo(() => {
+    return products.filter((product: any) => product.popular === true);
+  }, [products]);
 
   // Для адаптивности
   useEffect(() => {

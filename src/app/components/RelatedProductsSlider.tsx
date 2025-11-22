@@ -1,8 +1,9 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import ProductCard from "./ProductCard";
 import { Product } from "../types/types";
+import { useProductsCache } from "@/hooks/useProductsCache";
 
 const RelatedProductsSlider = () => {
   const [isTablet, setIsTablet] = useState(false);
@@ -11,49 +12,21 @@ const RelatedProductsSlider = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState("Все");
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // Функция для загрузки товаров со скидкой из всех API
-  const fetchDiscountedProducts = async () => {
-    setLoading(true);
-    const endpoints = [
-      'https://k-r.by/api/monuments',
-      'https://k-r.by/api/fences'
-    ];
+  // Используем кешированные данные
+  const { products, loading } = useProductsCache([
+    'https://k-r.by/api/monuments',
+    'https://k-r.by/api/fences'
+  ]);
 
-    let allDiscountedProducts: Product[] = [];
-
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(endpoint);
-        if (response.ok) {
-          const data = await response.json();
-          const products = data.data || [];
-          
-          // Фильтруем товары со скидкой (discount > 0 или есть oldPrice > price)
-          const discountedProducts = products.filter((product: any) => {
-            const hasExplicitDiscount = product.discount && Number(product.discount) > 0;
-            const hasOldPrice = product.oldPrice && Number(product.oldPrice) > Number(product.price || 0);
-            return hasExplicitDiscount || hasOldPrice;
-          });
-          
-          allDiscountedProducts = [...allDiscountedProducts, ...discountedProducts];
-        }
-      } catch (error) {
-        console.warn(`Error fetching from ${endpoint}:`, error);
-      }
-    }
-
-    console.log('Загружено товаров со скидкой:', allDiscountedProducts.length);
-    setAllProducts(allDiscountedProducts);
-    setLoading(false);
-  };
-
-  // Загрузка товаров со скидкой при монтировании компонента
-  useEffect(() => {
-    fetchDiscountedProducts();
-  }, []);
+  // Фильтруем товары со скидкой
+  const allProducts = useMemo(() => {
+    return products.filter((product: any) => {
+      const hasExplicitDiscount = product.discount && Number(product.discount) > 0;
+      const hasOldPrice = product.oldPrice && Number(product.oldPrice) > Number(product.price || 0);
+      return hasExplicitDiscount || hasOldPrice;
+    });
+  }, [products]);
 
   // Для адаптивности
   useEffect(() => {
