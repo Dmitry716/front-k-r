@@ -82,7 +82,7 @@ const HeroSlider = () => {
   const slides = [
     {
       id: 1,
-      image: "/sliders/single.jpg",
+      image: "/sliders/single.webp",
       title: "Одиночные памятники",
       subtitle: "Классические и современные модели из высококачественного гранита",
       button: {
@@ -92,7 +92,7 @@ const HeroSlider = () => {
     },
     {
       id: 2,
-      image: "/sliders/composite.jpg",
+      image: "/sliders/composite.webp",
       title: "Составные памятники",
       subtitle: "Многоэлементные комплексы с богатым оформлением",
       button: {
@@ -102,7 +102,7 @@ const HeroSlider = () => {
     },
     {
       id: 3,
-      image: "/sliders/exclusive.jpg",
+      image: "/sliders/exclusive.webp",
       title: "Эксклюзивные памятники",
       subtitle: "Уникальные авторские работы из редких пород гранита",
       button: {
@@ -112,7 +112,7 @@ const HeroSlider = () => {
     },
     {
       id: 4,
-      image: "/sliders/complex.jpg",
+      image: "/sliders/complex.webp",
       title: "Мемориальные комплексы",
       subtitle: "Полное благоустройство места захоронения с оградой",
       button: {
@@ -122,7 +122,7 @@ const HeroSlider = () => {
     },
     {
       id: 5,
-      image: "/sliders/fences.jpg",
+      image: "/sliders/fences.webp",
       title: "Ограды для захоронений",
       subtitle: "Ограды на кладбище любой сложности",
       button: {
@@ -178,17 +178,16 @@ const HeroSlider = () => {
               index === currentSlide ? "opacity-100" : "opacity-0"
             }`}
           >
-            {/* Фоновое изображение для десктопа */}
-            {windowWidth >= 768 && (
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                fill
-                className="rounded-xl object-cover -z-10"
-                priority={index === 0}
-                quality={80}
-              />
-            )}
+            {/* Фоновое изображение */}
+            <Image
+              src={slide.image}
+              alt={slide.title}
+              fill
+              className="rounded-xl object-cover -z-10"
+              priority={index === 0}
+              quality={75}
+              sizes="(max-width: 768px) 100vw, 1300px"
+            />
             {/* Контент слайда */}
             {windowWidth >= 768 ? (
               // Десктопная версия - текст слева, изображение справа

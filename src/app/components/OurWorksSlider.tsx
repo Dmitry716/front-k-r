@@ -192,7 +192,7 @@ const OurWorksSlider = ({
                     height={401}
                     sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="w-full h-auto aspect-square object-cover rounded-xl hover:opacity-80 duration-500"
-                    quality={75}
+                    quality={60}
                     priority={index < 4}
                 />
                 {work.title && (
