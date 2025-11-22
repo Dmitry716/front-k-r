@@ -52,7 +52,19 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Preload LCP image FIRST - highest priority */}
+        {/* Critical inline styles to prevent CLS */}
+        <style dangerouslySetInnerHTML={{__html: `
+          body{font-size:16px;line-height:1.5;margin:0;padding:0}
+          main{min-height:100vh;display:block}
+          .min-h-screen{min-height:100vh}
+          section:first-of-type{min-height:clamp(226px,29.5vw,400px);aspect-ratio:1300/400;contain:layout style paint}
+        `}} />
+        
+        {/* Preconnect FIRST for early connection establishment */}
+        <link rel="preconnect" href="https://mc.yandex.ru" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
+        
+        {/* Preload LCP image - highest priority */}
         <link
           rel="preload"
           as="image"
@@ -78,13 +90,9 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         
-        {/* Preconnect to external domains */}
-        <link rel="preconnect" href="https://mc.yandex.ru" crossOrigin="anonymous" />
-        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
-        
         <SchemaOrg schema={schemaOrganization} />
       </head>
-      <body className="min-w-[360px]">
+      <body className="min-w-[360px]" style={{ willChange: 'contents' }}>
         <YandexMetrika />
         <DropdownProvider>
           <AdminProtector>

@@ -31,7 +31,7 @@ const nextConfig: NextConfig = {
     scrollRestoration: false,
     optimizeCss: true, // Оптимизация CSS для уменьшения критического пути
     optimizePackageImports: ['react-icons'], // Tree-shaking для иконок
-    cssChunking: true, // Разделение CSS для уменьшения блокирующих запросов
+    cssChunking: 'strict', // Строгое разделение CSS для оптимизации загрузки
   },
   // Настройка компилятора для современных браузеров
   compiler: {

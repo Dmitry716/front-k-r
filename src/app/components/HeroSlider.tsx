@@ -8,9 +8,8 @@ const HeroSlider = () => {
   const [isPaused, setIsPaused] = useState(false);
   const [windowWidth, setWindowWidth] = useState(1024); // Значение по умолчанию для SSR
   const [mounted, setMounted] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
-  // Адаптивная высота
+  // Адаптивная высота - используем CSS вместо JS для избежания принудительной компоновки
   const getSliderHeight = () => {
     if (windowWidth >= 768) {
       return "clamp(226px, 29.5vw, 400px)";
@@ -77,28 +76,29 @@ const HeroSlider = () => {
   useEffect(() => {
     setMounted(true);
     setWindowWidth(window.innerWidth);
-    // Отключаем загрузку после первого рендера
-    requestAnimationFrame(() => {
-      setIsLoading(false);
-    });
   }, []);
 
-  // Отслеживаем ширину окна с debounce для уменьшения принудительной компоновки
+  // Отслеживаем ширину окна с ResizeObserver для избежания принудительной компоновки
   useEffect(() => {
-    if (!mounted) return;
+    if (!mounted || typeof window === 'undefined') return;
     
     let timeoutId: NodeJS.Timeout;
-    const handleResize = () => {
+    
+    // Используем ResizeObserver вместо window.innerWidth
+    const resizeObserver = new ResizeObserver((entries) => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
-        setWindowWidth(window.innerWidth);
+        for (const entry of entries) {
+          setWindowWidth(entry.contentRect.width);
+        }
       }, 150); // Debounce 150ms
-    };
+    });
     
-    window.addEventListener("resize", handleResize);
+    resizeObserver.observe(document.documentElement);
+    
     return () => {
       clearTimeout(timeoutId);
-      window.removeEventListener("resize", handleResize);
+      resizeObserver.disconnect();
     };
   }, [mounted]);
 
