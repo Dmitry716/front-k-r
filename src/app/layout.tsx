@@ -1,15 +1,18 @@
 import type { Metadata } from "next";
+import dynamic from "next/dynamic";
 import "./globals.css";
 import Header from "./components/Header";
-import Footer from "./components/Footer";
-import FooterMenu from "./components/FooterMenu";
-import ScrollToTop from "./components/ScrollToTop";
 import { DropdownProvider } from "./context/DropDownContext";
 import { AdminProtector } from "./components/AdminProtector";
-import YandexMetrika from "./components/YandexMetrika";
-import CookieConsent from "./components/CookieConsent";
 import SchemaOrg from "./components/SchemaOrg";
 import { schemaOrganization } from "@/lib/seo-schema";
+
+// Ленивая загрузка некритических компонентов
+const Footer = dynamic(() => import("./components/Footer"), { ssr: true });
+const FooterMenu = dynamic(() => import("./components/FooterMenu"), { ssr: true });
+const ScrollToTop = dynamic(() => import("./components/ScrollToTop"), { ssr: false });
+const YandexMetrika = dynamic(() => import("./components/YandexMetrika"), { ssr: false });
+const CookieConsent = dynamic(() => import("./components/CookieConsent"), { ssr: false });
 
 // Default metadata для корневого layout - используется как fallback
 export const metadata: Metadata = {
@@ -52,19 +55,31 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Critical inline styles to prevent CLS and optimize rendering */}
+        {/* Critical inline styles to prevent CLS and eliminate render-blocking CSS */}
         <style dangerouslySetInnerHTML={{__html: `
-          *{box-sizing:border-box}
-          body{font-size:16px;line-height:1.5;margin:0;padding:0;contain:layout style}
+          *{box-sizing:border-box;margin:0;padding:0}
+          body{font-family:system-ui,-apple-system,BlinkMacSystemFont,Arial,sans-serif;font-size:16px;line-height:1.5;contain:layout style;min-width:360px}
           main{min-height:100vh;display:block;contain:layout style}
           .min-h-screen{min-height:100vh}
-          section:first-of-type{min-height:clamp(226px,29.5vw,400px);aspect-ratio:1300/400;contain:layout style paint}
-          img{content-visibility:auto;contain-intrinsic-size:auto 400px}
+          section:first-of-type{min-height:clamp(226px,29.5vw,400px);aspect-ratio:1300/400;contain:layout style paint;position:relative}
+          img{content-visibility:auto;contain-intrinsic-size:auto 400px;max-width:100%;height:auto}
+          h1,h2,h3,h4,h5,h6{font-weight:700;line-height:1.2}
+          a{text-decoration:none;color:inherit}
         `}} />
         
         {/* Preconnect FIRST for early connection establishment */}
-        <link rel="preconnect" href="https://mc.yandex.ru" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://mc.yandex.ru" />
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
+        <link rel="preconnect" href="https://k-r.by" />
+        
+        {/* Preload critical font FIRST to prevent FOUT */}
+        <link
+          rel="preload"
+          href="/fonts/LatoRegular.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
         
         {/* Preload LCP image - highest priority */}
         <link
@@ -74,22 +89,6 @@ export default function RootLayout({
           fetchPriority="high"
           imageSizes="(max-width: 768px) 100vw, 1300px"
           imageSrcSet="/_next/image?url=%2Fsliders%2Fsingle.webp&w=640&q=90 640w, /_next/image?url=%2Fsliders%2Fsingle.webp&w=1200&q=90 1200w, /_next/image?url=%2Fsliders%2Fsingle.webp&w=1920&q=90 1920w"
-        />
-        
-        {/* Preload critical fonts */}
-        <link
-          rel="preload"
-          href="/fonts/LatoRegular.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/LatoBold.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
         />
         
         <SchemaOrg schema={schemaOrganization} />

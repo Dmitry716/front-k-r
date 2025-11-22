@@ -1,20 +1,47 @@
 import { Metadata } from 'next';
 import { getMetadataForPage } from '@/lib/seo-metadata';
 import { generateOpenGraphMetadata } from '@/lib/open-graph';
+import dynamic from 'next/dynamic';
+
+// Критические компоненты - загружаем сразу
 import HeroSlider from "./components/HeroSlider";
 import PopularCategories from "./components/PopularCategories";
 import StoreInfo from "./components/StoreInfo";
-import PopularProducts from "./components/PopularProducts";
-import RelatedProductsSlider from "./components/RelatedProductsSlider";
-import CompleteSolutionSlider from "./components/CompleteSolutionSlider";
-import PaymentInfo from "./components/PaymentInfo";
-import OurWorksSlider from "./components/OurWorksSlider";
-import OrderStepsSection from "./components/OrderStepsSection";
-import WhyTrustUs from "./components/WhyTrustUs";
-import ReviewsSlider from "./components/ReviewsSlider";
-import Promo from "./components/Promo";
-import Blog from "./components/Blog";
-import FAQ from "./components/FAQ";
+
+// Некритические компоненты - ленивая загрузка
+const PopularProducts = dynamic(() => import("./components/PopularProducts"), {
+  loading: () => <div style={{ minHeight: '400px' }} />,
+});
+const RelatedProductsSlider = dynamic(() => import("./components/RelatedProductsSlider"), {
+  loading: () => <div style={{ minHeight: '300px' }} />,
+});
+const CompleteSolutionSlider = dynamic(() => import("./components/CompleteSolutionSlider"), {
+  loading: () => <div style={{ minHeight: '300px' }} />,
+});
+const PaymentInfo = dynamic(() => import("./components/PaymentInfo"), {
+  loading: () => <div style={{ minHeight: '200px' }} />,
+});
+const OurWorksSlider = dynamic(() => import("./components/OurWorksSlider"), {
+  loading: () => <div style={{ minHeight: '400px' }} />,
+});
+const OrderStepsSection = dynamic(() => import("./components/OrderStepsSection"), {
+  loading: () => <div style={{ minHeight: '300px' }} />,
+});
+const WhyTrustUs = dynamic(() => import("./components/WhyTrustUs"), {
+  loading: () => <div style={{ minHeight: '300px' }} />,
+});
+const ReviewsSlider = dynamic(() => import("./components/ReviewsSlider"), {
+  loading: () => <div style={{ minHeight: '400px' }} />,
+});
+const Promo = dynamic(() => import("./components/Promo"), {
+  loading: () => <div style={{ minHeight: '200px' }} />,
+});
+const Blog = dynamic(() => import("./components/Blog"), {
+  loading: () => <div style={{ minHeight: '400px' }} />,
+});
+const FAQ = dynamic(() => import("./components/FAQ"), {
+  loading: () => <div style={{ minHeight: '300px' }} />,
+});
 
 // Генерируем метаданные для SEO
 export async function generateMetadata(): Promise<Metadata> {
