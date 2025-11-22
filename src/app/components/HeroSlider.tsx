@@ -153,14 +153,16 @@ const HeroSlider = () => {
   const totalSlides = slides.length;
   const slide = slides[currentSlide]
 
-  // Автоплей
+  // Автоплей - задержка 7 секунд на первом слайде для загрузки LCP
   useEffect(() => {
-    if (isPaused) return;
+    if (isPaused || !mounted) return;
+    
+    const delay = currentSlide === 0 ? 7000 : 5000; // 7 сек на первом слайде
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    }, 5000); // 5 секунд
+    }, delay);
     return () => clearInterval(interval);
-  }, [isPaused, totalSlides]);
+  }, [isPaused, totalSlides, currentSlide, mounted]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -193,12 +195,14 @@ const HeroSlider = () => {
       {/* Слайды */}
       <div className="max-w-[1300px] container-centered h-full relative">
         {slides.map((slide, index) => {
-          // Рендерим только текущий слайд и соседние для плавного перехода
-          const shouldRender = index === currentSlide ||
+          // Всегда рендерим первый слайд для SSR + текущий слайд и соседние после hydration
+          const isFirstSlide = index === 0;
+          const shouldRender = isFirstSlide || 
+            index === currentSlide ||
             index === (currentSlide - 1 + slides.length) % slides.length ||
             index === (currentSlide + 1) % slides.length;
 
-          if (!shouldRender) return null;
+          if (!shouldRender && mounted) return null;
 
           return (
             <div
@@ -213,9 +217,9 @@ const HeroSlider = () => {
                 alt={slide.title}
                 fill
                 className="rounded-xl object-cover -z-10"
-                priority={index === currentSlide}
-                fetchPriority={index === currentSlide ? "high" : "auto"}
-                loading={index === currentSlide ? "eager" : "lazy"}
+                priority={index === 0}
+                fetchPriority={index === 0 ? "high" : "auto"}
+                loading={index === 0 ? "eager" : "lazy"}
                 quality={85}
                 sizes="(max-width: 768px) 100vw, 1300px"
               />
