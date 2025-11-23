@@ -14,12 +14,10 @@ const CompleteSolutionSlider = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  const { products: allProducts, loading, error } = useProductsCache();
-  
-  // Filter for complex monuments only
-  const products = allProducts.filter(p => p.category === 'complex');
+  const { products: allProducts, loading } = useProductsCache(['https://k-r.by/api/monuments']);
 
-  useEffect(() => {
+  // Filter for complex monuments only
+  const products = allProducts.filter(p => p.category === 'complex');  useEffect(() => {
     const checkScreenSize = () => {
       const width = window.innerWidth;
       setIsMobile(width < 768);
