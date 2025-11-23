@@ -189,9 +189,9 @@ const HeroSlider = () => {
   const padding = getPadding();
 
   return (
-    <div className="relative" style={{ height: getSliderHeight() }}>
+    <div style={{ height: getSliderHeight() }}>
       <section
-        className="max-w-[1300px] container-centered h-full"
+        className="relative max-w-[1300px] container-centered h-full"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
@@ -208,7 +208,7 @@ const HeroSlider = () => {
             }`}
             style={{
               backgroundImage: `url(${slide.image})`,
-              backgroundSize: "cover",
+              backgroundSize: windowWidth > 760 ? "cover" : "250%",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
             }}

@@ -53,8 +53,23 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
+        {/* Preload критических шрифтов для устранения блокировки */}
+        <link
+          rel="preload"
+          href="/fonts/LatoRegular.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/LatoBold.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
         
-        {/* Preload LCP изображения - единственное критическое */}
+        {/* Preload LCP изображения */}
         <link
           rel="preload"
           as="image"

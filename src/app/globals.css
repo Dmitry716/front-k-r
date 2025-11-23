@@ -25,27 +25,53 @@
 body {
   font-size: 16px;
   line-height: 1.5;
-  contain: layout style;
 }
 
-/* Prevent CLS - reserve exact space for hero slider */
-section[class*="relative"]:first-of-type {
-  aspect-ratio: 1300 / 400;
-  max-height: 400px;
+/* Prevent CLS for hero slider - reserve exact space before JS loads */
+main > div:first-child {
+  min-height: 400px;
 }
 
-@media (max-width: 767px) {
-  section[class*="relative"]:first-of-type {
-    aspect-ratio: auto;
-    min-height: 226px;
-    max-height: none;
+@media (max-width: 1299px) {
+  main > div:first-child {
+    min-height: clamp(226px, 29.5vw, 400px);
   }
 }
 
-/* Optimize rendering */
-main {
-  contain: layout style;
-  content-visibility: auto;
+@media (max-width: 767px) {
+  main > div:first-child {
+    min-height: 70vw;
+  }
+}
+
+@media (max-width: 600px) {
+  main > div:first-child {
+    min-height: 85vw;
+  }
+}
+
+@media (max-width: 499px) {
+  main > div:first-child {
+    min-height: 100vw;
+  }
+}
+
+@media (max-width: 424px) {
+  main > div:first-child {
+    min-height: 112vw;
+  }
+}
+
+@media (max-width: 374px) {
+  main > div:first-child {
+    min-height: 120vw;
+  }
+}
+
+@media (max-width: 319px) {
+  main > div:first-child {
+    min-height: 138vw;
+  }
 }
 
 /* Prevent layout shifts from images */
