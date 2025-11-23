@@ -187,13 +187,17 @@ const ProductCard = ({
       return imagePath;
     }
     
-    // Если путь начинается с / - это абсолютный путь от корня
-    if (imagePath.startsWith('/')) {
-      return imagePath;
-    }
+    let normalizedPath = imagePath;
     
     // Если путь не начинается с / - добавляем его
-    return `/${imagePath}`;
+    if (!normalizedPath.startsWith('/')) {
+      normalizedPath = `/${normalizedPath}`;
+    }
+    
+    // Кодируем пробелы и другие специальные символы, но сохраняем слеши
+    const parts = normalizedPath.split('/');
+    const encodedParts = parts.map(part => encodeURIComponent(part));
+    return encodedParts.join('/');
   };
 
   // Изображение для отображения с нормализацией пути
