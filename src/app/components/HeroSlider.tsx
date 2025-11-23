@@ -190,7 +190,15 @@ const HeroSlider = () => {
   const padding = getPadding();
 
   return (
-    <div className="relative" style={{ height: getSliderHeight() }}>
+    <div 
+      className="relative" 
+      style={{ 
+        height: getSliderHeight(),
+        minHeight: getSliderHeight(),
+        maxHeight: getSliderHeight(),
+        contain: 'layout size'
+      }}
+    >
       <section
         className="max-w-[1300px] container-centered h-full relative"
         onMouseEnter={handleMouseEnter}

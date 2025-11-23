@@ -53,10 +53,6 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* DNS prefetch and preconnect for faster resource loading */}
-        <link rel="dns-prefetch" href="https://k-r.by" />
-        <link rel="preconnect" href="https://k-r.by" crossOrigin="anonymous" />
-        
         {/* Preload критических шрифтов для устранения блокировки */}
         <link
           rel="preload"
@@ -73,11 +69,17 @@ export default function RootLayout({
           crossOrigin="anonymous"
         />
         
-        {/* Preload LCP изображения */}
+        {/* Preload LCP изображений */}
         <link
           rel="preload"
           as="image"
           href="/sliders/single.webp"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/section/cheap.webp"
           fetchPriority="high"
         />
         

@@ -129,20 +129,29 @@ export default function PopularCategories() {
 
     loadCategoriesWithPrices();
   }, []);
+  // Static categories structure for immediate render
+  const staticCategories: CategoryWithPrice[] = [
+    { title: "Недорогие", img: "/section/cheap.webp", link: "/monuments/cheap" },
+    { title: "Одиночные", img: "/section/single.webp", link: "/monuments/single" },
+    { title: "Двойные", img: "/section/double.webp", link: "/monuments/double" },
+    { title: "Эксклюзивные", img: "/section/exclusive.webp", link: "/monuments/exclusive" },
+    { title: "Мемориальные комплексы", img: "/section/complex.webp", link: "/monuments/complex" },
+    { title: "Гранитные ограды", img: "/section/granite.webp", link: "/fences" },
+    { title: "Благоустройство могил", img: "/section/landscape.webp", link: "/landscape" },
+    { title: "Памятники", img: "/section/monuments.webp", link: "/monuments" },
+  ];
+
+  const displayCategories = categories.length > 0 ? categories : staticCategories;
+
   return (
     <section className="max-w-[1300px] container-centered mt-17 lg:mt-30">
       <h2 className="text-4xl font-bold text-[#2c3a54] md:ml-2.5 mb-3.5 md:mb-7.5">Популярные категории</h2>
 
-      {loading ? (
-        <div className="flex items-center justify-center py-8">
-          <p className="text-gray-600">Загрузка категорий...</p>
-        </div>
-      ) : (
-        <>
+      <>
           {/* Список для экранов <768px */}
           <div className="block md:hidden">
             <ul className="space-y-3">
-              {categories.map(({ title, img, link, price }, index) => (
+              {displayCategories.map(({ title, img, link, price }, index) => (
                 <li key={title}>
                   <a
                     href={link}
@@ -171,7 +180,7 @@ export default function PopularCategories() {
 
           {/* Сетка для экранов >=768px (md и выше) */}
           <div className="hidden md:grid grid-cols-2 xl:grid-cols-4">
-            {categories.map(({ title, price, img, link }, index) => (
+            {displayCategories.map(({ title, price, img, link }, index) => (
               <div className="mt-5 px-2.5" key={title}>
                 <a
                   href={link}
@@ -196,8 +205,7 @@ export default function PopularCategories() {
               </div>
             ))}
           </div>
-        </>
-      )}
+      </>
     </section>
   );
 }
