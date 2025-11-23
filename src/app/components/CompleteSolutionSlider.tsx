@@ -2,8 +2,8 @@
 import Link from "next/link";
 import React, { useState, useRef, useEffect } from "react";
 import { Product } from "../types/types";
-import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import ProductCard from "./ProductCard";
+import { useProductsCache } from "@/hooks/useProductsCache";
 
 const CompleteSolutionSlider = () => {
   const [isMobile, setIsMobile] = useState(false); // <768px
@@ -14,9 +14,10 @@ const CompleteSolutionSlider = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { products: allProducts, loading, error } = useProductsCache();
+  
+  // Filter for complex monuments only
+  const products = allProducts.filter(p => p.category === 'complex');
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -28,42 +29,6 @@ const CompleteSolutionSlider = () => {
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
-  }, []);
-
-  // Load memorial complexes
-  useEffect(() => {
-    const loadComplexes = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const data = await apiClient.get(`${API_ENDPOINTS.monuments}/complex`);
-        // Expect either array or { success, data }
-        const rawItems: any[] = Array.isArray(data) ? data : data?.data || [];
-        const mapped: Product[] = rawItems.map((item) => ({
-          id: Number(item.id) || 0,
-          slug: String(item.slug || ''),
-          name: String(item.name || ''),
-          category: String(item.category || ''),
-          price: Number(item.price) || 0,
-          oldPrice: item.oldPrice ? Number(item.oldPrice) : undefined,
-          discount: Number(item.discount) || 0,
-          image: String(item.image || item.images?.[0] || ''),
-          description: String(item.description || ''),
-          height: String(item.height || ''),
-          colors: Array.isArray(item.colors) ? item.colors : [],
-          options: typeof item.options === 'object' && item.options !== null ? item.options : {},
-          hit: Boolean(item.hit),
-          popular: Boolean(item.popular),
-          new: Boolean(item.new)
-        }));
-        setProducts(mapped);
-      } catch (e: any) {
-        setError(e.message || 'Ошибка загрузки мемориальных комплексов');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadComplexes();
   }, []);
 
   // Функции для навигации слайдера (скролл на ширину visible карточек)
