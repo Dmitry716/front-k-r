@@ -190,50 +190,40 @@ const HeroSlider = () => {
   const padding = getPadding();
 
   return (
-    <div style={{ height: getSliderHeight() }}>
+    <div className="relative" style={{ height: getSliderHeight() }}>
       <section
-        className="relative max-w-[1300px] container-centered h-full"
+        className="max-w-[1300px] container-centered h-full relative"
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {/* Скрытая преднагрузка первого изображения для LCP оптимизации */}
-        {slides.map((slide, index) => index === 0 && (
-          <Image
-            key={`preload-${slide.id}`}
-            src={slide.image}
-            alt={slide.title}
-            fill
-            priority
-            fetchPriority="high"
-            quality={90}
-            sizes="(max-width: 768px) 100vw, 1300px"
-            className="opacity-0 pointer-events-none"
-          />
-        ))}
-        
-        {/* Слайды */}
-        <div className="h-full relative">
+        {/* Слайды с Next.js Image */}
+        <div className="h-full relative overflow-hidden rounded-xl">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`absolute rounded-xl inset-0 transition-opacity duration-500 ${
-              index === currentSlide ? "opacity-100" : "opacity-0"
+            className={`absolute inset-0 transition-opacity duration-500 ${
+              index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
-            style={{
-              backgroundImage: `url(${slide.image})`,
-              backgroundSize: windowWidth > 760 ? "cover" : "250%",
-              backgroundPosition: "center",
-              backgroundRepeat: "no-repeat",
-            }}
           >
-            {/* Контент слайда */}
+            {/* Next.js Image для оптимизации */}
+            <Image
+              src={slide.image}
+              alt={slide.title}
+              fill
+              priority={index === 0}
+              quality={90}
+              sizes="(max-width: 768px) 100vw, 1300px"
+              className="object-cover object-center"
+            />
+            
+            {/* Контент слайда поверх изображения */}
             {windowWidth >= 768 ? (
-              // Десктопная версия - текст слева, изображение справа
+              // Десктопная версия - текст слева
               <div
-                className=""
+                className="relative z-20"
                 style={{
                   paddingLeft: padding.x,
                   paddingRight: padding.x,
@@ -271,7 +261,7 @@ const HeroSlider = () => {
               </div>
             ) : (
               // Мобильная версия - контент внизу поверх изображения
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pb-12">
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20">
                 <h2
                   className="font-bold mb-2 text-white"
                   style={{ fontSize: fontSize.title }}
@@ -337,7 +327,7 @@ const HeroSlider = () => {
 
       {/* Индикаторы */}
       <div
-        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 ${
+        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 z-30 ${
           windowWidth < 768 ? "my-3" : "bottom-4"
         }`}
       >
