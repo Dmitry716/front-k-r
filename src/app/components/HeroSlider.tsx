@@ -215,8 +215,8 @@ const HeroSlider = () => {
               fill
               priority={index === 0}
               fetchPriority={index === 0 ? "high" : "low"}
-              quality={index === 0 ? 75 : 60}
-              sizes="(max-width: 768px) 100vw, 1300px"
+              quality={index === 0 ? 85 : 65}
+              sizes="(max-width: 640px) 640px, (max-width: 768px) 768px, 1300px"
               className="object-cover object-center"
             />
             
