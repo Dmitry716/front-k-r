@@ -65,6 +65,22 @@ export default function RootLayout({
         <link rel="preconnect" href="https://mc.yandex.ru" />
         <link rel="dns-prefetch" href="https://mc.yandex.ru" />
         
+        {/* Preload критических шрифтов для устранения блокировки рендеринга */}
+        <link
+          rel="preload"
+          href="/fonts/LatoRegular.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
+          href="/fonts/LatoBold.ttf"
+          as="font"
+          type="font/ttf"
+          crossOrigin="anonymous"
+        />
+        
         {/* Preload LCP изображения с наивысшим приоритетом */}
         <link
           rel="preload"

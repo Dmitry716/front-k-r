@@ -9,6 +9,22 @@ const HeroSlider = () => {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
+  // Предзагрузка первого изображения для LCP оптимизации
+  useEffect(() => {
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = '/sliders/single.webp';
+    link.fetchPriority = 'high' as any;
+    document.head.appendChild(link);
+    
+    return () => {
+      if (document.head.contains(link)) {
+        document.head.removeChild(link);
+      }
+    };
+  }, []);
+
   // Адаптивная высота
   const getSliderHeight = () => {
     if (windowWidth >= 768) {
@@ -191,7 +207,11 @@ const HeroSlider = () => {
   return (
     <section
       className="relative"
-      style={{ height: getSliderHeight() }}
+      style={{ 
+        height: getSliderHeight(),
+        minHeight: 'clamp(226px, 29.5vw, 400px)',
+        willChange: 'auto'
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleTouchStart}
