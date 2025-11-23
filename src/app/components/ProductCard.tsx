@@ -178,10 +178,30 @@ const ProductCard = ({
   // expandedColors = массив цветов (первый всегда дефолт из БД)
   const expandedColors: ColorOption[] = productColors;
 
-  // Изображение для отображения
-  const displayImage = isTablet
+  // Функция для нормализации пути к изображению
+  const normalizeImagePath = (imagePath: string | undefined): string => {
+    if (!imagePath) return '/placeholder.png';
+    
+    // Если путь уже начинается с http/https - возвращаем как есть
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    // Если путь начинается с / - это абсолютный путь от корня
+    if (imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+    // Если путь не начинается с / - добавляем его
+    return `/${imagePath}`;
+  };
+
+  // Изображение для отображения с нормализацией пути
+  const rawDisplayImage = isTablet
     ? (expandedColors[selectedColorIndex]?.image || product.image)
     : (expandedColors[hoveredColorIndex]?.image || product.image);
+  
+  const displayImage = normalizeImagePath(rawDisplayImage);
 
   // Получаем текущий выбранный/hovered цвет
   const currentColorIndex = isTablet ? selectedColorIndex : hoveredColorIndex;
