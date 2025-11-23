@@ -53,47 +53,18 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Critical inline styles - минимум для первого рендера */}
-        <style dangerouslySetInnerHTML={{__html: `
-          body{font-family:LatoRegular,system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.5;min-width:360px}
-          main{min-height:100vh}
-          section:first-of-type{min-height:clamp(226px,29.5vw,400px)}
-        `}} />
         
-        {/* Preconnect для раннего установления соединения */}
-        <link rel="preconnect" href="https://k-r.by" />
-        <link rel="preconnect" href="https://mc.yandex.ru" />
-        <link rel="dns-prefetch" href="https://mc.yandex.ru" />
-        
-        {/* Preload критических шрифтов для устранения блокировки рендеринга */}
-        <link
-          rel="preload"
-          href="/fonts/LatoRegular.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
-        <link
-          rel="preload"
-          href="/fonts/LatoBold.ttf"
-          as="font"
-          type="font/ttf"
-          crossOrigin="anonymous"
-        />
-        
-        {/* Preload LCP изображения с наивысшим приоритетом */}
+        {/* Preload LCP изображения - единственное критическое */}
         <link
           rel="preload"
           as="image"
           href="/sliders/single.webp"
           fetchPriority="high"
-          imageSizes="(max-width: 768px) 100vw, 1300px"
-          imageSrcSet="/_next/image?url=%2Fsliders%2Fsingle.webp&w=640&q=90 640w, /_next/image?url=%2Fsliders%2Fsingle.webp&w=1200&q=90 1200w, /_next/image?url=%2Fsliders%2Fsingle.webp&w=1920&q=90 1920w"
         />
         
         <SchemaOrg schema={schemaOrganization} />
       </head>
-      <body className="min-w-[360px]" style={{ willChange: 'contents' }}>
+      <body className="min-w-[360px]">
         <YandexMetrika />
         <DropdownProvider>
           <AdminProtector>

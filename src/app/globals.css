@@ -28,10 +28,18 @@ body {
   contain: layout style;
 }
 
-/* Prevent CLS for hero slider - reserve space */
-section[class*="relative"] > div[class*="container-centered"] {
-  min-height: clamp(226px, 29.5vw, 400px);
-  contain: layout style paint;
+/* Prevent CLS - reserve exact space for hero slider */
+section[class*="relative"]:first-of-type {
+  aspect-ratio: 1300 / 400;
+  max-height: 400px;
+}
+
+@media (max-width: 767px) {
+  section[class*="relative"]:first-of-type {
+    aspect-ratio: auto;
+    min-height: 226px;
+    max-height: none;
+  }
 }
 
 /* Optimize rendering */
