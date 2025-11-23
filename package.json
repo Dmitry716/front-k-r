@@ -37,10 +37,10 @@
   },
   "browserslist": {
     "production": [
-      "chrome >= 92",
-      "firefox >= 92",
+      "chrome >= 95",
+      "firefox >= 94",
       "safari >= 15.4",
-      "edge >= 92"
+      "edge >= 95"
     ],
     "development": [
       "last 1 chrome version",
