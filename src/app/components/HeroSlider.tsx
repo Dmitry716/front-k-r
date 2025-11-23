@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -198,6 +199,21 @@ const HeroSlider = () => {
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
+        {/* Скрытая преднагрузка первого изображения для LCP оптимизации */}
+        {slides.map((slide, index) => index === 0 && (
+          <Image
+            key={`preload-${slide.id}`}
+            src={slide.image}
+            alt={slide.title}
+            fill
+            priority
+            fetchPriority="high"
+            quality={90}
+            sizes="(max-width: 768px) 100vw, 1300px"
+            className="opacity-0 pointer-events-none"
+          />
+        ))}
+        
         {/* Слайды */}
         <div className="h-full relative">
         {slides.map((slide, index) => (
