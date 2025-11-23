@@ -29,58 +29,48 @@ body {
 
 /* Prevent CLS for hero slider - reserve exact space before JS loads */
 main.min-h-screen > div:first-child {
-  min-height: 400px !important;
-  max-height: 400px;
-  contain: layout size;
-  content-visibility: auto;
+  height: 400px !important;
 }
 
 @media (max-width: 1299px) {
   main.min-h-screen > div:first-child {
-    min-height: clamp(226px, 29.5vw, 400px) !important;
-    max-height: clamp(226px, 29.5vw, 400px);
+    height: clamp(226px, 29.5vw, 400px) !important;
   }
 }
 
 @media (max-width: 767px) {
   main.min-h-screen > div:first-child {
-    min-height: 70vw !important;
-    max-height: 70vw;
+    height: 70vw !important;
   }
 }
 
 @media (max-width: 600px) {
   main.min-h-screen > div:first-child {
-    min-height: 85vw !important;
-    max-height: 85vw;
+    height: 85vw !important;
   }
 }
 
 @media (max-width: 499px) {
   main.min-h-screen > div:first-child {
-    min-height: 100vw !important;
-    max-height: 100vw;
+    height: 100vw !important;
   }
 }
 
 @media (max-width: 424px) {
   main.min-h-screen > div:first-child {
-    min-height: 112vw !important;
-    max-height: 112vw;
+    height: 112vw !important;
   }
 }
 
 @media (max-width: 374px) {
   main.min-h-screen > div:first-child {
-    min-height: 120vw !important;
-    max-height: 120vw;
+    height: 120vw !important;
   }
 }
 
 @media (max-width: 319px) {
   main.min-h-screen > div:first-child {
-    min-height: 138vw !important;
-    max-height: 138vw;
+    height: 138vw !important;
   }
 }
 
