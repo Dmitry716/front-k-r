@@ -74,11 +74,11 @@ function StoreStatusInline() {
   }, []);
 
   return (
-    <div className="relative group mx-auto inline-block" style={{ minHeight: '24px' }}>
-      <button className="flex items-center text-[#2c3a54] hover:text-[#1a2a4a] transition" aria-haspopup="true" aria-expanded="false">
-        <span className={`inline-block w-2 h-2 mr-2 xl:mr-3 rounded-full ${colorClass}`}></span>
-        <span style={{ display: 'inline-block' }}>{status || 'Закрыто'}</span>
-        <Image src={'/arrow.svg'} width={17} height={17} alt="arrow" className="group-hover:rotate-180 transition-transform" />
+    <div className="relative group mx-auto inline-block" style={{ height: '24px' }}>
+      <button className="flex items-center text-[#2c3a54] hover:text-[#1a2a4a] transition h-full" aria-haspopup="true" aria-expanded="false">
+        <span className={`inline-block w-2 h-2 mr-2 xl:mr-3 rounded-full flex-shrink-0 ${colorClass}`}></span>
+        <span className="whitespace-nowrap">{status || 'Закрыто'}</span>
+        <Image src={'/arrow.svg'} width={17} height={17} alt="arrow" className="group-hover:rotate-180 transition-transform flex-shrink-0" />
       </button>
 
       <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-0 bg-[#f5f6fa] border border-gray-200 rounded-md shadow-lg z-50 hidden group-hover:block focus-within:block">
