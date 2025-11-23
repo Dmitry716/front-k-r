@@ -1,15 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(1024); // Значение по умолчанию для SSR
-  const [mounted, setMounted] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(0);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
-  // Адаптивная высота - используем CSS вместо JS для избежания принудительной компоновки
+  // Адаптивная высота
   const getSliderHeight = () => {
     if (windowWidth >= 768) {
       return "clamp(226px, 29.5vw, 400px)";
@@ -72,35 +72,13 @@ const HeroSlider = () => {
     }
   };
 
-  // Устанавливаем начальное значение после монтирования
+  // Отслеживаем ширину окна
   useEffect(() => {
-    setMounted(true);
-    setWindowWidth(window.innerWidth);
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
-
-  // Отслеживаем ширину окна с ResizeObserver для избежания принудительной компоновки
-  useEffect(() => {
-    if (!mounted || typeof window === 'undefined') return;
-    
-    let timeoutId: NodeJS.Timeout;
-    
-    // Используем ResizeObserver вместо window.innerWidth
-    const resizeObserver = new ResizeObserver((entries) => {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        for (const entry of entries) {
-          setWindowWidth(entry.contentRect.width);
-        }
-      }, 150); // Debounce 150ms
-    });
-    
-    resizeObserver.observe(document.documentElement);
-    
-    return () => {
-      clearTimeout(timeoutId);
-      resizeObserver.disconnect();
-    };
-  }, [mounted]);
 
   const slides = [
     {
@@ -158,16 +136,14 @@ const HeroSlider = () => {
   const totalSlides = slides.length;
   const slide = slides[currentSlide]
 
-  // Автоплей - задержка 7 секунд на первом слайде для загрузки LCP
+  // Автоплей
   useEffect(() => {
-    if (isPaused || !mounted) return;
-    
-    const delay = currentSlide === 0 ? 7000 : 5000; // 7 сек на первом слайде
+    if (isPaused) return;
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % totalSlides);
-    }, delay);
+    }, 5000); // 5 секунд
     return () => clearInterval(interval);
-  }, [isPaused, totalSlides, currentSlide, mounted]);
+  }, [isPaused, totalSlides]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -184,197 +160,170 @@ const HeroSlider = () => {
   const handleMouseEnter = () => setIsPaused(true);
   const handleMouseLeave = () => setIsPaused(false);
 
+  // Обработка свайпов
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      nextSlide();
+    }
+    if (isRightSwipe) {
+      prevSlide();
+    }
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
   const fontSize = getFontSize();
   const padding = getPadding();
 
   return (
     <section
       className="relative"
-      style={{
-        height: getSliderHeight(),
-        minHeight: 'clamp(226px, 29.5vw, 400px)',
-        aspectRatio: '1300/400',
-        contain: 'layout style paint'
-      }}
+      style={{ height: getSliderHeight() }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Слайды */}
       <div className="max-w-[1300px] container-centered h-full relative">
-        {slides.map((slide, index) => {
-          // Всегда рендерим первые 2 слайда для SSR + текущий слайд и соседние после hydration
-          const isFirstSlides = index <= 1;
-          const shouldRender = isFirstSlides || 
-            index === currentSlide ||
-            index === (currentSlide - 1 + slides.length) % slides.length ||
-            index === (currentSlide + 1) % slides.length;
-
-          if (!shouldRender && mounted) return null;
-
-          return (
-            <div
-              key={slide.id}
-              className={`absolute rounded-xl inset-0 transition-opacity duration-500 ${index === currentSlide ? "opacity-100" : "opacity-0"
-                }`}
-              style={{ aspectRatio: '1300/400' }}
-            >
-              {/* Фоновое изображение */}
-              <Image
-                src={slide.image}
-                alt={slide.title}
-                fill
-                className="rounded-xl object-cover -z-10"
-                priority={index === 0}
-                fetchPriority={index === 0 ? "high" : "auto"}
-                loading={index === 0 ? "eager" : "lazy"}
-                quality={index === 0 ? 90 : 85}
-                sizes="(max-width: 768px) 100vw, 1300px"
-              />
-              {/* Контент слайда */}
-              {windowWidth >= 768 ? (
-                // Десктопная версия - текст слева, изображение справа
-                <div
-                  className="relative z-10"
+        {slides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute rounded-xl inset-0 transition-opacity duration-500 ${
+              index === currentSlide ? "opacity-100" : "opacity-0"
+            }`}
+            style={{
+              backgroundImage: `url(${slide.image})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
+          >
+            {/* Контент слайда */}
+            {windowWidth >= 768 ? (
+              // Десктопная версия - текст слева, изображение справа
+              <div
+                className=""
+                style={{
+                  paddingLeft: padding.x,
+                  paddingRight: padding.x,
+                  paddingTop: padding.y,
+                  paddingBottom: padding.y,
+                  minWidth: "45vw",
+                  maxWidth: "54vw",
+                  color: "#2c3a54",
+                }}
+              >
+                <h2
+                  className="font-bold mb-2"
+                  style={{ fontSize: fontSize.title, paddingInlineEnd: "300px" }}
+                >
+                  {slide.title}
+                </h2>
+                <p
                   style={{
-                    paddingLeft: padding.x,
-                    paddingRight: padding.x,
-                    paddingTop: padding.y,
-                    paddingBottom: padding.y,
-                    minWidth: "45vw",
-                    maxWidth: "54vw",
-                    color: "#2c3a54",
-                    minHeight: "200px",
-                    contain: "layout"
+                    fontSize: fontSize.subtitle,
+                    marginBottom: windowWidth > 1200 ? "56px" : "20px",
                   }}
                 >
-                  <h2
-                    className="font-bold mb-2"
-                    style={{ 
-                      fontSize: fontSize.title, 
-                      paddingInlineEnd: "300px",
-                      minHeight: "1.2em"
-                    }}
-                  >
-                    {slide.title}
-                  </h2>
-                  <p
-                    style={{
-                      fontSize: fontSize.subtitle,
-                      marginBottom: windowWidth > 1200 ? "56px" : "20px",
-                      minHeight: "1.5em"
-                    }}
-                  >
-                    {slide.subtitle}
-                  </p>
-                  <Link
-                    href={slide.button.href}
-                    target="_blank"
-                    className="inline-block bg-transparent text-[#2c3a54] border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54]! hover:text-white! transition-all duration-300 relative z-20"
-                    style={{
-                      fontSize: fontSize.button,
-                      padding: windowWidth > 1280 ? "11px 24px" : "10px 20px",
-                    }}
-                  >
-                    {slide.button.text}
-                  </Link>
-                </div>
-              ) : (
-                // Мобильная версия - изображение сверху, текст снизу
-                <div className="flex flex-col h-full">
-                  {/* Верхняя часть - изображение */}
-                  <div
-                    className="w-full mb-5.5 rounded-xl relative"
-                    style={{
-                      height: "clamp(200px, 50vh, 300px)",
-                    }}
-                  >
-                    <Image
-                      src={slide.image}
-                      alt={slide.title}
-                      fill
-                      className="rounded-xl object-cover"
-                      priority={index === 0}
-                      fetchPriority={index === 0 ? "high" : "auto"}
-                      quality={80}
-                      sizes="100vw"
-                    />
-                  </div>
-
-                  {/* Нижняя часть - текст и кнопка на белом фоне */}
-                  <div className="bg-white text-[#2c3a54]">
-                    <h2
-                      className="font-bold mb-4"
-                      style={{ fontSize: fontSize.title }}
-                    >
-                      {slide.title}
-                    </h2>
-                    <p className="mb-6" style={{ fontSize: fontSize.subtitle }}>
-                      {slide.subtitle}
-                    </p>
-                    <Link
-                      href={slide.button.href}
-                      target="_blank"
-                      className="bg-transparent text-[#2c3a54] border-2 border-[#2c3a54] px-6 py-2.75 rounded-full font-medium hover:bg-[#2c3a54]! hover:text-white! transition-all duration-300 block text-center w-max relative z-20"
-                      style={{
-                        fontSize: fontSize.button,
-                      }}
-                    >
-                      {slide.button.text}
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Кнопки навигации */}
-        {windowWidth >= 768 && (
-          <>
-            <button
-              onClick={prevSlide}
-              className="absolute -left-4 border-1 border-[#2c3a54] top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2c3a54"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 18l-6-6 6-6" />
-              </svg>
-            </button>
-            <button
-              onClick={nextSlide}
-              className="absolute -right-4 border-1 border-[#2c3a54] top-1/2 transform -translate-y-1/2 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12"
-                height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#2c3a54"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
-          </>
-        )}
+                  {slide.subtitle}
+                </p>
+                <Link
+                  href={slide.button.href}
+                  className="bg-transparent px-6 py-3 border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54] hover:text-white transition"
+                  style={{
+                    fontSize: fontSize.button,
+                    padding: windowWidth > 1280 ? "11px 24px" : "10px 20px",
+                  }}
+                >
+                  {slide.button.text}
+                </Link>
+              </div>
+            ) : (
+              // Мобильная версия - контент внизу поверх изображения
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pb-12">
+                <h2
+                  className="font-bold mb-2 text-white"
+                  style={{ fontSize: fontSize.title }}
+                >
+                  {slide.title}
+                </h2>
+                <p className="mb-4 text-white/90" style={{ fontSize: fontSize.subtitle }}>
+                  {slide.subtitle}
+                </p>
+                <Link
+                  href={slide.button.href}
+                  className="inline-block bg-white text-[#2c3a54] px-4 py-2 rounded-full font-medium text-sm"
+                >
+                  {slide.button.text}
+                </Link>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
+
+      {/* Кнопки навигации - за пределами контейнера */}
+      {windowWidth >= 768 && (
+        <>
+          <button
+            onClick={prevSlide}
+            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#2c3a54"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+          <button
+            onClick={nextSlide}
+            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#2c3a54"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 6l6 6-6 6" />
+            </svg>
+          </button>
+        </>
+      )}
 
       {/* Индикаторы */}
       <div
-        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 ${windowWidth < 768 ? "my-3" : "bottom-4"
-          }`}
+        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 ${
+          windowWidth < 768 ? "my-3" : "bottom-4"
+        }`}
       >
         {slides.map((_, index) => (
           <button

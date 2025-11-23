@@ -38,6 +38,8 @@ const OurWorksSlider = ({
     const [isTablet, setIsTablet] = useState(false); // <1024px
     const [activeCategory, setActiveCategory] = useState("Все");
     const [categories, setCategories] = useState<string[]>(["Все"]);
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
     // Для адаптивности
     useEffect(() => {
@@ -171,6 +173,56 @@ const OurWorksSlider = ({
         }
     };
 
+    // Обработка свайпов
+    const handleTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            scrollRight();
+        }
+        if (isRightSwipe) {
+            scrollLeft();
+        }
+        setTouchStart(0);
+        setTouchEnd(0);
+    };
+
+    // Обработка свайпов в модальном окне
+    const handleModalTouchStart = (e: React.TouchEvent) => {
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const handleModalTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const handleModalTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > 50;
+        const isRightSwipe = distance < -50;
+
+        if (isLeftSwipe) {
+            nextSlide();
+        }
+        if (isRightSwipe) {
+            prevSlide();
+        }
+        setTouchStart(0);
+        setTouchEnd(0);
+    };
+
     // Карточка работы (без цен, без кнопок, только фото)
     const WorkCard = ({ work, index }: { work: Work; index: number }) => {
         const cardBasis = isMobile
@@ -265,6 +317,9 @@ const OurWorksSlider = ({
                                 scrollbarWidth: "none",
                                 WebkitOverflowScrolling: "touch",
                             }}
+                            onTouchStart={handleTouchStart}
+                            onTouchMove={handleTouchMove}
+                            onTouchEnd={handleTouchEnd}
                         >
                             {filteredWorks.map((work, index) => (
                                 <WorkCard key={work.id} work={work} index={index} />
@@ -351,6 +406,9 @@ const OurWorksSlider = ({
                         <div
                             className="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center p-4"
                             onClick={(e) => e.stopPropagation()} // Не закрывать при клике на контент
+                            onTouchStart={handleModalTouchStart}
+                            onTouchMove={handleModalTouchMove}
+                            onTouchEnd={handleModalTouchEnd}
                         >
                             {/* Индикатор текущего слайда (например, "1 / 16") */}
                             <div className="absolute top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">

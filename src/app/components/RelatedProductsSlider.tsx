@@ -12,6 +12,8 @@ const RelatedProductsSlider = () => {
   const sliderRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState("Все");
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Используем кешированные данные
   const { products, loading } = useProductsCache([
@@ -64,6 +66,31 @@ const RelatedProductsSlider = () => {
       const scrollAmount = slideWidth * getVisibleCards();
       sliderRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
     }
+  };
+
+  // Обработка свайпов
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      scrollRight();
+    }
+    if (isRightSwipe) {
+      scrollLeft();
+    }
+    setTouchStart(0);
+    setTouchEnd(0);
   };
 
   // Получаем уникальные категории из загруженных товаров
@@ -134,6 +161,9 @@ const RelatedProductsSlider = () => {
                     scrollbarWidth: "none",
                     WebkitOverflowScrolling: "touch",
                   }}
+                  onTouchStart={handleTouchStart}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
                 >
                   {discountedProducts.map((product) => (
                     <ProductCard key={product.slug || `product-${product.id}`} product={product} isTablet={isTablet} isMobile={isMobile} isNarrowMobile={isNarrowMobile}/>

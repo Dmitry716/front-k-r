@@ -11,6 +11,8 @@ const CompleteSolutionSlider = () => {
   const [isNarrowMobile, setIsNarrowMobile] = useState(false); // <480px
   const sliderRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
@@ -93,6 +95,31 @@ const CompleteSolutionSlider = () => {
     }
   };
 
+  // Обработка свайпов
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe) {
+      scrollRight();
+    }
+    if (isRightSwipe) {
+      scrollLeft();
+    }
+    setTouchStart(0);
+    setTouchEnd(0);
+  };
+
   return (
     <section className="max-w-[1300px] mt-17 lg:mt-30 container-centered">
 
@@ -112,6 +139,9 @@ const CompleteSolutionSlider = () => {
               scrollbarWidth: "none",
               WebkitOverflowScrolling: "touch",
             }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             {products.map((product) => (
               <div key={product.slug || `product-${product.id}`} className="shrink-0 w-full">

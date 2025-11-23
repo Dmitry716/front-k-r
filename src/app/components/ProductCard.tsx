@@ -129,6 +129,8 @@ const ProductCard = ({
   const imageRef = useRef<HTMLDivElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(0);
+  const [touchEndX, setTouchEndX] = useState(0);
 
   useEffect(() => {
     setIsClient(true);
@@ -306,48 +308,45 @@ const ProductCard = ({
     return false;
   })();
 
-  // Обработчик свайпа по изображению (адаптирован из вашего кода)
-  const handleTouchStartImage = (e: React.TouchEvent) => {
-    if (isTablet) {
-      const startX = e.touches[0].clientX;
-      const startY = e.touches[0].clientY;
-      const onTouchMoveImg = (e: TouchEvent) => {
-        const deltaX = e.touches[0].clientX - startX;
-        const deltaY = e.touches[0].clientY - startY;
-        if (Math.abs(deltaY) > Math.abs(deltaX)) return;
-        e.preventDefault();
-      };
-      const onTouchEndImg = (e: TouchEvent) => {
-        document.removeEventListener("touchmove", onTouchMoveImg);
-        document.removeEventListener("touchend", onTouchEndImg);
-        const deltaX = e.changedTouches[0].clientX - startX;
-        if (Math.abs(deltaX) > 50) {
-          const direction = deltaX > 0 ? -1 : 1;
-          const newIndex =
-            (selectedColorIndex + direction + expandedColors.length) %
-            expandedColors.length;
-          setSelectedColorIndex(newIndex);
-        }
-      };
-      document.addEventListener("touchmove", onTouchMoveImg);
-      document.addEventListener("touchend", onTouchEndImg);
-    } else {
-      const startX = e.touches[0].clientX;
-      const onTouchEndDesktop = (e: TouchEvent) => {
-        document.removeEventListener("touchend", onTouchEndDesktop);
-        const deltaX = e.changedTouches[0].clientX - startX;
-        if (Math.abs(deltaX) > 50) {
-          const direction = deltaX > 0 ? -1 : 1;
-          const newIndex = Math.max(
-            0,
-            Math.min(expandedColors.length - 1, hoveredColorIndex + direction)
-          );
-          setHoveredColorIndex(newIndex);
-          setShowIndicators(true);
-        }
-      };
-      document.addEventListener("touchend", onTouchEndDesktop);
+  // Обработчик тач-свайпов для переключения цветов
+  const handleTouchStartImage = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (expandedColors.length <= 1) return;
+    setTouchStartX(e.targetTouches[0].clientX);
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMoveImage = (e: React.TouchEvent<HTMLDivElement>) => {
+    if (expandedColors.length <= 1) return;
+    setTouchEndX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEndImage = () => {
+    if (expandedColors.length <= 1 || !touchStartX || !touchEndX) return;
+    
+    const distance = touchStartX - touchEndX;
+    const isLeftSwipe = distance > 50;
+    const isRightSwipe = distance < -50;
+
+    if (isLeftSwipe || isRightSwipe) {
+      if (isTablet || isMobile) {
+        // На мобильных и планшетах используем selectedColorIndex
+        const direction = isLeftSwipe ? 1 : -1;
+        const newIndex = (selectedColorIndex + direction + expandedColors.length) % expandedColors.length;
+        setSelectedColorIndex(newIndex);
+      } else {
+        // На десктопе используем hoveredColorIndex
+        const direction = isLeftSwipe ? 1 : -1;
+        const newIndex = Math.max(
+          0,
+          Math.min(expandedColors.length - 1, hoveredColorIndex + direction)
+        );
+        setHoveredColorIndex(newIndex);
+        setShowIndicators(true);
+      }
     }
+    
+    setTouchStartX(0);
+    setTouchEndX(0);
   };
 
   // Обработчик движения мыши для расчета сегмента
@@ -480,6 +479,8 @@ const ProductCard = ({
           setShowIndicators(false);
         }}
         onTouchStart={handleTouchStartImage}
+        onTouchMove={handleTouchMoveImage}
+        onTouchEnd={handleTouchEndImage}
       >
         <Link href={generateProductHref(product)}>
           <div className="relative w-full h-full">
