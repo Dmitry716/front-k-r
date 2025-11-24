@@ -60,7 +60,6 @@ const Gallery = () => {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [isModalOpen, nextSlide, prevSlide]);
 
-
     return (
         <>
             <div className="relative mt-2.5 p-5 lg:p-7.5 max-w-[872px] mx-auto">

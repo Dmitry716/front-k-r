@@ -101,12 +101,6 @@ const ExclusiveProductPage = () => {
         }
 
         setProduct(product);
-        console.log('Product loaded:', {
-          id: product.id,
-          name: product.name,
-          image: product.image,
-          colors: product.colors?.slice(0, 2)
-        });
       } catch (error) {
         console.error("Error fetching product:", error);
         notFound();
@@ -256,7 +250,6 @@ const ExclusiveProductPage = () => {
       if (!favorites.includes(product.slug)) {
         favorites.push(product.slug);
         localStorage.setItem("favorites", JSON.stringify(favorites));
-        console.log('Добавлен в избранное:', product.slug);
       }
     } else {
       // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
@@ -264,7 +257,6 @@ const ExclusiveProductPage = () => {
         item !== product.slug && item !== product.id
       );
       localStorage.setItem("favorites", JSON.stringify(newFavorites));
-      console.log('Удалён из избранного:', product.slug);
     }
 
     window.dispatchEvent(new Event("favoritesChanged"));
@@ -274,7 +266,6 @@ const ExclusiveProductPage = () => {
   const closeModal = () => setIsModalOpen(false);
 
   const handleModalSubmit = (formData: { name: string; phone: string }) => {
-    console.log("Данные формы:", formData);
     alert(
       `Форма отправлена! Имя: ${formData.name}, Телефон: ${formData.phone}`
     );
@@ -790,10 +781,11 @@ const ExclusiveProductPage = () => {
                 Похожие товары
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3">
-                {similarProducts.map((similarProduct) => (
+                {similarProducts.map((similarProduct, index) => (
                   <ProductCard
                     key={similarProduct.id}
                     product={similarProduct}
+                    index={index}
                     isTablet={isTablet}
                     isMobile={isMobile}
                     isNarrowMobile={isNarrowMobile}

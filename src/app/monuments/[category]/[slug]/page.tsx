@@ -173,10 +173,8 @@ const ProductPage = () => {
                     
                     // Загружаем похожие товары из той же категории
                     try {
-                        console.log('Loading similar products for category:', categorySlug);
                         // Используем правильный endpoint для категории
                         const similarData = await apiClient.get(`/admin/monuments?category=${categorySlug}`);
-                        console.log('Similar products response:', similarData);
                         if (similarData.success && similarData.products) {
                             // Фильтруем товары, исключая текущий товар, и конвертируем в нужный формат
                             const filtered = similarData.products
@@ -184,7 +182,6 @@ const ProductPage = () => {
                                 .sort(() => 0.5 - Math.random()) // Рандомизируем
                                 .slice(0, 6) // Берем максимум 6 товаров
                                 .map(convertMonumentToProductFormat); // Конвертируем в формат ProductCard
-                            console.log('Filtered similar products:', filtered);
                             setSimilarProducts(filtered);
                         }
                     } catch (error) {
@@ -262,7 +259,6 @@ const ProductPage = () => {
             (prev) => (prev - 1 + imageSlides.length) % imageSlides.length
         );
     };
-
 
     const nextGraniteSlide = () => {
         setCurrentGraniteSlide((prev) => (prev + 1) % graniteTypes.length);
@@ -427,7 +423,6 @@ const ProductPage = () => {
             if (!favorites.includes(product.slug)) {
                 favorites.push(product.slug);
                 localStorage.setItem('favorites', JSON.stringify(favorites));
-                console.log('Добавлен в избранное:', product.slug);
             }
         } else {
             // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
@@ -435,7 +430,6 @@ const ProductPage = () => {
                 item !== product.slug && item !== product.id
             );
             localStorage.setItem('favorites', JSON.stringify(newFavorites));
-            console.log('Удалён из избранного:', product.slug);
         }
 
         // Отправляем кастомное событие
@@ -526,13 +520,10 @@ const ProductPage = () => {
     // Выбираем изображение для отображения
     const displayImage = selectedColor ? selectedColor.image : product.image;
 
-
-
     const closeGraniteModal = () => {
         setIsGraniteModalOpen(false);
         document.body.style.overflow = "auto";
     };
-
 
     const openImageModal = (index: number) => {
         // Подготовьте массив изображений для примеров оформления
@@ -572,7 +563,6 @@ const ProductPage = () => {
         setIsImageModalOpen(true);
         document.body.style.overflow = "hidden";
     };
-
 
     // Обработчик отправки формы
     const handleModalSubmit = (formData: { name: string; phone: string }) => {
@@ -661,7 +651,6 @@ const ProductPage = () => {
                         aria-label="Габбро Карелия"
                     />
 
-
                     {colors.map((color, index) => (
                         <div
                             key={index}
@@ -738,7 +727,6 @@ const ProductPage = () => {
                             />
                         </div>
 
-
                         <div className={`${isMobile ? 'w-full' : 'flex flex-col w-5/12'}`}>
                             <div className={`${isMobile ? "mb-5" : 'bg-[#f5f6fa] p-5 rounded-lg mb-5'}`}>
 
@@ -793,7 +781,6 @@ const ProductPage = () => {
                                     </div>
                                 )}
 
-
                                 <div className="mb-5">
                                     <span className="text-[#2c3a54]">Цена:</span>
                                     <div className="flex items-center space-x-2">
@@ -830,7 +817,6 @@ const ProductPage = () => {
                                     </div>
                                 </div>
 
-
                                 <div className="space-y-2.5 mb-5">
                                     <button
                                         className="w-full py-3 bg-[#2c3a54] text-white rounded-full font-bold hover:bg-[#1a273b] transition"
@@ -840,7 +826,6 @@ const ProductPage = () => {
                                     </button>
                                 </div>
                             </div>
-
 
                             <div className={`max-w-[550px] ${isMobile ? 'flex flex-wrap gap-y-3' : 'flex flex-wrap gap-y-5'}`}>
                                 <div className={`flex w-1/2 items-center space-x-2`}>
@@ -862,7 +847,6 @@ const ProductPage = () => {
                             </div>
                         </div>
                     </div>
-
 
                     <div className="border-b border-gray-200 mb-5">
                         <div className="flex space-x-4 md:space-x-6 text-[14px] md:text-[16px]">
@@ -895,7 +879,6 @@ const ProductPage = () => {
                             </button>
                         </div>
                     </div>
-
 
                     <div className="mb-7.5 font-[600]">
                         {activeTab === "characteristics" && (
@@ -1042,16 +1025,16 @@ const ProductPage = () => {
                         </div>
                     </div>
 
-
                     <div className="mb-7.5">
                         <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
                             Похожие товары
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-3">
-                            {similarProducts.map((similarProduct) => (
+                            {similarProducts.map((similarProduct, index) => (
                                 <ProductCard
                                     key={similarProduct.id}
                                     product={similarProduct}
+                                    index={index}
                                     isTablet={isTablet}
                                     isMobile={isMobile}
                                     isNarrowMobile={isNarrowMobile}
@@ -1067,7 +1050,6 @@ const ProductPage = () => {
                 onClose={closeModal}
                 onSubmit={handleModalSubmit}
             />
-
 
             {isGraniteModalOpen && (
                 <div

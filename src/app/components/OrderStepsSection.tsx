@@ -30,8 +30,6 @@ const OrderStepsSection = () => {
     }
   }, [isModalOpen]);
 
-
-
   // Функция для открытия модалки
   const openModal = () => {
     setIsModalOpen(true);
@@ -46,7 +44,7 @@ const OrderStepsSection = () => {
   const handleModalSubmit = (formData: { name: string; phone: string }) => {
     // Отправка уже произойдёт в ModalCommunication компоненте
     // Эта функция вызывается после успешной отправки
-    console.log("Заявка отправлена:", formData);
+
   };
 
   return (

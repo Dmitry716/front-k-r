@@ -13,8 +13,7 @@ import { Product } from "../types/types";
 
 // Функция для получения товара по slug из всех категорий
 const fetchProductBySlug = async (slug: string): Promise<Product | null> => {
-    console.log('fetchProductBySlug вызвана для slug:', slug);
-    
+
     // Список всех возможных API endpoints
     const endpoints = [
         'https://k-r.by/api/monuments',
@@ -23,17 +22,16 @@ const fetchProductBySlug = async (slug: string): Promise<Product | null> => {
 
     for (const endpoint of endpoints) {
         try {
-            console.log(`Проверяем endpoint: ${endpoint} для slug: ${slug}`);
+
             const response = await fetch(endpoint);
             if (!response.ok) {
-                console.log(`Endpoint ${endpoint} вернул ошибку:`, response.status);
+
                 continue;
             }
             
             const data = await response.json();
             const products = data.data || [];
-            console.log(`Получено товаров из ${endpoint}:`, products.length);
-            
+
             // Логируем первые несколько slug'ов для отладки
             if (products.length > 0) {
                 console.log(`Первые 3 slug'а из ${endpoint}:`, products.slice(0, 3).map((p: any) => p.slug));
@@ -42,10 +40,10 @@ const fetchProductBySlug = async (slug: string): Promise<Product | null> => {
             // Ищем товар с нужным slug
             const product = products.find((p: any) => p.slug === slug);
             if (product) {
-                console.log(`✅ Товар найден в ${endpoint}:`, product.name);
+
                 return product;
             } else {
-                console.log(`❌ Товар с slug ${slug} НЕ найден в ${endpoint}`);
+
             }
         } catch (error) {
             console.warn(`Error fetching from ${endpoint}:`, error);
@@ -85,10 +83,7 @@ const FavoritesPage = () => {
         
         // Фильтруем только строки (slug'и), удаляя старые числовые ID
         savedFavorites = savedFavorites.filter((item: any) => typeof item === 'string');
-        
-        console.log('Загруженные избранные при инициализации:', savedFavorites);
-        console.log('Отфильтровано только slug\'и:', savedFavorites);
-        
+
         // Обновляем localStorage с очищенными данными
         localStorage.setItem('favorites', JSON.stringify(savedFavorites));
         
@@ -98,10 +93,9 @@ const FavoritesPage = () => {
     // Загружаем продукты по slug из избранного через API
     useEffect(() => {
         const loadFavoriteProducts = async () => {
-            console.log('Начинаем загрузку избранных товаров:', favorites);
-            
+
             if (favorites.length === 0) {
-                console.log('Список избранного пуст');
+
                 setFavoriteProducts([]);
                 return;
             }
@@ -111,17 +105,16 @@ const FavoritesPage = () => {
 
             // Загружаем каждый товар по slug
             for (const slug of favorites) {
-                console.log('Загружаем товар по slug:', slug);
+
                 const product = await fetchProductBySlug(slug);
                 if (product) {
-                    console.log('Товар найден:', product.name);
+
                     products.push(product);
                 } else {
-                    console.log('Товар не найден по slug:', slug);
+
                 }
             }
 
-            console.log('Загружено товаров:', products.length);
             setFavoriteProducts(products);
             setIsLoading(false);
         };
@@ -135,9 +128,7 @@ const FavoritesPage = () => {
             
             // Фильтруем только строки (slug'и)
             savedFavorites = savedFavorites.filter((item: any) => typeof item === 'string');
-            
-            console.log('Изменения в избранном:', savedFavorites);
-            
+
             // Обновляем localStorage с очищенными данными
             localStorage.setItem('favorites', JSON.stringify(savedFavorites));
             
@@ -181,7 +172,7 @@ const FavoritesPage = () => {
                         </div>
                     ) : favoriteProducts.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-3 mb-7.5">
-                            {currentProducts.map((product) => (
+                            {currentProducts.map((product, index) => (
                                 <ProductCard
                                     key={product.slug || `product-${product.id}`}
                                     product={product}

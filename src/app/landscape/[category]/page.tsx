@@ -1,4 +1,6 @@
 "use client";
+
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { apiClient } from "@/lib/api-client";
@@ -168,7 +170,7 @@ const LandscapeCategoryPage = () => {
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
               {isClient && !loading ? (
                 finalProducts.length > 0 ? (
-                  finalProducts.map((product) => (
+                  finalProducts.map((product, index) => (
                     <ProductCard
                       key={product.slug || `product-${product.id}`}
                       product={{

@@ -1,5 +1,7 @@
 "use client";
 
+
+import Image from "next/image";
 export const dynamic = 'force-dynamic';
 
 import { useEffect, useState } from "react";
@@ -335,9 +337,6 @@ const MonumentsSubcategoryPage = () => {
                         // Если не удалось извлечь номер, сортируем по алфавиту
                         return nameA.localeCompare(nameB, 'ru');
                     });
-                    
-                    console.log(`Загружено ${sortedProducts.length} памятников для категории ${lowerCategorySlug}`);
-
                     setCategoryData(prev => ({
                         ...prev,
                         [lowerCategorySlug]: {
@@ -510,7 +509,7 @@ const MonumentsSubcategoryPage = () => {
                         {/* Сетка продуктов */}
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
                             {isClient ? (
-                                finalProducts.map((product) => (
+                                finalProducts.map((product, index) => (
                                     <ProductCard
                                         key={product.slug || `product-${product.id}`}
                                         product={product}
@@ -520,7 +519,7 @@ const MonumentsSubcategoryPage = () => {
                                     />
                                 ))
                             ) : (
-                                finalProducts.map((product) => (
+                                finalProducts.map((product, index) => (
                                     <div key={product.slug || `product-${product.id}`} className="invisible h-0" />
                                 ))
                             )}
@@ -570,16 +569,20 @@ const MonumentsSubcategoryPage = () => {
                                                 className="block overflow-hidden rounded-lg hover:border-2 border-[#2c3a54] bg-[#f5f6fa] relative h-full items-center p-7.5"
                                             >
                                                 <h2 className="text-[16px] font-bold text-[#222222] self-start">{cat.title}</h2>
-                                                <img
+                                                <Image
                                                     src={cat.image}
                                                     alt={cat.title}
+                                                    width={130}
+                                                    height={130}
                                                     className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
                                                     style={{
                                                         position: 'absolute',
                                                         top: '50%',
                                                         right: '10px',
                                                         transform: 'translateY(-50%)',
-                                                    }} loading="lazy"
+                                                    }}
+                                                    sizes="(max-width: 1024px) 75px, 130px"
+                                                    quality={60}
                                                 />
                                             </a>
                                         </div>

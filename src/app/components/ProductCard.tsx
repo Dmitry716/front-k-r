@@ -10,6 +10,7 @@ interface ProductCardProps {
   isTablet: boolean;
   isMobile: boolean;
   isNarrowMobile: boolean;
+  index?: number; // Index для определения priority loading
 }
 
 // Функция для формирования ссылки на товар в зависимости от категории
@@ -113,7 +114,7 @@ const generateProductHref = (product: Product): string => {
   }
 
   // Fallback
-  console.log('❌ No URL generated for product:', product.name, 'category:', product.category);
+
   return '';
 };
 
@@ -122,6 +123,7 @@ const ProductCard = ({
   isTablet,
   isMobile,
   isNarrowMobile,
+  index = 999,
 }: ProductCardProps) => {
   const [hoveredColorIndex, setHoveredColorIndex] = useState(0);
   const [showIndicators, setShowIndicators] = useState(false);
@@ -243,17 +245,6 @@ const ProductCard = ({
 
   // Временное логирование для отладки
   if (product.name.includes("О-22") || product.name.includes("О-25")) {
-    console.log("Product debug:", {
-      name: product.name,
-      price: product.price,
-      oldPrice: product.oldPrice,
-      discount: product.discount,
-      currentPrice,
-      currentOldPrice,
-      currentDiscount,
-      hasColors,
-      currentColor
-    });
   }
 
   // Функция для отображения цены
@@ -413,21 +404,12 @@ const ProductCard = ({
     
     // Фильтруем только строки (slug'и), удаляя числовые ID
     favorites = favorites.filter((item: any) => typeof item === 'string');
-    
-    console.log('toggleFavorite:', {
-      productSlug: product.slug,
-      productName: product.name,
-      newIsFavorite,
-      currentFavorites: favorites
-    });
-
     if (newIsFavorite) {
       // Добавляем в избранное
       if (!favorites.includes(product.slug)) {
         favorites.push(product.slug);
         localStorage.setItem('favorites', JSON.stringify(favorites));
-        console.log('Добавлен в избранное:', product.slug);
-        console.log('Новый список избранного:', favorites);
+
       }
     } else {
       // Удаляем из избранного (убираем и по slug, и по старому ID на всякий случай)
@@ -435,8 +417,7 @@ const ProductCard = ({
         item !== product.slug && item !== product.id
       );
       localStorage.setItem('favorites', JSON.stringify(newFavorites));
-      console.log('Удалён из избранного:', product.slug);
-      console.log('Новый список избранного:', newFavorites);
+
     }
 
     window.dispatchEvent(new Event('favoritesChanged'));
@@ -513,7 +494,7 @@ const ProductCard = ({
               alt={product.name}
               fill
               className="object-contain transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
+              priority={index < 6}
               sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
               quality={80}
             />

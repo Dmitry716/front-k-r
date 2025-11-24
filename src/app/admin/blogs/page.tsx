@@ -75,7 +75,7 @@ export default function BlogsAdminPage() {
   const fetchBlogs = async () => {
     try {
       const data = await apiClient.get("/admin/blogs?limit=200");
-      console.log('Fetch blogs response:', data);
+
       if (data.success) {
         // Обрабатываем оба формата ответа
         const blogs = data.blogs || data.data || [];
@@ -222,7 +222,7 @@ export default function BlogsAdminPage() {
   };
 
   const startEditing = (blog: Blog) => {
-    console.log('Edit blog data:', blog);
+
     setEditingBlog(blog);
     setTitle(blog.title);
     setSlug(blog.slug || '');
@@ -261,7 +261,6 @@ export default function BlogsAdminPage() {
       };
 
       const data = await apiClient.put(`/admin/blogs/${editingBlog.id}`, body);
-      console.log('Ответ сервера при обновлении:', data);
 
       if (data.success) {
         setSuccess('✓ Блог обновлен');
@@ -311,10 +310,7 @@ export default function BlogsAdminPage() {
         ogImage: ogImage || undefined,
       };
 
-      console.log('Отправляю данные блога:', body);
-
       const data = await apiClient.post("/admin/blogs", body);
-      console.log('Ответ сервера:', data);
 
       if (data.success) {
         setSuccess("✓ Блог добавлен");

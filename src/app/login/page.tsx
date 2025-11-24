@@ -19,8 +19,6 @@ export default function LoginPage() {
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://k-r.by';
       const endpoint = `${apiUrl}/auth/login`;
-      console.log('Logging in with endpoint:', endpoint);
-      
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: {

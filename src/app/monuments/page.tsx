@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import OurWorksSlider from "../components/OurWorksSlider";
 import PathPage from "../components/PathPage";
 import SidebarCatalogMenu from "../components/Sidebar/SidebarCatalogMenu";
@@ -254,7 +255,7 @@ const MonumentsPage = () => {
 
                         {/* Блок категорий */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">
-                            {categories.map((category) => (
+                            {categories.map((category, index) => (
                                 <a
                                     key={category.title}
                                     href={category.link}
@@ -266,10 +267,15 @@ const MonumentsPage = () => {
                                             <p className="text-[12px] text-[#969ead]">{category.price || "\u00A0"}</p>
                                         </div>
                                         <div className="absolute self-center -right-2 rounded-lg max-w-[130px] overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={category.img}
                                                 alt={category.title}
-                                                className={`h-full object-cover rounded-lg ${isTablet ? 'w-[75px]' : 'w-[130px]'}`} loading="lazy"
+                                                width={130}
+                                                height={130}
+                                                className={`h-full object-cover rounded-lg ${isTablet ? 'w-[75px]' : 'w-[130px]'}`}
+                                                sizes="(max-width: 768px) 75px, 130px"
+                                                quality={60}
+                                                priority={index < 3}
                                             />
                                         </div>
                                     </div>
@@ -353,9 +359,11 @@ const MonumentsPage = () => {
                                     {/* Текст */}
                                     <h2 className="text-[16px] font-bold text-[#222222] self-start">Услуги</h2>
                                     {/* Изображение с абсолютным позиционированием */}
-                                    <img
+                                    <Image
                                         src="/landscape.webp"
                                         alt="Услуги"
+                                        width={130}
+                                        height={130}
                                         className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
                                         style={{
                                             position: 'absolute',
@@ -363,7 +371,9 @@ const MonumentsPage = () => {
                                             right: '10px',
                                             transform: 'translateY(-50%)',
                                         }}
-                                     loading="lazy"/>
+                                        sizes="(max-width: 1024px) 75px, 130px"
+                                        quality={60}
+                                    />
                                 </a>
                             </div>
 
@@ -376,9 +386,11 @@ const MonumentsPage = () => {
                                     {/* Текст */}
                                     <h2 className="text-[16px] font-bold text-[#222222] self-start">Ограды</h2>
                                     {/* Изображение с абсолютным позиционированием */}
-                                    <img
+                                    <Image
                                         src="/fences.webp"
                                         alt="Ограды"
+                                        width={130}
+                                        height={130}
                                         className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
                                         style={{
                                             position: 'absolute',
@@ -386,7 +398,9 @@ const MonumentsPage = () => {
                                             right: '10px',
                                             transform: 'translateY(-50%)',
                                         }}
-                                     loading="lazy"/>
+                                        sizes="(max-width: 1024px) 75px, 130px"
+                                        quality={60}
+                                    />
                                 </a>
                             </div>
                         </div>

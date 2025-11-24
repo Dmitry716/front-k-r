@@ -130,24 +130,21 @@ const ModalCommunication: React.FC<ModalProps> = ({
   // Обработчик отправки формы
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('🚀 Form submitted');
-    
+
     const formData = new FormData(e.currentTarget);
     const name = formData.get('name') as string;
     const fullPhone = countryCode + phoneNumber.replace(/\D/g, '');
 
-    console.log('📝 Form data:', { name, phone: fullPhone });
-
     // Валидация имени
     if (!name.trim()) {
-      console.log('❌ Name validation failed');
+
       setMessage({ type: 'error', text: 'Пожалуйста, введите ваше имя' });
       return;
     }
 
     // Валидация телефона
     if (!validatePhone(phoneNumber)) {
-      console.log('❌ Phone validation failed');
+
       const expectedDigits = countryCode === '+375' ? '12 цифр' : '11 цифр';
       setMessage({ type: 'error', text: `Пожалуйста, введите корректный номер телефона (${expectedDigits})` });
       return;
@@ -160,20 +157,13 @@ const ModalCommunication: React.FC<ModalProps> = ({
       // Отправляем в Telegram бот
       const telegramBotToken = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
       const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
-      
-      console.log('🔑 Telegram config:', { 
-        hasToken: !!telegramBotToken, 
-        hasChat: !!chatId,
-        productData 
-      });
-      
       if (!telegramBotToken || !chatId) {
         throw new Error('Telegram конфигурация не найдена');
       }
       
       // Если есть фото товара, отправляем его отдельно
       if (productData?.image) {
-        console.log('📤 Sending photo to Telegram');
+
         console.log('📦 Product data:', JSON.stringify(productData, null, 2));
         
         // Формируем подпись для фото
@@ -193,15 +183,6 @@ const ModalCommunication: React.FC<ModalProps> = ({
         if (productData.price) {
           const price = typeof productData.price === 'string' ? parseFloat(productData.price) : productData.price;
           const oldPrice = productData.oldPrice ? (typeof productData.oldPrice === 'string' ? parseFloat(productData.oldPrice) : productData.oldPrice) : 0;
-          
-          console.log('💰 Price calculation:', { 
-            rawPrice: productData.price, 
-            rawOldPrice: productData.oldPrice,
-            parsedPrice: price, 
-            parsedOldPrice: oldPrice,
-            hasDiscount: oldPrice > 0 && oldPrice > price 
-          });
-          
           if (oldPrice > 0 && oldPrice > price) {
             caption += `\n💰 Цена со скидкой: ${price.toFixed(2)} руб.`;
             caption += `\n💵 Старая цена: ${oldPrice.toFixed(2)} руб.`;
@@ -209,16 +190,12 @@ const ModalCommunication: React.FC<ModalProps> = ({
             caption += `\n💰 Цена: ${price.toFixed(2)} руб.`;
           }
         }
-        
-        console.log('📝 Caption to send:', caption);
-        
+
         // Преобразуем относительный путь в абсолютный URL
         const imageUrl = productData.image.startsWith('http') 
           ? productData.image 
           : `https://k-r.by${productData.image}`;
-        
-        console.log('🖼️ Image URL:', imageUrl);
-        
+
         const photoResponse = await fetch(
           `https://api.telegram.org/bot${telegramBotToken}/sendPhoto`,
           {
@@ -232,15 +209,12 @@ const ModalCommunication: React.FC<ModalProps> = ({
           }
         );
 
-        console.log('📥 Photo response status:', photoResponse.status);
-
         if (!photoResponse.ok) {
           const errorData = await photoResponse.json();
           console.error('❌ Telegram photo API error:', errorData);
           throw new Error('Ошибка при отправке фото');
         }
 
-        console.log('✅ Photo sent successfully');
       } else {
         // Если нет фото, отправляем обычное текстовое сообщение
         let messageText = `📞 Новый заказ звонка\n\n`;
@@ -270,9 +244,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
             }
           }
         }
-        
-        console.log('📤 Sending text message to Telegram');
-        
+
         const response = await fetch(
           `https://api.telegram.org/bot${telegramBotToken}/sendMessage`,
           {
@@ -285,15 +257,12 @@ const ModalCommunication: React.FC<ModalProps> = ({
           }
         );
 
-        console.log('📥 Response status:', response.status);
-
         if (!response.ok) {
           const errorData = await response.json();
           console.error('❌ Telegram API error:', errorData);
           throw new Error('Ошибка при отправке сообщения');
         }
 
-        console.log('✅ Message sent successfully');
       }
 
       // Вызываем функцию обработки из props

@@ -7,7 +7,6 @@ import { categoriesServices } from "../mock/categories";
 import Promo from "../components/Promo";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
 
-
 const ServicesPage = () => {
     const [isTablet, setIsTablet] = useState(false);
 

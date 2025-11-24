@@ -12,7 +12,6 @@ import { productsLandscape } from '../mock/products';
 import { apiClient } from '@/lib/api-client';
 import { Product } from '../types/types';
 
-
 // Маппинг пути → название страницы
 const pageTitles: Record<string, string> = {
   '/policy': 'Политика конфиденциальности',

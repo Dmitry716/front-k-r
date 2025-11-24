@@ -136,7 +136,7 @@ export default function AdminCampaignsNewPage() {
   const fetchCampaigns = async () => {
     try {
       const data = await apiClient.get('/admin/campaigns?limit=200');
-      console.log('Fetch campaigns response:', data);
+
       if (data.success) {
         // Обрабатываем оба формата ответа
         const campaigns = data.campaigns || data.data || [];
@@ -241,7 +241,7 @@ export default function AdminCampaignsNewPage() {
   };
 
   const startEditing = (campaign: Campaign) => {
-    console.log('Edit campaign data:', campaign);
+
     setEditingCampaign(campaign);
     setTitle(campaign.title);
     setSlug(campaign.slug);
@@ -250,7 +250,7 @@ export default function AdminCampaignsNewPage() {
     setFeaturedImage(campaign.featuredImage || '');
     setTags(campaign.tags || []);
     setBlocks(campaign.blocks || []);
-    console.log('SEO data:', { seoTitle: campaign.seoTitle, seoDescription: campaign.seoDescription, seoKeywords: campaign.seoKeywords, ogImage: campaign.ogImage });
+
     setSeoTitle(campaign.seoTitle || '');
     setSeoDescription(campaign.seoDescription || '');
     setSeoKeywords(campaign.seoKeywords || '');
@@ -280,7 +280,6 @@ export default function AdminCampaignsNewPage() {
       };
 
       const data = await apiClient.put(`/admin/campaigns/${editingCampaign.id}`, body);
-      console.log('Ответ сервера при обновлении:', data);
 
       if (data.success) {
         setSuccess('✓ Кампания обновлена');
@@ -331,10 +330,7 @@ export default function AdminCampaignsNewPage() {
         ogImage: ogImage || undefined,
       };
 
-      console.log('Отправляю данные кампании:', body);
-
       const data = await apiClient.post('/admin/campaigns', body);
-      console.log('Ответ сервера:', data);
 
       if (data.success) {
         setSuccess('✓ Кампания добавлена');

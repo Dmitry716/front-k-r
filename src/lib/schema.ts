@@ -271,7 +271,6 @@ export const complexMonuments = pgTable("complex_monuments", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-
 export const works = pgTable("works", {
   id: serial("id").primaryKey().notNull(),
   title: varchar("title").notNull(),

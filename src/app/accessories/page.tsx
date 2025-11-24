@@ -1,4 +1,6 @@
 "use client";
+
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import PathPage from "../components/PathPage";
 import SidebarCatalogMenu from "../components/Sidebar/SidebarCatalogMenu";
@@ -193,7 +195,7 @@ const AccessoriesPage = () => {
 
                         {/* Блок категорий */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">
-                            {categories.map((category) => (
+                            {categories.map((category, index) => (
                                 <a
                                     key={category.title}
                                     href={category.link}
@@ -205,10 +207,15 @@ const AccessoriesPage = () => {
                                             <p className="text-[12px] text-[#969ead]">{category.price || "\u00A0"}</p>
                                         </div>
                                         <div className="absolute self-center -right-2 rounded-lg max-w-[130px] overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={category.img}
                                                 alt={category.title}
-                                                className={`h-full object-cover rounded-lg ${isTablet ? 'w-[75px]' : 'w-[130px]'}`} loading="lazy"
+                                                width={130}
+                                                height={130}
+                                                className={`h-full object-cover rounded-lg ${isTablet ? 'w-[75px]' : 'w-[130px]'}`}
+                                                sizes="(max-width: 768px) 75px, 130px"
+                                                quality={60}
+                                                priority={index < 3}
                                             />
                                         </div>
                                     </div>
@@ -256,7 +263,7 @@ const AccessoriesPage = () => {
                                 />
                             ))
                         ) : (
-                            currentProducts.map((product) => (
+                            currentProducts.map((product, index) => (
                                 <div key={`product-${product.id}`} className="invisible h-0" />
                             ))
                         )}

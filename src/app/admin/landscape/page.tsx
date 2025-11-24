@@ -219,32 +219,28 @@ export default function LandscapeAdminPage() {
       let seoKeywords = editForm.seo_keywords;
       let ogImage = editForm.og_image;
 
-      console.log('[LANDSCAPE] Initial SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
-
       const hasUserProvidedSeo = seoTitle || seoDescription || seoKeywords || ogImage;
-      console.log('[LANDSCAPE] hasUserProvidedSeo:', hasUserProvidedSeo);
-      
+
       if (!hasUserProvidedSeo) {
         // Только загружаем шаблон если все поля пусты
         try {
           const { fetchSeoTemplate } = await import('@/lib/hooks/use-seo-hierarchy');
           const categoryKey = CATEGORY_TO_KEY_MAP[editForm.category] || editForm.category;
-          console.log('Fetching SEO template for landscape category:', editForm.category, 'key:', categoryKey);
+
           const template = await fetchSeoTemplate("landscape", categoryKey);
-          console.log('Template received:', template);
-          
+
           if (template) {
             seoTitle = template.seoTitle || editForm.name;
             seoDescription = template.seoDescription || `Благоустройство ${editForm.name}`;
             seoKeywords = template.seoKeywords || editForm.name;
             ogImage = template.ogImage || "";
-            console.log('Applied template SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
           } else {
             // Если шаблона нет - используем данные как fallback
             seoTitle = editForm.name;
             seoDescription = `Благоустройство ${editForm.name}`;
             seoKeywords = editForm.name;
-            console.log('No template found, using fallback:', { seoTitle, seoDescription, seoKeywords });
+
           }
         } catch (err) {
           console.warn('Failed to load SEO template, using defaults:', err);
@@ -252,11 +248,11 @@ export default function LandscapeAdminPage() {
           seoTitle = editForm.name;
           seoDescription = `Благоустройство ${editForm.name}`;
           seoKeywords = editForm.name;
-          console.log('Template load error, using fallback:', { seoTitle, seoDescription, seoKeywords });
+
         }
       } else {
         // Юзер вписал что-то - используем его значения, заполняя пропуски fallback'ом
-        console.log('User provided SEO, using user values:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
         seoTitle = seoTitle || editForm.name;
         seoDescription = seoDescription || `Благоустройство ${editForm.name}`;
         seoKeywords = seoKeywords || editForm.name;
@@ -342,9 +338,7 @@ export default function LandscapeAdminPage() {
     const seoDescription = landscapeItem.seo_description || (landscapeItem as any).seoDescription || "";
     const seoKeywords = landscapeItem.seo_keywords || (landscapeItem as any).seoKeywords || "";
     const ogImage = landscapeItem.og_image || (landscapeItem as any).ogImage || "";
-    
-    console.log('SEO data extracted:', { seoTitle, seoDescription, seoKeywords, ogImage });
-    
+
     setEditingLandscape(landscapeItem);
     setEditForm({
       name: landscapeItem.name || "",
@@ -759,7 +753,7 @@ export default function LandscapeAdminPage() {
                           ogImage: editForm.og_image,
                         }}
                         onChange={(data) => {
-                          console.log('SeoFieldsForm onChange:', data);
+
                           setEditForm(prev => ({
                             ...prev,
                             seo_title: data.seoTitle,

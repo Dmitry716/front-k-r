@@ -158,7 +158,6 @@ const DiscountPage = () => {
                     }
                 }
 
-                console.log(`Загружено ${allProducts.length} товаров со скидкой`);
                 setProducts(allProducts);
             } catch (error) {
                 console.error("Ошибка загрузки товаров со скидкой:", error);
@@ -293,7 +292,7 @@ const DiscountPage = () => {
                         ) : (
                             <>
                                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">
-                                    {currentProducts.map((product) => (
+                                    {currentProducts.map((product, index) => (
                                         <ProductCard
                                             key={`${product.productType}-${product.categorySlug}-${product.id}`}
                                             product={product}

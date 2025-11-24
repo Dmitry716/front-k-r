@@ -10,12 +10,8 @@ const runMigrations = async () => {
   });
 
   const db = drizzle(pool, { schema });
-
-  console.log("Running migrations...");
-
   try {
     await migrate(db, { migrationsFolder: "./drizzle" });
-    console.log("Migrations completed successfully!");
   } catch (error) {
     console.error("Migration error:", error);
     throw error;

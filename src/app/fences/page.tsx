@@ -1,5 +1,7 @@
 'use client';
 
+
+import Image from "next/image";
 import { useState, useEffect } from 'react';
 import OurWorksSlider from "../components/OurWorksSlider";
 import PathPage from "../components/PathPage";
@@ -168,7 +170,7 @@ const FencesPageClient = () => {
 
                         {/* Блок категорий */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">
-                            {categories.map((category) => (
+                            {categories.map((category, index) => (
                                 <a
                                     key={category.title}
                                     href={category.link}
@@ -180,10 +182,15 @@ const FencesPageClient = () => {
                                             <p className="text-[12px] text-[#969ead]">{category.price || "\u00A0"}</p>
                                         </div>
                                         <div className="absolute self-center -right-2 rounded-lg max-w-[130px] overflow-hidden">
-                                            <img
+                                            <Image
                                                 src={category.img}
                                                 alt={category.title}
-                                                className={`h-full object-cover rounded-lg ${isTablet ? 'w-[75px]' : 'w-[130px]'}`} loading="lazy"
+                                                width={130}
+                                                height={130}
+                                                className={`h-full object-cover rounded-lg ${isTablet ? 'w-[75px]' : 'w-[130px]'}`}
+                                                sizes="(max-width: 768px) 75px, 130px"
+                                                quality={60}
+                                                priority={index < 3}
                                             />
                                         </div>
                                     </div>
@@ -221,17 +228,18 @@ const FencesPageClient = () => {
                     {/* Сетка продуктов */}
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
                         {isClient ? (
-                            currentProducts.map((product: any) => (
+                            currentProducts.map((product: any, index: number) => (
                                 <ProductCard
                                     key={product.id}
                                     product={product}
+                                    index={index}
                                     isTablet={isTablet}
                                     isMobile={isMobile}
                                     isNarrowMobile={isNarrowMobile}
                                 />
                             ))
                         ) : (
-                            currentProducts.map((product) => (
+                            currentProducts.map((product, index) => (
                                 <div key={product.id} className="invisible h-0" />
                             ))
                         )}

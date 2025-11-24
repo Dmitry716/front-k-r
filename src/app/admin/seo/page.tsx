@@ -122,30 +122,29 @@ export default function SEOAdminPage() {
 
   useEffect(() => {
     const userStr = localStorage.getItem('adminUser');
-    console.log('[/admin/seo] useEffect 1: checking auth, userStr:', userStr ? 'present' : 'missing');
-    
+
     if (!userStr) {
-      console.log('[/admin/seo] No user found, redirecting to /login');
+
       router.push('/login');
       return;
     }
 
     try {
       const userData = JSON.parse(userStr);
-      console.log('[/admin/seo] User data:', { role: userData.role, username: userData.username });
+
       setUser(userData);
       setCheckingAuth(false);
       
       // Если пользователь НЕ superadmin - устанавливаем ошибку, но НЕ редиректим в useEffect
       // Редирект будет в return блоке компонента
       if (userData.role !== 'superadmin') {
-        console.log('[/admin/seo] User is not superadmin, setting error');
+
         setError('У вас нет доступа к SEO разделу. Только superadmin может управлять SEO.');
         return; // НЕ загружаем данные для non-superadmin
       }
       
       // Только если superadmin - загружаем данные
-      console.log('[/admin/seo] User is superadmin, loading data');
+
       fetchPageSeoData();
       fetchAvailableImages();
     } catch (e) {
@@ -281,7 +280,7 @@ export default function SEOAdminPage() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ pageSlug: seoData.pageSlug }),
           });
-          console.log(`[Admin SEO] Кэш инвалидирован для ${seoData.pageSlug}`);
+
         } catch (e) {
           console.warn("[Admin SEO] Не удалось инвалидировать кэш:", e);
           // Не ошибка - данные всё равно сохранены

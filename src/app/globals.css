@@ -50,6 +50,17 @@ main.min-h-screen > div:first-child {
   }
 }
 
+/* Prevent CLS for monuments page category grid */
+.grid.grid-cols-2.md\:grid-cols-3 > a > div {
+  min-height: 80px;
+}
+
+@media (min-width: 1024px) {
+  .grid.grid-cols-2.md\:grid-cols-3 > a > div {
+    min-height: 120px;
+  }
+}
+
 @media (max-width: 499px) {
   main.min-h-screen > div:first-child {
     height: 100vw !important;

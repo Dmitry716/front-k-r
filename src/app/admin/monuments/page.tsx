@@ -276,11 +276,9 @@ export default function ProductsAdminPage() {
       setLoading(true);
       
       // Используем публичный эндпоинт с категорией
-      console.log('Fetching monuments for category:', category);
+
       const data = await apiClient.get(`/monuments/${category}`);
-      
-      console.log('Fetch response for', category, ':', data);
-      
+
       if (data.success) {
         const monuments = data.data || [];
         console.log('Monuments loaded:', monuments.length, monuments.map((m: Monument) => ({id: m.id, name: m.name, category: m.category})));
@@ -427,9 +425,7 @@ export default function ProductsAdminPage() {
         console.warn('Failed to parse colors:', monument.colors, e);
       }
     }
-    
-    console.log('Loaded colors in startEditing:', colors);
-    
+
     // Определяем, используется ли "Цена по запросу" или обычная цена
     // Если price = 0/null - это значит "Цена по запросу"
     let price = "";
@@ -695,7 +691,7 @@ export default function ProductsAdminPage() {
           hit: color.hit || false
         }));
         colorsJson = JSON.stringify(normalizedColors);
-        console.log('Normalized colors for exclusive monument:', normalizedColors);
+
       }
 
       if (editingMonument) {
@@ -725,7 +721,6 @@ export default function ProductsAdminPage() {
 
         // При редактировании НЕ загружаем шаблон - используем только то что в форме
         // Шаблон загружается только при создании нового памятника
-        console.log('Edit SEO data:', { seo_title: seoTitle, seo_description: seoDescription, seo_keywords: seoKeywords, og_image: ogImage });
 
         // Определяем правильную категорию для отправки (преобразуем русские названия в английские)
         let updateCategory = editForm.category || selectedCategory;
@@ -756,25 +751,20 @@ export default function ProductsAdminPage() {
         
         // Добавляем category в тело запроса для API
         updateData.category = selectedCategory;
-        
-        console.log('Update endpoint:', updateEndpoint);
-        console.log('Update data:', updateData);
-        console.log('Selected category:', selectedCategory);
-        console.log('SEO data:', { seo_title: seoTitle, seo_description: seoDescription, seo_keywords: seoKeywords });
-        
+
         const data = await apiClient.put(updateEndpoint, updateData);
         if (data.success) {
           // Если есть SEO данные - сохраняем их отдельным запросом
           if (seoTitle || seoDescription || seoKeywords || ogImage) {
             try {
-              console.log('Saving SEO data for monument ID:', editingMonument.id);
+
               await saveSeoFields(editingMonument.id, {
                 seoTitle: seoTitle,
                 seoDescription: seoDescription,
                 seoKeywords: seoKeywords,
                 ogImage: ogImage,
               }, selectedCategory);
-              console.log('✓ SEO данные сохранены');
+
             } catch (seoErr) {
               console.warn('Failed to save SEO data:', seoErr);
               // Продолжаем даже если SEO не сохранилось
@@ -822,8 +812,6 @@ export default function ProductsAdminPage() {
         let seoKeywords = editForm.seo_keywords;
         let ogImage = editForm.og_image;
 
-        console.log('Initial SEO values:', { seoTitle, seoDescription, seoKeywords, ogImage });
-
         // Если юзер вписал хоть что-то в SEO - используем его значения
         // Загружаем шаблон ТОЛЬКО если все SEO поля пусты
         const hasUserProvidedSeo = seoTitle || seoDescription || seoKeywords || ogImage;
@@ -833,22 +821,21 @@ export default function ProductsAdminPage() {
           try {
             const { fetchSeoTemplate } = await import('@/lib/hooks/use-seo-hierarchy');
             // Для всех типов памятников используем entityType "monuments"
-            console.log('Fetching SEO template for monuments category:', selectedCategory);
+
             const template = await fetchSeoTemplate("monuments", selectedCategory);
-            console.log('Template received:', template);
-            
+
             if (template) {
               seoTitle = template.seoTitle || editForm.name;
               seoDescription = template.seoDescription || `Памятник ${editForm.name}`;
               seoKeywords = template.seoKeywords || editForm.name;
               ogImage = template.ogImage || "";
-              console.log('Applied template SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
             } else {
               // Если шаблона нет - используем данные памятника как fallback
               seoTitle = editForm.name;
               seoDescription = `Памятник ${editForm.name}`;
               seoKeywords = editForm.name;
-              console.log('No template found, using fallback:', { seoTitle, seoDescription, seoKeywords });
+
             }
           } catch (err) {
             console.warn('Failed to load SEO template, using defaults:', err);
@@ -856,11 +843,11 @@ export default function ProductsAdminPage() {
             seoTitle = editForm.name;
             seoDescription = `Памятник ${editForm.name}`;
             seoKeywords = editForm.name;
-            console.log('Template load error, using fallback:', { seoTitle, seoDescription, seoKeywords });
+
           }
         } else {
           // Юзер вписал что-то - используем его значения, заполняя пропуски fallback'ом
-          console.log('User provided SEO, using user values:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
           seoTitle = seoTitle || editForm.name;
           seoDescription = seoDescription || `Памятник ${editForm.name}`;
           seoKeywords = seoKeywords || editForm.name;
@@ -893,25 +880,13 @@ export default function ProductsAdminPage() {
           createData.colors = colorsJson;
         }
 
-        console.log('Creating monument with data:', createData);
-        console.log('Selected category:', selectedCategory);
-        console.log('Final category sent to backend:', createData.category);
-        console.log('Create endpoint:', createEndpoint);
-        console.log('SEO data being sent:', { seoTitle: createData.seoTitle, seoDescription: createData.seoDescription, seoKeywords: createData.seoKeywords, ogImage: createData.ogImage });
-        console.log('=============== BEFORE POST REQUEST ===============');
         console.log('Full createData object:', JSON.stringify(createData, null, 2));
         
         const data = await apiClient.post(createEndpoint, createData);
-        
-        console.log('=============== AFTER POST RESPONSE ===============');
-        console.log('Response from server:', data);
-        
-        console.log('Create response:', data);
-        
+
         if (data.success) {
           setSuccess("✓ Памятник успешно добавлен");
-          console.log('Created monument with ID:', data.data?.id, 'category:', selectedCategory);
-          
+
           // Оставляем форму открытой для редактирования SEO
           if (data.data) {
             // Обновляем editingMonument чтобы был ID для сохранения SEO
@@ -935,7 +910,7 @@ export default function ProductsAdminPage() {
           
           // Также делаем перезагрузку для синхронизации
           setTimeout(async () => {
-            console.log('Reloading monuments for category:', selectedCategory);
+
             await fetchMonuments(selectedCategory);
             // После перезагрузки закрываем форму редактирования
             cancelEditing();
@@ -996,13 +971,9 @@ export default function ProductsAdminPage() {
         // Для остальных используем /monuments/id/:id с категорией
         deleteUrl = `/monuments/id/${monument.id}?category=${selectedCategory}&slug=${encodeURIComponent(monument.slug)}`;
       }
-      
-      console.log('Delete URL:', deleteUrl, 'Monument ID:', monument.id, 'Slug:', monument.slug, 'Name:', monument.name, 'Category:', selectedCategory);
-      
+
       const data = await apiClient.delete(deleteUrl);
-      
-      console.log('Delete response:', data);
-      
+
       if (data.success) {
         setSuccess("✓ Памятник успешно удален");
         // Сразу удаляем из локального списка для быстрого обновления

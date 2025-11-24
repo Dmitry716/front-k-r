@@ -60,7 +60,7 @@ export default function View360({ baseImagePath, sourceImagePath = '', totalFram
       const fullUrl = `${baseImagePath}/${frameName}`;
       imageRef.current.src = fullUrl;
       currentFrameRef.current = currentFrame;
-      console.log('View360 loading frame:', { baseImagePath, frameName, fullUrl });
+
     }
   }, [currentFrame, baseImagePath]);
 

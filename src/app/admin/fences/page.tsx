@@ -152,11 +152,9 @@ export default function FencesAdminPage() {
       
       const categoryName = categoryNames[category];
       const endpoint = `${categoryConfig.apiEndpoint}?category=${encodeURIComponent(categoryName)}`;
-      
-      console.log('Fetching fences for category:', category, 'endpoint:', endpoint);
+
       const data = await apiClient.get(endpoint);
-      console.log('API response:', data);
-      
+
       if (data.success) {
         // Публичный API возвращает в поле data, admin API в поле products
         const fencesList = data.data || data.products || [];
@@ -187,9 +185,9 @@ export default function FencesAdminPage() {
   };
 
   const startEditing = (fence: Fence) => {
-    console.log('Starting edit for fence:', fence);
+
     console.log('Fence data from API:', JSON.stringify(fence, null, 2));
-    console.log('Fence SEO fields - seo_title:', fence.seo_title, 'seo_description:', fence.seo_description, 'seo_keywords:', fence.seo_keywords, 'og_image:', fence.og_image);
+
     console.log('Fence SEO fields camelCase - seoTitle:', (fence as any).seoTitle, 'seoDescription:', (fence as any).seoDescription, 'seoKeywords:', (fence as any).seoKeywords, 'ogImage:', (fence as any).ogImage);
     
     setEditingFence(fence);
@@ -232,8 +230,7 @@ export default function FencesAdminPage() {
       seo_keywords: fence.seo_keywords || (fence as any).seoKeywords || "",
       og_image: fence.og_image || (fence as any).ogImage || "",
     };
-    
-    console.log('Filled form SEO:', filledForm.seo_title, filledForm.seo_description, filledForm.seo_keywords, filledForm.og_image);
+
     setEditForm(filledForm);
   };
 
@@ -452,34 +449,29 @@ export default function FencesAdminPage() {
       let seoKeywords = editForm.seo_keywords;
       let ogImage = editForm.og_image;
 
-      console.log('[FENCES] Initial SEO from editForm:', { seoTitle, seoDescription, seoKeywords, ogImage });
-      console.log('[FENCES] editForm values:', editForm.seo_title, editForm.seo_description, editForm.seo_keywords, editForm.og_image);
-
       // Если юзер вписал хоть что-то в SEO - используем его значения
       // Загружаем шаблон ТОЛЬКО если все SEO поля пусты
       const hasUserProvidedSeo = seoTitle || seoDescription || seoKeywords || ogImage;
-      console.log('[FENCES] hasUserProvidedSeo:', hasUserProvidedSeo);
-      
+
       if (!hasUserProvidedSeo) {
         // Только загружаем шаблон если все поля пусты
         try {
           const { fetchSeoTemplate } = await import('@/lib/hooks/use-seo-hierarchy');
-          console.log('Fetching SEO template for fences category:', selectedCategory);
+
           const template = await fetchSeoTemplate("fences", selectedCategory);
-          console.log('Template received:', template);
-          
+
           if (template) {
             seoTitle = template.seoTitle || editForm.name;
             seoDescription = template.seoDescription || `Ограда ${editForm.name}`;
             seoKeywords = template.seoKeywords || editForm.name;
             ogImage = template.ogImage || "";
-            console.log('Applied template SEO:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
           } else {
             // Если шаблона нет - используем данные ограды как fallback
             seoTitle = editForm.name;
             seoDescription = `Ограда ${editForm.name}`;
             seoKeywords = editForm.name;
-            console.log('No template found, using fallback:', { seoTitle, seoDescription, seoKeywords });
+
           }
         } catch (err) {
           console.warn('Failed to load SEO template, using defaults:', err);
@@ -487,11 +479,11 @@ export default function FencesAdminPage() {
           seoTitle = editForm.name;
           seoDescription = `Ограда ${editForm.name}`;
           seoKeywords = editForm.name;
-          console.log('Template load error, using fallback:', { seoTitle, seoDescription, seoKeywords });
+
         }
       } else {
         // Юзер вписал что-то - используем его значения, заполняя пропуски fallback'ом
-        console.log('User provided SEO, using user values:', { seoTitle, seoDescription, seoKeywords, ogImage });
+
         seoTitle = seoTitle || editForm.name;
         seoDescription = seoDescription || `Ограда ${editForm.name}`;
         seoKeywords = seoKeywords || editForm.name;
@@ -510,9 +502,7 @@ export default function FencesAdminPage() {
           metal: "Металлические ограды", 
           polymer: "С полимерным покрытием"
         };
-        
-        console.log('Updating fence:', editingFence.id, 'endpoint:', `/admin/fences/${editingFence.id}`);
-        
+
         const data = await apiClient.put(`/admin/fences/${editingFence.id}`, {
           name: editForm.name,
           price: currentPrice,
@@ -529,7 +519,7 @@ export default function FencesAdminPage() {
           seoKeywords: seoKeywords,
           ogImage: ogImage,
         });
-        console.log('Update response:', data);
+
         if (data.success) {
           setSuccess("✓ Ограда успешно обновлена");
           await fetchFences(selectedCategory);
@@ -550,8 +540,7 @@ export default function FencesAdminPage() {
           metal: "Металлические ограды", 
           polymer: "С полимерным покрытием"
         };
-        
-        console.log('Adding fence, endpoint:', '/admin/fences');
+
         const postData = {
           name: editForm.name,
           slug: generateSlug(editForm.name),
@@ -569,10 +558,9 @@ export default function FencesAdminPage() {
           seoKeywords: seoKeywords,
           ogImage: ogImage,
         };
-        console.log('POST data being sent:', postData);
+
         const data = await apiClient.post('/admin/fences', postData);
-        console.log('Add response:', data);
-        
+
         if (data.success) {
           setSuccess("✓ Ограда успешно добавлена");
           
@@ -599,7 +587,7 @@ export default function FencesAdminPage() {
           
           // Также делаем перезагрузку для синхронизации
           setTimeout(async () => {
-            console.log('Reloading fences for category:', selectedCategory);
+
             await fetchFences(selectedCategory);
             // После перезагрузки закрываем форму редактирования
             cancelEditing();
@@ -651,11 +639,9 @@ export default function FencesAdminPage() {
       
       const categoryConfig = fenceCategories.find(c => c.key === selectedCategory);
       if (!categoryConfig) return;
-      
-      console.log('Deleting fence:', id, 'endpoint:', `/admin/fences/${id}`);
+
       const data = await apiClient.delete(`/admin/fences/${id}`);
-      console.log('Delete response:', data);
-      
+
       if (data.success) {
         setSuccess("✓ Ограда успешно удалена");
         await fetchFences(selectedCategory);
@@ -990,8 +976,6 @@ export default function FencesAdminPage() {
                     />
                   </div>
 
-
-
                   {/* Изображение */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1176,7 +1160,7 @@ export default function FencesAdminPage() {
                       }}
                       onChange={(data) => {
                         // Синхронизируем SEO значения в editForm при создании/редактировании
-                        console.log('[FENCES] onChange called with:', data);
+
                         setEditForm(prev => ({
                           ...prev,
                           seo_title: data.seoTitle,

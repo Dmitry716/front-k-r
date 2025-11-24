@@ -135,19 +135,19 @@ export async function POST(request: NextRequest) {
     console.log(`\n📥 Starting import for: ${category} (table: ${tableName})`);
 
     // Проверяем и создаем недостающие колонки
-    console.log(`  🔍 Checking table structure...`);
+
     await ensureColumns(tableName);
 
     // Создаем бэкап перед импортом
-    console.log(`  💾 Creating backup...`);
+
     const backupTableName = await backupTable(tableName);
 
     // Получаем существующие памятники
-    console.log(`  📊 Loading existing records...`);
+
     const existing = await getExistingMonuments(tableName);
 
     // Читаем Excel файл
-    console.log(`  📖 Reading Excel file...`);
+
     const buffer = await file.arrayBuffer();
     const workbook = XLSX.read(new Uint8Array(buffer));
     
@@ -180,14 +180,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log(`  ✓ Read ${data.length} rows`);
-
     let created = 0;
     let updated = 0;
     const errors: string[] = [];
 
     // Импортируем каждую строку
-    console.log(`\n🔄 Processing data...`);
+
     for (let idx = 0; idx < data.length; idx++) {
       try {
         const row = data[idx] as any;
@@ -221,7 +219,7 @@ export async function POST(request: NextRequest) {
             [name, price, oldPrice, discount, height, image, description, category_val, existingMonument.id]
           );
           updated++;
-          console.log(`  📝 Row ${idx + 1}: UPDATED "${name}"`);
+
         } else {
           // INSERT
           await pool.query(
@@ -230,7 +228,7 @@ export async function POST(request: NextRequest) {
             [slug, name, price, oldPrice, discount, height, image, description, category_val]
           );
           created++;
-          console.log(`  ✨ Row ${idx + 1}: CREATED "${name}"`);
+
         }
       } catch (rowError: any) {
         const rowName = (data[idx] as any)['Название'] || (data[idx] as any)['Name'] || `(row ${idx + 1})`;
@@ -238,10 +236,6 @@ export async function POST(request: NextRequest) {
         console.error(`  ❌ Row error:`, rowError.message);
       }
     }
-
-    console.log(`\n✅ Import completed!`);
-    console.log(`  📊 Total: ${created + updated} | Created: ${created} | Updated: ${updated}`);
-    console.log(`  💾 Backup: ${backupTableName}`);
 
     return NextResponse.json({
       success: true,

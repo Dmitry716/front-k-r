@@ -492,7 +492,7 @@ const WorksAdmin = () => {
                    loadingProducts ? "Загрузка товаров..." : 
                    "Не привязано"}
                 </option>
-                {products.map((product) => (
+                {products.map((product, index) => (
                   <option key={product.uniqueKey || `${product.id}-${product.category}`} value={product.id}>
                     {product.name} ({product.category})
                   </option>
