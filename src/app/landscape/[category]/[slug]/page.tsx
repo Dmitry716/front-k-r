@@ -8,6 +8,7 @@ import ModalCommunication from "@/app/components/Modal/ModalCommunication";
 import OurWorksSlider from "@/app/components/OurWorksSlider";
 import Image from "next/image";
 import { apiClient } from "@/lib/api-client";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Specifications {
   color?: string;
@@ -217,7 +218,9 @@ const LandscapeDetailPage = () => {
   if (loading) {
     return (
       <div className="container mx-auto px-4 py-8">
-        <p className="text-gray-600">Загрузка...</p>
+        <div className="flex justify-center">
+          <LoadingSpinner size={36} />
+        </div>
       </div>
     );
   }

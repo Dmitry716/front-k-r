@@ -9,6 +9,7 @@ import ProductWorksGallery from "@/app/components/ProductWorksGallery";
 import Image from "next/image";
 import Tooltip from "@/app/components/Tooltip";
 import { apiClient } from "@/lib/api-client";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Specifications {
     // Гранитные ограды - динамические
@@ -254,7 +255,9 @@ const FenceDetailPage = () => {
     if (loading) {
         return (
             <div className="container mx-auto px-4 py-8">
-                <p className="text-gray-600">Загрузка...</p>
+                <div className="flex justify-center">
+                    <LoadingSpinner size={36} />
+                </div>
             </div>
         );
     }
@@ -275,15 +278,15 @@ const FenceDetailPage = () => {
                     <SidebarStickyHelp />
                 </div>
 
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
                     <PathPage />
 
-                    <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">
+                    <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">
                         {fence.name}
                     </h1>
 
                     {/* Основной контент карточки */}
-                    <div className={`mb-7.5 font-[600] ${isMobile ? 'block' : 'flex p-5'}`}>
+                    <div className={`mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
                         {/* Изображение */}
                         <div className="relative max-w-[523px] md:w-7/12 mx-auto">
                             {/* Звезда (избранное) */}
@@ -389,7 +392,7 @@ const FenceDetailPage = () => {
                             </div>
 
                             {/* Контент вкладок */}
-                            <div className="mb-7.5 font-[600]">
+                            <div className="mb-7.5 font-semibold">
                                 {activeTab === "characteristics" && hasCharacteristics && (
                                     <div>
                                         <div className="space-y-1">

@@ -16,6 +16,7 @@ import { ColorOption } from "@/app/types/types";
 import { getMaterialData } from "@/lib/materials-mapping";
 import { apiClient } from "@/lib/api-client";
 import ProductWorksGallery from "@/app/components/ProductWorksGallery";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Product {
   id: number;
@@ -220,7 +221,9 @@ const ExclusiveProductPage = () => {
   if (loading) {
     return (
       <div className="container-centered max-w-[1300px] mt-5">
-        <div className="text-center py-10">Загрузка...</div>
+        <div className="flex items-center justify-center py-10">
+          <LoadingSpinner size={40} />
+        </div>
       </div>
     );
   }
@@ -379,7 +382,7 @@ const ExclusiveProductPage = () => {
           <span className="text-[#2D4266]">{label}</span>
           {tooltipImage && tooltipDescription && (
             <span
-              className="text-[#969ead] text-xs font-bold border-1 border-[#969ead] hover:border-[#2c3a54] hover:text-[#2c3a54] rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
+              className="text-[#969ead] text-xs font-bold border border-[#969ead] hover:border-[#2c3a54] hover:text-[#2c3a54] rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
               ref={tooltipTriggerRef}
               onClick={handleClick}
             >
@@ -427,14 +430,14 @@ const ExclusiveProductPage = () => {
         </div>
 
         {/* Основной контент */}
-        <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+        <div className="w-full lg:ml-5 lg:max-w-[75%]">
           <PathPage />
-          <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">
+          <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">
             {product.name}
           </h1>
 
           {/* Основной контент карточки */}
-          <div className={`mb-7.5 font-[600] ${isMobile ? "block" : "flex p-5"}`}>
+          <div className={`mb-7.5 font-semibold ${isMobile ? "block" : "flex p-5"}`}>
             {/* Изображение */}
             <div className="relative max-w-[523px] md:w-7/12 mx-auto">
               {/* Плашка скидки - только если у selectedColor есть скидка */}
@@ -636,7 +639,7 @@ const ExclusiveProductPage = () => {
           </div>
 
           {/* Контент вкладок */}
-          <div className="mb-7.5 font-[600]">
+          <div className="mb-7.5 font-semibold">
             {activeTab === "characteristics" && (
               <div>
                 <div
@@ -746,7 +749,7 @@ const ExclusiveProductPage = () => {
 
             {/* Примеры оформления */}
             <div className="mb-7.5">
-              <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
+              <h2 className="text-[28px] font-semibold text-[#2D4266] mb-5">
                 Примеры оформления
               </h2>
               <p className="text-[#2D4266] mb-5">
@@ -777,7 +780,7 @@ const ExclusiveProductPage = () => {
 
             {/* Похожие товары */}
             <div className="mb-7.5">
-              <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
+              <h2 className="text-[28px] font-semibold text-[#2D4266] mb-5">
                 Похожие товары
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3">

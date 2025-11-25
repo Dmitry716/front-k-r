@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { apiClient } from "@/lib/api-client";
 import Image from "next/image";
 import Link from "next/link";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 const ReviewsSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -490,7 +491,11 @@ const ReviewsSlider = () => {
         {isMobile && showAllReviews && (
           <div className="mt-6">{renderMobileReviews()}</div>
         )}
-        {loading && <div className="mt-6 text-[#6B809E]">Загрузка отзывов...</div>}
+        {loading && (
+          <div className="mt-6 flex justify-center">
+            <LoadingSpinner size={28} />
+          </div>
+        )}
         {error && <div className="mt-6 text-red-600">{error}</div>}
         {!loading && !error && reviews.length === 0 && (
           <div className="mt-6 text-[#6B809E]">Отзывы отсутствуют</div>

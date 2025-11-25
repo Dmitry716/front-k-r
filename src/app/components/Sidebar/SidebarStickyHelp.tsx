@@ -50,7 +50,7 @@ export default function SidebarStickyHelp() {
                 rel="noopener noreferrer"
                 className="cursor-pointer"
               >
-                <Image src="/viber.svg" alt="Viber" width={28} height={28} priority />
+                <Image src="/viber.svg" alt="Viber" width={28} height={28} priority className="icon-fixed-28" />
               </a>
               {/* Telegram */}
               <a
@@ -60,7 +60,7 @@ export default function SidebarStickyHelp() {
                 rel="noopener noreferrer"
                 className="cursor-pointer"
               >
-                <Image src="/tm.svg" alt="Telegram" width={28} height={28} priority />
+                <Image src="/tm.svg" alt="Telegram" width={28} height={28} priority className="icon-fixed-28" />
               </a>
               {/* WhatsApp */}
               <a
@@ -70,7 +70,7 @@ export default function SidebarStickyHelp() {
                 rel="noopener noreferrer"
                 className="cursor-pointer"
               >
-                <Image src="/wa.svg" alt="WhatsApp" width={28} height={28} priority />
+                <Image src="/wa.svg" alt="WhatsApp" width={28} height={28} priority className="icon-fixed-28" />
               </a>
             </div>
           </div>

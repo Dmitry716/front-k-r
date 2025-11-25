@@ -8,6 +8,7 @@ import SidebarStickyHelp from "../components/Sidebar/SidebarStickyHelp";
 import ProductCard from "../components/ProductCard";
 import Promo from "../components/Promo";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
+import LoadingSpinner from "../components/LoadingSpinner";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 
 interface LandscapeItem {
@@ -198,9 +199,9 @@ const LandscapePage = () => {
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
-                    <div className="text-center py-8">
-                        <p className="text-gray-600">Загрузка...</p>
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
+                    <div className="flex justify-center py-8">
+                        <LoadingSpinner size={40} />
                     </div>
                 </div>
             </section>
@@ -214,11 +215,11 @@ const LandscapePage = () => {
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
 
                     <div className={`${isTablet ? 'container-centered' : ''}`}>
                         <PathPage />
-                        <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Благоустройство могил</h1>
+                        <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">Благоустройство могил</h1>
 
                         {/* Блок категорий */}
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5 mb-7.5">
@@ -228,7 +229,7 @@ const LandscapePage = () => {
                                     href={category.link}
                                     className="block overflow-hidden rounded-lg"
                                 >
-                                    <div className="relative flex h-[80px] lg:h-[120px] py-5 pl-3.75 pr-12.5 lg:pr-25 justify-between bg-[#f5f6fa] rounded-lg hover:border-2 border-[#2c3a54]">
+                                    <div className="relative flex h-20 lg:h-[120px] py-5 pl-3.75 pr-12.5 lg:pr-25 justify-between bg-[#f5f6fa] rounded-lg hover:border-2 border-[#2c3a54]">
                                         <div className="flex flex-col w-[70%] self-center z-10">
                                             <h2 className="text-[16px] font-bold text-[#222222] mb-2.5">{category.title}</h2>
                                             <p className="text-[12px] text-[#969ead]">{category.price || "\u00A0"}</p>

@@ -11,6 +11,7 @@ import Pagination from "@/app/components/Pagination";
 import Promo from "@/app/components/Promo";
 import { apiClient } from "@/lib/api-client";
 import { PageDescriptionBlock } from "@/app/components/PageDescriptionBlock";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Fence {
   id: number;
@@ -154,10 +155,10 @@ const FencesCategoryPage = () => {
           <SidebarCatalogMenu />
           <SidebarStickyHelp />
         </div>
-        <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+        <div className="w-full lg:ml-5 lg:max-w-[75%]">
           <div className={`${isTablet ? 'container-centered' : ''}`}>
             <PathPage />
-            <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">
+            <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">
               {categoryTitle}
             </h1>
 
@@ -256,7 +257,9 @@ const FencesCategoryPage = () => {
                 )
               ) : (
                 <div className="col-span-full text-center py-10">
-                  <p className="text-gray-600">Загрузка...</p>
+                  <div className="flex justify-center">
+                    <LoadingSpinner size={36} />
+                  </div>
                 </div>
               )}
             </div>

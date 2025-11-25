@@ -12,6 +12,7 @@ import Tooltip from "../../../components/Tooltip";
 import { apiClient } from "@/lib/api-client";
 import ModalCommunication from "../../../components/Modal/ModalCommunication";
 import { categorySlugToName } from "../page";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 // Функция для конвертации товара из админки в формат ProductCard
 function convertMonumentToProductFormat(dbProduct: Record<string, unknown>) {
@@ -144,16 +145,17 @@ const ProductPage = () => {
     const modalRef = useRef<HTMLDivElement>(null);
     const backdropRef = useRef<HTMLDivElement>(null);
 
-    // Загрузка данных продукта и похожих товаров
+    // Загрузка данных продукта
     useEffect(() => {
+        if (!productSlug || !categorySlug) return;
+
+        let isActive = true;
+
         const loadProduct = async () => {
-            if (!productSlug || !categorySlug) return;
-            
+            setIsLoading(true);
             try {
-                setIsLoading(true);
                 const data = await apiClient.get(`/monuments/${categorySlug}/${productSlug}`);
                 if (data.success && data.data) {
-                    // Парсим JSON строку options в объект
                     let parsedOptions = {};
                     if (typeof data.data.options === 'string') {
                         try {
@@ -164,55 +166,79 @@ const ProductPage = () => {
                     } else if (data.data.options) {
                         parsedOptions = data.data.options;
                     }
-                    
-                    // Обновляем данные продукта с распарсенными options
-                    setProduct({
-                        ...data.data,
-                        options: parsedOptions
-                    });
-                    
-                    // Загружаем похожие товары из той же категории
-                    try {
-                        // Используем правильный endpoint для категории
-                        const similarData = await apiClient.get(`/admin/monuments?category=${categorySlug}`);
-                        if (similarData.success && similarData.products) {
-                            // Фильтруем товары, исключая текущий товар, и конвертируем в нужный формат
-                            const filtered = similarData.products
-                                .filter((p: any) => p.id !== data.data.id)
-                                .sort(() => 0.5 - Math.random()) // Рандомизируем
-                                .slice(0, 6) // Берем максимум 6 товаров
-                                .map(convertMonumentToProductFormat); // Конвертируем в формат ProductCard
-                            setSimilarProducts(filtered);
-                        }
-                    } catch (error) {
-                        console.error("Ошибка загрузки похожих товаров:", error);
-                        // Fallback: пробуем другой endpoint
-                        try {
-                            const fallbackData = await apiClient.get("/monuments");
-                            if (fallbackData.success && fallbackData.data) {
-                                const filtered = fallbackData.data
-                                    .filter((p: any) => p.category === data.data.category && p.id !== data.data.id)
-                                    .sort(() => 0.5 - Math.random()) 
-                                    .slice(0, 6)
-                                    .map(convertMonumentToProductFormat); // Конвертируем в формат ProductCard
-                                setSimilarProducts(filtered);
-                            }
-                        } catch (fallbackError) {
-                            console.error("Ошибка загрузки похожих товаров (fallback):", fallbackError);
-                        }
+
+                    if (isActive) {
+                        setProduct({
+                            ...data.data,
+                            options: parsedOptions
+                        });
                     }
-                } else {
+                } else if (isActive) {
                     setError("Продукт не найден");
                 }
             } catch (err) {
-                setError("Ошибка загрузки продукта");
+                if (isActive) {
+                    setError("Ошибка загрузки продукта");
+                }
             } finally {
-                setIsLoading(false);
+                if (isActive) {
+                    setIsLoading(false);
+                }
             }
         };
-        
+
         loadProduct();
+
+        return () => {
+            isActive = false;
+        };
     }, [productSlug, categorySlug]);
+
+    // Загрузка похожих товаров отдельно, после появления продукта
+    useEffect(() => {
+        if (!product?.id || !product.category) return;
+
+        let cancelled = false;
+
+        const loadSimilar = async () => {
+            const convertAndSet = (items: any[]) => {
+                const filtered = items
+                    .filter((p: any) => p.id !== product.id)
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 6)
+                    .map(convertMonumentToProductFormat);
+                if (!cancelled) {
+                    setSimilarProducts(filtered);
+                }
+            };
+
+            try {
+                const similarData = await apiClient.get(`/admin/monuments?category=${product.category}`);
+                if (similarData.success && similarData.products) {
+                    convertAndSet(similarData.products);
+                    return;
+                }
+            } catch (error) {
+                console.error("Ошибка загрузки похожих товаров:", error);
+            }
+
+            try {
+                const fallbackData = await apiClient.get("/monuments");
+                if (fallbackData.success && fallbackData.data) {
+                    const sameCategory = fallbackData.data.filter((p: any) => p.category === product.category);
+                    convertAndSet(sameCategory);
+                }
+            } catch (fallbackError) {
+                console.error("Ошибка загрузки похожих товаров (fallback):", fallbackError);
+            }
+        };
+
+        loadSimilar();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [product?.id, product?.category]);
 
     // Обработчики событий
     const handleClickOutside = (e: MouseEvent) => {
@@ -381,8 +407,8 @@ const ProductPage = () => {
             <section className="container-centered mt-5 max-w-[1300px]">
                 <div className="w-full lg:ml-5 lg:max-w-[75%]">
                     <PathPage />
-                    <div className="flex items-center justify-center py-20">
-                        <div className="text-[#2c3a54] text-lg">Загрузка...</div>
+                    <div className="flex items-center justify-center py-20 text-[#2c3a54]">
+                        <LoadingSpinner size={48} />
                     </div>
                 </div>
             </section>
@@ -504,7 +530,7 @@ const ProductPage = () => {
                     <span className="text-[#2D4266]">{label}</span>
                     {tooltipImage && tooltipDescription && (
                         <span
-                            className="text-[#969ead] text-xs font-bold border-1 border-[#969ead] hover:border-[#2c3a54] hover:text-[#2c3a54] rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
+                            className="text-[#969ead] text-xs font-bold border border-[#969ead] hover:border-[#2c3a54] hover:text-[#2c3a54] rounded-full w-5 h-5 flex items-center justify-center cursor-pointer"
                             ref={tooltipTriggerRef}
                             onClick={handleClick}
                         >
@@ -519,6 +545,7 @@ const ProductPage = () => {
 
     // Выбираем изображение для отображения
     const displayImage = selectedColor ? selectedColor.image : product.image;
+    const heroImageSrc = displayImage && displayImage.trim() !== "" ? displayImage : "/single/example1.webp";
 
     const closeGraniteModal = () => {
         setIsGraniteModalOpen(false);
@@ -638,7 +665,7 @@ const ProductPage = () => {
                     <div
                         key="default"
                         onClick={() => onSelectColor(null)}
-                        className={`w-[calc(25%-8px)] aspect-3/2 flex-shrink-0 rounded-lg border-2 transition ${selectedColor === null
+                        className={`w-[calc(25%-8px)] aspect-3/2 shrink-0 rounded-lg border-2 transition ${selectedColor === null
                             ? "border-[#2c3a54]"
                             : "border-gray-300 hover:border-[#2c3a54]"
                             }`}
@@ -655,7 +682,7 @@ const ProductPage = () => {
                         <div
                             key={index}
                             onClick={() => onSelectColor(color)}
-                            className={`w-[calc(25%-8px)] aspect-3/2 flex-shrink-0 rounded-lg border-2 transition ${selectedColor?.name === color.name
+                            className={`w-[calc(25%-8px)] aspect-3/2 shrink-0 rounded-lg border-2 transition ${selectedColor?.name === color.name
                                 ? "border-[#2c3a54]"
                                 : "border-gray-300 hover:border-[#2c3a54]"
                                 }`}
@@ -675,19 +702,19 @@ const ProductPage = () => {
 
     return (
         <>
-            <section className="container-centered mt-5 max-w-[1300px] flex">
+            <section className="single-product container-centered mt-5 max-w-[1300px] flex">
                 <div className="max-w-[25%] w-full hidden lg:block space-y-7.5 ml-5">
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
                     <PathPage />
-                    <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">
+                    <h1 className="text-black text-[24px] md:text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">
                         {product.name}
                     </h1>
 
-                    <div className={`mb-7.5 font-[600] ${isMobile ? 'block' : 'flex p-5'}`}>
-                        <div className="relative max-w-[523px] md:w-7/12 mx-auto">
+                    <div className={`mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
+                        <div className="single-product-media relative max-w-[523px] md:w-7/12 mx-auto">
 
                             {product.discount && product.discount > 0 && (
                                 <div className="absolute top-2 left-2 z-10 bg-[#cd5554] text-white text-xs font-bold px-2.5 py-0.75 rounded">
@@ -720,10 +747,14 @@ const ProductPage = () => {
                                 ★
                             </div>
 
-                            <img
-                                src={displayImage}
+                            <Image
+                                src={heroImageSrc}
                                 alt={product.name}
-                                className="w-full h-auto object-contain rounded-lg md:pr-4" loading="lazy"
+                                width={800}
+                                height={800}
+                                priority
+                                sizes="(max-width: 640px) 100vw, (max-width: 1023px) 70vw, 523px"
+                                className="w-full h-auto object-contain rounded-lg md:pr-4"
                             />
                         </div>
 
@@ -781,9 +812,9 @@ const ProductPage = () => {
                                     </div>
                                 )}
 
-                                <div className="mb-5">
+                                <div className="mb-5 single-product-price">
                                     <span className="text-[#2c3a54]">Цена:</span>
-                                    <div className="flex items-center space-x-2">
+                                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
                                         {(() => {
                                             const specialPrice = formatPriceDisplay(product.price, product.description);
                                             
@@ -827,21 +858,21 @@ const ProductPage = () => {
                                 </div>
                             </div>
 
-                            <div className={`max-w-[550px] ${isMobile ? 'flex flex-wrap gap-y-3' : 'flex flex-wrap gap-y-5'}`}>
-                                <div className={`flex w-1/2 items-center space-x-2`}>
-                                    <Image src="/guarantee.svg" width={24} height={24} alt="Гарантия 10 лет" />
+                            <div className={`single-product-icons max-w-[550px] ${isMobile ? 'flex flex-wrap gap-y-3' : 'flex flex-wrap gap-y-5'}`}>
+                                <div className="single-product-icons__item flex w-1/2 items-center space-x-2">
+                                    <Image src="/guarantee.svg" width={28} height={28} alt="Гарантия 10 лет" priority className="icon-fixed-28" />
                                     <span className="text-[12px] text-[#2D4266]">Гарантия 10 лет</span>
                                 </div>
-                                <div className={`flex w-1/2 items-center space-x-2`}>
-                                    <Image src="/3d.svg" width={24} height={24} alt="Бесплатный 3D эскиз" />
+                                <div className="single-product-icons__item flex w-1/2 items-center space-x-2">
+                                    <Image src="/3d.svg" width={28} height={28} alt="Бесплатный 3D эскиз" priority className="icon-fixed-28" />
                                     <span className="text-[12px] text-[#2D4266]">Бесплатный 3D эскиз</span>
                                 </div>
-                                <div className={`flex w-1/2 items-center space-x-2`}>
-                                    <Image src="/credit.svg" width={24} height={24} alt="Рассрочка платежа" />
+                                <div className="single-product-icons__item flex w-1/2 items-center space-x-2">
+                                    <Image src="/credit.svg" width={28} height={28} alt="Рассрочка платежа" priority className="icon-fixed-28" />
                                     <span className="text-[12px] text-[#2D4266]">Рассрочка платежа</span>
                                 </div>
-                                <div className={`flex w-1/2 items-center space-x-2`}>
-                                    <Image src="/safe.svg" width={24} height={24} alt="Бесплатное хранение" />
+                                <div className="single-product-icons__item flex w-1/2 items-center space-x-2">
+                                    <Image src="/safe.svg" width={28} height={28} alt="Бесплатное хранение" priority className="icon-fixed-28" />
                                     <span className="text-[12px] text-[#2D4266]">Бесплатное хранение</span>
                                 </div>
                             </div>
@@ -880,7 +911,7 @@ const ProductPage = () => {
                         </div>
                     </div>
 
-                    <div className="mb-7.5 font-[600]">
+                    <div className="mb-7.5 font-semibold">
                         {activeTab === "characteristics" && (
                             <div>
                                 <div
@@ -989,7 +1020,7 @@ const ProductPage = () => {
                     />
 
                     <div className="mb-7.5">
-                        <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
+                        <h2 className="text-[28px] font-semibold text-[#2D4266] mb-5">
                             Примеры оформления
                         </h2>
                         <p className="text-[#2D4266] mb-5">
@@ -1026,7 +1057,7 @@ const ProductPage = () => {
                     </div>
 
                     <div className="mb-7.5">
-                        <h2 className="text-[28px] font-[600] text-[#2D4266] mb-5">
+                        <h2 className="text-[28px] font-semibold text-[#2D4266] mb-5">
                             Похожие товары
                         </h2>
                         <div className="grid grid-cols-2 md:grid-cols-3">

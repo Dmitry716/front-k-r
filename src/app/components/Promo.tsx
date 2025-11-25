@@ -54,27 +54,30 @@ const Promo = () => {
         {campaigns.map((campaign) => (
           <div
             key={campaign.id}
-            className="max-w-full md:w-1/3 px-2.5 overflow-hidden"
+            className="promo-card max-w-full md:w-1/3 px-2.5 overflow-hidden"
           >
             <a
               href={campaign.link || (campaign.slug ? `/sales/${campaign.slug}` : '#')}
-              className="block h-full bg-[#f5f6fa] rounded-lg shadow-sm"
+              className="promo-card__link block h-full bg-[#f5f6fa] rounded-lg shadow-sm"
             >
               {(() => {
                 const imgSrc = campaign.featuredImage || campaign.image || campaign.images?.[0];
                 if (!imgSrc) return null;
                 return (
-                  <Image
-                    src={imgSrc}
-                    alt={campaign.title}
-                    className="w-full h-auto object-cover rounded-lg"
-                    width={400}
-                    height={250}
-                    quality={80}
-                  />
+                  <div className="promo-card__image">
+                    <Image
+                      src={imgSrc}
+                      alt={campaign.title}
+                      fill
+                      className="rounded-lg"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                      quality={80}
+                      priority={Boolean(campaigns.length && campaign.id === campaigns[0].id)}
+                    />
+                  </div>
                 );
               })()}
-              <div className="px-4.25 py-3.75 md:p-6">
+              <div className="promo-card__content px-4.25 py-3.75 md:p-6">
                 <h3 className="font-bold text-md lg:text-xl text-[#2c3a54] mb-1.25">{campaign.title}</h3>
                 {campaign.description && (
                   <p className="text-sm md:text-md text-[#2c3a54cc] leading-relaxed">

@@ -10,6 +10,7 @@ import SidebarStickyHelp from "@/app/components/Sidebar/SidebarStickyHelp";
 import ProductCard from "@/app/components/ProductCard";
 import Pagination from "@/app/components/Pagination";
 import Promo from "@/app/components/Promo";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { PageDescriptionBlock } from "@/app/components/PageDescriptionBlock";
 
 interface LandscapeItem {
@@ -126,15 +127,15 @@ const LandscapeCategoryPage = () => {
           <SidebarCatalogMenu />
           <SidebarStickyHelp />
         </div>
-        <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+        <div className="w-full lg:ml-5 lg:max-w-[75%]">
           <div className={`${isTablet ? 'container-centered' : ''}`}>
             <PathPage />
-            <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">
+            <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">
               {categoryTitle}
             </h1>
 
             {/* Описание страницы */}
-            <div className="mt-7.5 font-[600] shadow-xs p-5 lg:p-7.5 rounded-lg mb-7.5">
+            <div className="mt-7.5 font-semibold shadow-xs p-5 lg:p-7.5 rounded-lg mb-7.5">
               <PageDescriptionBlock pageSlug={`landscape-${categorySlug}`} />
             </div>
 
@@ -200,7 +201,9 @@ const LandscapeCategoryPage = () => {
                 )
               ) : (
                 <div className="col-span-full text-center py-10">
-                  <p className="text-gray-600">Загрузка...</p>
+                  <div className="flex justify-center">
+                    <LoadingSpinner size={36} />
+                  </div>
                 </div>
               )}
             </div>

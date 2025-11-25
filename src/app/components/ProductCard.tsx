@@ -129,34 +129,26 @@ const ProductCard = ({
   const [showIndicators, setShowIndicators] = useState(false);
   const [selectedColorIndex, setSelectedColorIndex] = useState(0); 
   const imageRef = useRef<HTMLDivElement>(null);
-  const [isClient, setIsClient] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [touchStartX, setTouchStartX] = useState(0);
   const [touchEndX, setTouchEndX] = useState(0);
 
   useEffect(() => {
-    setIsClient(true);
     // Инициализация состояния из localStorage используя slug
-    if (product.slug) {
-      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
-      // Проверяем как новый формат (slug), так и старый (ID)
-      const isFavoriteBySlug = favorites.includes(product.slug);
-      const isFavoriteById = favorites.includes(product.id);
-      setIsFavorite(isFavoriteBySlug || isFavoriteById);
+    if (typeof window === "undefined" || !product.slug) {
+      return;
     }
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    // Проверяем как новый формат (slug), так и старый (ID)
+    const isFavoriteBySlug = favorites.includes(product.slug);
+    const isFavoriteById = favorites.includes(product.id);
+    setIsFavorite(isFavoriteBySlug || isFavoriteById);
   }, [product.slug, product.id]);
 
   // Инициализация дефолтного цвета на планшете
   useEffect(() => {
     setSelectedColorIndex(0);
   }, [product.id]);
-
-  // Пока не на клиенте — рендерим "нейтральную" версию
-  if (!isClient) {
-    return (
-      <div className="relative bg-gray-200 animate-pulse">Загрузка...</div>
-    );
-  }
 
   // Проверяем, существуют ли цвета и есть ли в них хотя бы один элемент
   const productColors: ColorOption[] = (() => {
@@ -425,7 +417,7 @@ const ProductCard = ({
 
   return (
     <div
-      className={`relative bg-white shadow-sm overflow-hidden group flex-shrink-0 h-full ${isTablet ? "basis-[calc(100%_/_3)]" : "basis-[calc(100%_/_4)]"
+      className={`product-card relative bg-white shadow-sm overflow-hidden group shrink-0 h-full ${isTablet ? "basis-[calc(100%/3)]" : "basis-[calc(100%/4)]"
         }`}
     >
       {/* Бейдж скидки */}
@@ -476,7 +468,7 @@ const ProductCard = ({
       </div>
       {/* Изображение товара */}
       <div
-        className="relative w-full h-64 overflow-hidden cursor-pointer"
+        className="product-card__image relative w-full h-64 overflow-hidden cursor-pointer"
         ref={imageRef}
         onMouseMove={handleMouseMove}
         onMouseLeave={() => {
@@ -535,10 +527,10 @@ const ProductCard = ({
         )}
       </div>
       {/* Нижняя часть карточки */}
-      <div className="p-3 flex flex-col h-[calc(100%-256px)]">
+      <div className="product-card__body p-3 flex flex-col h-[calc(100%-256px)]">
         {/* Title */}
         <h3
-          className={`font-bold text-gray-800 mb-1 ${isTablet ? "text-base" : "text-lg"
+          className={`product-card__title font-bold text-gray-800 mb-1 ${isTablet ? "text-base" : "text-lg"
             }`}
         >
           {product.name}
@@ -550,7 +542,7 @@ const ProductCard = ({
           </p>
         ) : null}
         {/* Блок с ценой и кнопкой: flex-row на десктопе (цена слева, кнопка справа), на мобиле - col */}
-        <div className="flex-1 flex flex-col xl:flex-row justify-between">
+        <div className="product-card__price flex-1 flex flex-col xl:flex-row justify-between">
           {/* Цены в одну строку */}
           <div
             className={`flex items-center xl:self-end xl:flex-col xl:items-start ${isNarrowMobile ? "flex-col gap-0 items-start" : "gap-2"

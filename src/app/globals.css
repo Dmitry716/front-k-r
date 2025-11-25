@@ -84,15 +84,27 @@ body.min-w-\[360px\] {
   contain: layout;
 }
 
+.page-centered.mt-5.max-w-\[1300px\].flex {
+  min-height: 900px;
+}
+
 @media (max-width: 1023px) {
   .page-centered.mt-5.max-w-\[1300px\] {
     min-height: 520px;
+  }
+
+  .page-centered.mt-5.max-w-\[1300px\].flex {
+    min-height: 720px;
   }
 }
 
 @media (max-width: 767px) {
   .page-centered.mt-5.max-w-\[1300px\] {
     min-height: 680px;
+  }
+
+  .page-centered.mt-5.max-w-\[1300px\].flex {
+    min-height: 640px;
   }
 }
 
@@ -249,15 +261,110 @@ section.max-w-\[1300px\].mt-17.lg\:mt-30 {
 }
 
 /* Fix ProductCard CLS on category pages */
-.relative.bg-white.shadow-sm.overflow-hidden.group.flex-shrink-0.h-full {
+.relative.bg-white.shadow-sm.overflow-hidden.group.shrink-0.h-full {
   min-height: 420px;
   contain: layout style;
 }
 
 @media (max-width: 767px) {
-  .relative.bg-white.shadow-sm.overflow-hidden.group.flex-shrink-0.h-full {
+  .relative.bg-white.shadow-sm.overflow-hidden.group.shrink-0.h-full {
     min-height: 360px;
   }
+}
+
+.single-product {
+  min-height: 900px;
+  contain: layout paint;
+}
+
+@media (max-width: 1023px) {
+  .single-product {
+    min-height: 700px;
+  }
+}
+
+@media (max-width: 767px) {
+  .single-product {
+    min-height: 620px;
+  }
+}
+
+/* Stabilize single product hero media */
+.single-product-media {
+  min-height: 520px;
+  contain: layout paint;
+}
+
+@media (max-width: 1023px) {
+  .single-product-media {
+    min-height: 420px;
+  }
+}
+
+@media (max-width: 767px) {
+  .single-product-media {
+    min-height: 360px;
+  }
+}
+
+.single-product-media img,
+.single-product-media picture {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.single-product-price {
+  min-height: 110px;
+  contain: layout;
+}
+
+@media (max-width: 767px) {
+  .single-product-price {
+    min-height: 90px;
+  }
+}
+
+.single-product-icons {
+  min-height: 120px;
+  contain: layout;
+}
+
+.single-product-icons__item {
+  min-height: 36px;
+}
+
+.icon-fixed-28 {
+  width: 28px !important;
+  height: 28px !important;
+  flex-shrink: 0;
+}
+
+.promo-card {
+  min-height: 340px;
+}
+
+.promo-card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  contain: layout paint;
+}
+
+.promo-card__image {
+  position: relative;
+  width: 100%;
+  padding-top: 62%;
+  overflow: hidden;
+}
+
+.promo-card__image img {
+  object-fit: cover;
+}
+
+.promo-card__content {
+  flex: 1;
+  min-height: 150px;
 }
 
 /* Stabilize footer to prevent 0.567 CLS */
