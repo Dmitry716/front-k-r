@@ -162,7 +162,7 @@ export default function AdminLayout({
       </aside>
 
       {/* Main content */}
-      <main className="ml-64 min-h-screen bg-gray-50">
+      <main className="ml-64 min-h-screen bg-gray-50 max-h-screen overflow-y-auto">
         <div className="p-8">
           <div className="max-w-7xl mx-auto">
             {children}

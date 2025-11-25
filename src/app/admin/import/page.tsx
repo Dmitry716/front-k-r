@@ -38,6 +38,29 @@ export default function MonumentsImportPage() {
     { value: "composite", label: "Составные памятники" },
   ];
 
+  const templateFiles = [
+    {
+      label: "Одиночные памятники",
+      filename: "single-monuments.xlsx",
+      countLabel: "(59 шт)",
+    },
+    {
+      label: "Двойные памятники",
+      filename: "double-monuments.xlsx",
+      countLabel: "(32 шт)",
+    },
+    {
+      label: "Составные памятники",
+      filename: "composite-monuments.xlsx",
+      countLabel: "(106 шт)",
+    },
+    {
+      label: "Эксклюзивные памятники",
+      filename: "exclusive-monuments.xlsx",
+      countLabel: "(49 шт)",
+    },
+  ];
+
   // Проверка доступа
   useEffect(() => {
     const userStr = localStorage.getItem("adminUser");
@@ -383,42 +406,18 @@ export default function MonumentsImportPage() {
             Скачайте пример Excel файла для нужной категории, отредактируйте данные и загрузите обратно
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <a
-              href="/import-examples/single-monuments.xlsx"
-              download="single-monuments.xlsx"
-              className="flex items-center gap-2 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors text-green-700 font-medium"
-            >
-              <span>📥</span>
-              <span>Одиночные памятники</span>
-              <span className="text-xs ml-auto text-gray-600">(59 шт)</span>
-            </a>
-            <a
-              href="/import-examples/double-monuments.xlsx"
-              download="double-monuments.xlsx"
-              className="flex items-center gap-2 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors text-green-700 font-medium"
-            >
-              <span>📥</span>
-              <span>Двойные памятники</span>
-              <span className="text-xs ml-auto text-gray-600">(32 шт)</span>
-            </a>
-            <a
-              href="/import-examples/composite-monuments.xlsx"
-              download="composite-monuments.xlsx"
-              className="flex items-center gap-2 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors text-green-700 font-medium"
-            >
-              <span>📥</span>
-              <span>Составные памятники</span>
-              <span className="text-xs ml-auto text-gray-600">(106 шт)</span>
-            </a>
-            <a
-              href="/import-examples/exclusive-monuments.xlsx"
-              download="exclusive-monuments.xlsx"
-              className="flex items-center gap-2 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors text-green-700 font-medium"
-            >
-              <span>📥</span>
-              <span>Эксклюзивные памятники</span>
-              <span className="text-xs ml-auto text-gray-600">(49 шт)</span>
-            </a>
+            {templateFiles.map((file) => (
+              <a
+                key={file.filename}
+                href={`/import-examples/${file.filename}`}
+                download={file.filename}
+                className="flex items-center gap-2 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors text-green-700 font-medium"
+              >
+                <span>📥</span>
+                <span>{file.label}</span>
+                <span className="text-xs ml-auto text-gray-600">{file.countLabel}</span>
+              </a>
+            ))}
           </div>
         </div>
       </div>
