@@ -632,7 +632,7 @@ const Header = () => {
               height={20}
               src="/mts.svg"
               alt="MTS"
-              objectFit="contain"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </div>
           <span className="text-sm font-medium">{PHONE_MTS}</span>
@@ -650,7 +650,7 @@ const Header = () => {
               height={20}
               src="/a1.webp"
               alt="A1"
-              objectFit="contain"
+              style={{ width: 'auto', height: 'auto' }}
             />
           </div>
           <span className="text-sm font-medium">{PHONE_A1}</span>

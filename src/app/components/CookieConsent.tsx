@@ -14,9 +14,6 @@ const CookieConsent = () => {
       const now = Date.now();
       const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
 
-      // Показываем баннер если:
-      // 1. Нет согласия вообще
-      // 2. Согласие истекло (30 дней)
       if (!consent || !consentTime) {
         setShowBanner(true);
       } else if (now - parseInt(consentTime) > thirtyDaysInMs) {
@@ -25,7 +22,6 @@ const CookieConsent = () => {
         setShowBanner(false);
       }
     } catch (error) {
-      console.error('Error checking cookie consent:', error);
       setShowBanner(true);
     }
   }, []);
@@ -35,7 +31,6 @@ const CookieConsent = () => {
       localStorage.setItem('cookieConsent', 'accepted');
       localStorage.setItem('cookieConsentTime', Date.now().toString());
       setShowBanner(false);
-      // Reload to load metrika if needed
       setTimeout(() => {
         window.location.reload();
       }, 500);

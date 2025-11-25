@@ -409,7 +409,7 @@ export default function MonumentsImportPage() {
             {templateFiles.map((file) => (
               <a
                 key={file.filename}
-                href={`/import-examples/${file.filename}`}
+                href={`/api/download-template?file=${encodeURIComponent(file.filename)}`}
                 download={file.filename}
                 className="flex items-center gap-2 p-3 bg-white border border-green-300 rounded-lg hover:bg-green-100 transition-colors text-green-700 font-medium"
               >

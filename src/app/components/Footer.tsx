@@ -62,6 +62,7 @@ const Footer = () => {
                 alt="Раскрыть"
                 width={18}
                 height={12}
+                style={{ width: 'auto', height: 'auto' }}
                 className={`transform transition-transform ${
                   openMenus.includes(category.key) ? "rotate-180" : ""
                 }`}
@@ -106,13 +107,13 @@ const Footer = () => {
             </button>
 
             <a href="viber://chat?number=%2B375333226652" className="flex mr-2" target="_blank" rel="noopener noreferrer">
-              <Image src="/viber.svg" alt="Viber" width={29} height={28} priority />
+              <Image src="/viber.svg" alt="Viber" width={29} height={28} style={{ width: 'auto', height: 'auto' }} priority />
             </a>
             <a href="https://t.me/+375333226652" className="flex mr-2" target="_blank" rel="noopener noreferrer">
-              <Image src="/tm.svg" alt="Telegram" width={28} height={28} priority />
+              <Image src="/tm.svg" alt="Telegram" width={28} height={28} style={{ width: 'auto', height: 'auto' }} priority />
             </a>
             <a href="https://wa.me/375333226652" className="flex" target="_blank" rel="noopener noreferrer">
-              <Image src="/wa.svg" alt="WhatsApp" width={28} height={28} priority />
+              <Image src="/wa.svg" alt="WhatsApp" width={28} height={28} style={{ width: 'auto', height: 'auto' }} priority />
             </a>
           </div>
 
