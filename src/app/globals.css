@@ -367,15 +367,26 @@ section.max-w-\[1300px\].mt-17.lg\:mt-30 {
   min-height: 150px;
 }
 
-/* Stabilize footer to prevent 0.567 CLS */
-footer.bg-white.border-t.border-\[#e6e8ed\] {
-  min-height: 400px;
+.fences-grid {
+  min-height: 520px;
   contain: layout;
 }
 
 @media (max-width: 1023px) {
+  .fences-grid {
+    min-height: 840px;
+  }
+}
+
+/* Stabilize footer block so contact section reserves space before hydration */
+footer.bg-white.border-t.border-\[#e6e8ed\] {
+  min-height: 560px;
+  contain: layout paint;
+}
+
+@media (max-width: 1023px) {
   footer.bg-white.border-t.border-\[#e6e8ed\] {
-    min-height: 800px;
+    min-height: 980px;
   }
 }
 

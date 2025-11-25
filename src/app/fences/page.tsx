@@ -13,6 +13,7 @@ import { categoriesFences } from "../mock/categories";
 import Link from "next/link";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 interface FenceProduct {
   id: number;
@@ -226,22 +227,28 @@ const FencesPageClient = () => {
                     </div>
 
                     {/* Сетка продуктов */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
-                        {isClient ? (
-                            currentProducts.map((product: any, index: number) => (
-                                <ProductCard
-                                    key={product.id}
-                                    product={product}
-                                    index={index}
-                                    isTablet={isTablet}
-                                    isMobile={isMobile}
-                                    isNarrowMobile={isNarrowMobile}
-                                />
-                            ))
+                    <div className="fences-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
+                        {isClient && !loading ? (
+                            currentProducts.length > 0 ? (
+                                currentProducts.map((product: any, index: number) => (
+                                    <ProductCard
+                                        key={product.id}
+                                        product={product}
+                                        index={index}
+                                        isTablet={isTablet}
+                                        isMobile={isMobile}
+                                        isNarrowMobile={isNarrowMobile}
+                                    />
+                                ))
+                            ) : (
+                                <div className="col-span-full py-10 text-center text-[#6B809E]">
+                                    Товары не найдены
+                                </div>
+                            )
                         ) : (
-                            currentProducts.map((product, index) => (
-                                <div key={product.id} className="invisible h-0" />
-                            ))
+                            <div className="col-span-full flex justify-center py-10">
+                                <LoadingSpinner size={36} />
+                            </div>
                         )}
                     </div>
 
@@ -269,9 +276,11 @@ const FencesPageClient = () => {
                                     {/* Текст */}
                                     <h2 className="text-[16px] font-bold text-[#222222] self-start">Памятники</h2>
                                     {/* Изображение с абсолютным позиционированием */}
-                                    <img
+                                    <Image
                                         src="/section/monuments.webp"
-                                        alt="Памятники"
+                                       alt="Памятники"
+                                       width={130}
+                                       height={130}
                                         className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
                                         style={{
                                             position: 'absolute',
@@ -279,7 +288,10 @@ const FencesPageClient = () => {
                                             right: '10px',
                                             transform: 'translateY(-50%)',
                                         }}
-                                     loading="lazy"/>
+                                        sizes="(max-width: 1024px) 75px, 130px"
+                                        loading="lazy"
+                                        quality={70}
+                                    />
                                 </Link>
                             </div>
 
@@ -292,9 +304,11 @@ const FencesPageClient = () => {
                                     {/* Текст */}
                                     <h2 className="text-[16px] font-bold text-[#222222] self-start">Аксессуары</h2>
                                     {/* Изображение с абсолютным позиционированием */}
-                                    <img
+                                    <Image
                                         src="/section/accessories.webp"
                                         alt="Аксессуары"
+                                        width={130}
+                                        height={130}
                                         className="w-[75px] lg:w-[130px] h-auto object-cover rounded-lg"
                                         style={{
                                             position: 'absolute',
@@ -302,7 +316,10 @@ const FencesPageClient = () => {
                                             right: '10px',
                                             transform: 'translateY(-50%)',
                                         }}
-                                     loading="lazy"/>
+                                        sizes="(max-width: 1024px) 75px, 130px"
+                                        loading="lazy"
+                                        quality={70}
+                                    />
                                 </Link>
                             </div>
                         </div>

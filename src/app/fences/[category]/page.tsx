@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import PathPage from "@/app/components/PathPage";
@@ -9,9 +8,9 @@ import SidebarStickyHelp from "@/app/components/Sidebar/SidebarStickyHelp";
 import ProductCard from "@/app/components/ProductCard";
 import Pagination from "@/app/components/Pagination";
 import Promo from "@/app/components/Promo";
-import { apiClient } from "@/lib/api-client";
 import { PageDescriptionBlock } from "@/app/components/PageDescriptionBlock";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import { useProductsCache } from "@/hooks/useProductsCache";
 
 interface Fence {
   id: number;
@@ -23,12 +22,6 @@ interface Fence {
   image: string;
   createdAt: string;
   popular?: boolean;
-}
-
-interface CategoryData {
-  title: string;
-  products: Fence[];
-  sortOptions?: string[];
 }
 
 const CATEGORY_MAP: Record<string, string> = {
@@ -43,6 +36,8 @@ const CATEGORY_DESCRIPTION_SLUGS: Record<string, string> = {
   "metal": "fences-metal",
 };
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://k-r.by/api";
+
 const FencesCategoryPage = () => {
   const params = useParams();
   const categorySlug = params?.category as string;
@@ -54,7 +49,6 @@ const FencesCategoryPage = () => {
   const [isMobile, setIsMobile] = useState(false);
   const [isNarrowMobile, setIsNarrowMobile] = useState(false);
   const [products, setProducts] = useState<Fence[]>([]);
-  const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState("Сначала популярные");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -77,34 +71,22 @@ const FencesCategoryPage = () => {
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
+  const categoryName = CATEGORY_MAP[categorySlug?.toLowerCase()] || categorySlug || "";
+  const encodedCategory = encodeURIComponent(categoryName);
+  const fencesEndpoint = `${API_BASE_URL}/fences${encodedCategory ? `?category=${encodedCategory}&limit=200` : "?limit=200"}`;
+  const { products: cachedProducts, loading } = useProductsCache([fencesEndpoint]);
+
   useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const categoryName = CATEGORY_MAP[categorySlug?.toLowerCase()] || categorySlug;
-        const encodedCategory = encodeURIComponent(categoryName);
-        const data = await apiClient.get(`/fences?category=${encodedCategory}&limit=200`);
-        
-        if (data.success && data.data) {
-          // Преобразуем в формат с colors для совместимости с ProductCard
-          const transformed = data.data.map((item: any) => ({
-            ...item,
-            colors: [{
-              name: item.category,
-              image: item.image,
-              price: item.price,
-            }],
-          }));
-          setProducts(transformed);
-        }
-      } catch (error) {
-        console.error("Ошибка при загрузке оград:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    loadProducts();
-  }, [categorySlug]);
+    const transformed = cachedProducts.map((item: any) => ({
+      ...item,
+      colors: [{
+        name: item.category,
+        image: item.image,
+        price: item.price,
+      }],
+    }));
+    setProducts(transformed);
+  }, [cachedProducts, categorySlug]);
 
   const currentProducts = products.slice(
     (currentPage - 1) * productsPerPage,
@@ -224,7 +206,7 @@ const FencesCategoryPage = () => {
             </div>
 
             {/* Сетка продуктов */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
+            <div className="fences-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
               {isClient && !loading ? (
                 finalProducts.length > 0 ? (
                   finalProducts.map((product, index) => (
@@ -248,6 +230,7 @@ const FencesCategoryPage = () => {
                       isTablet={isTablet}
                       isMobile={isMobile}
                       isNarrowMobile={isNarrowMobile}
+                      index={index}
                     />
                   ))
                 ) : (
