@@ -213,6 +213,18 @@ const FenceDetailPage = () => {
         window.dispatchEvent(new Event("favoritesChanged"));
     };
 
+    const normalizeImagePath = (imagePath?: string): string => {
+        if (!imagePath) return "/placeholder.png";
+        if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+            return imagePath;
+        }
+        const prepared = imagePath.startsWith("/") ? imagePath : `/${imagePath}`;
+        return prepared
+            .split("/")
+            .map((segment) => encodeURIComponent(segment))
+            .join("/");
+    };
+
     // Компонент для отображения одной характеристики
     const CharacteristicItem = ({
         label,
@@ -286,7 +298,7 @@ const FenceDetailPage = () => {
                     </h1>
 
                     {/* Основной контент карточки */}
-                    <div className={`mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
+                    <div className={`single-product-info mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
                         {/* Изображение */}
                         <div className="relative max-w-[523px] md:w-7/12 mx-auto">
                             {/* Звезда (избранное) */}
@@ -298,11 +310,16 @@ const FenceDetailPage = () => {
                                 ★
                             </div>
 
-                            <img
-                                src={fence.image}
+                            <Image
+                                src={normalizeImagePath(fence.image)}
                                 alt={fence.name}
-                                className="w-full h-auto object-contain rounded-lg md:pr-4" loading="lazy"
-                            />1
+                                width={800}
+                                height={800}
+                                className="w-full h-auto object-contain rounded-lg md:pr-4"
+                                priority
+                                sizes="(max-width: 640px) 100vw, (max-width: 1023px) 70vw, 523px"
+                                quality={80}
+                            />
                         </div>
 
                         {/* Блок с информацией о товаре */}
@@ -392,7 +409,7 @@ const FenceDetailPage = () => {
                             </div>
 
                             {/* Контент вкладок */}
-                            <div className="mb-7.5 font-semibold">
+                            <div className="single-product-info mb-7.5 font-semibold">
                                 {activeTab === "characteristics" && hasCharacteristics && (
                                     <div>
                                         <div className="space-y-1">

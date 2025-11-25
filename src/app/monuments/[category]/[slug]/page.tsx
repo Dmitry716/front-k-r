@@ -713,7 +713,7 @@ const ProductPage = () => {
                         {product.name}
                     </h1>
 
-                    <div className={`mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
+                    <div className={`single-product-info mb-7.5 font-semibold ${isMobile ? 'block' : 'flex p-5'}`}>
                         <div className="single-product-media relative max-w-[523px] md:w-7/12 mx-auto">
 
                             {product.discount && product.discount > 0 && (
@@ -911,7 +911,7 @@ const ProductPage = () => {
                         </div>
                     </div>
 
-                    <div className="mb-7.5 font-semibold">
+                    <div className="single-product-info mb-7.5 font-semibold">
                         {activeTab === "characteristics" && (
                             <div>
                                 <div

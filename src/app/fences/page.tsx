@@ -13,7 +13,6 @@ import { categoriesFences } from "../mock/categories";
 import Link from "next/link";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
-import LoadingSpinner from "../components/LoadingSpinner";
 
 interface FenceProduct {
   id: number;
@@ -60,7 +59,6 @@ const getTotalPages = (totalProducts: number, productsPerPage: number) => {
 };
 
 const FencesPageClient = () => {
-    const [isClient, setIsClient] = useState(false);
     const [fences, setFences] = useState<FenceProduct[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [productsPerPage, setProductsPerPage] = useState(60); // По умолчанию показываем 60 товаров
@@ -68,11 +66,10 @@ const FencesPageClient = () => {
     const [isMobile, setIsMobile] = useState(false);
     const [isNarrowMobile, setIsNarrowMobile] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>(categoriesFences);
 
     // Для адаптивности и загрузки данных
     useEffect(() => {
-        setIsClient(true)
         const checkScreenSize = () => {
             const width = window.innerWidth;
             setIsTablet(width < 1024);
@@ -228,7 +225,7 @@ const FencesPageClient = () => {
 
                     {/* Сетка продуктов */}
                     <div className="fences-grid grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">
-                        {isClient && !loading ? (
+                        {!loading ? (
                             currentProducts.length > 0 ? (
                                 currentProducts.map((product: any, index: number) => (
                                     <ProductCard
@@ -246,9 +243,17 @@ const FencesPageClient = () => {
                                 </div>
                             )
                         ) : (
-                            <div className="col-span-full flex justify-center py-10">
-                                <LoadingSpinner size={36} />
-                            </div>
+                            Array.from({ length: isMobile ? 6 : 9 }).map((_, idx) => (
+                                <div
+                                    key={`skeleton-${idx}`}
+                                    className="animate-pulse bg-white rounded-xl shadow-sm p-3 flex flex-col h-full"
+                                >
+                                    <div className="h-56 bg-[#eef1f4] rounded-lg mb-3" />
+                                    <div className="h-4 bg-[#eef1f4] rounded-md mb-2" />
+                                    <div className="h-4 bg-[#eef1f4] rounded-md mb-4 w-3/4" />
+                                    <div className="mt-auto h-5 bg-[#eef1f4] rounded-full w-2/3" />
+                                </div>
+                            ))
                         )}
                     </div>
 

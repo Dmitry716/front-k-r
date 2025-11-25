@@ -4,6 +4,7 @@ import Image from "next/image";
 import React from "react";
 import { useEffect, useState } from "react";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface CampaignApiItem {
   id: number | string;
@@ -47,7 +48,11 @@ const Promo = () => {
     <section className="max-w-[1300px] container-centered mt-17 lg:mt-30">
       <h2 className="text-4xl font-bold text-[#2c3a54] ml-2.5 mb-7.5">Наши акции</h2>
 
-      {loading && <div className="ml-2.5 text-[#6B809E]">Загрузка...</div>}
+      {loading && (
+        <div className="ml-2.5 flex text-[#6B809E]">
+          <LoadingSpinner size={28} />
+        </div>
+      )}
       {error && <div className="ml-2.5 text-red-600">{error}</div>}
 
       <div className="flex flex-col md:flex-row space-y-5 md:space-y-0">

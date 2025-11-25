@@ -367,6 +367,17 @@ section.max-w-\[1300px\].mt-17.lg\:mt-30 {
   min-height: 150px;
 }
 
+.single-product-info {
+  min-height: 540px;
+  contain: layout;
+}
+
+@media (max-width: 1023px) {
+  .single-product-info {
+    min-height: 780px;
+  }
+}
+
 .fences-grid {
   min-height: 520px;
   contain: layout;
