@@ -33,6 +33,7 @@ export default function SidebarInfoDropdown() {
                     height={12}
                     className={`transform transition-transform ${isOpen ? "rotate-180" : ""
                         }`}
+                    priority
                 />
             </button>
 

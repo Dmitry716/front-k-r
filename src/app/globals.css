@@ -80,12 +80,19 @@ body.min-w-\[360px\] {
 
 /* Reserve space for category page product grid */
 .page-centered.mt-5.max-w-\[1300px\] {
-  min-height: 600px;
+  min-height: 750px;
+  contain: layout;
 }
 
 @media (max-width: 1023px) {
   .page-centered.mt-5.max-w-\[1300px\] {
-    min-height: 400px;
+    min-height: 520px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-centered.mt-5.max-w-\[1300px\] {
+    min-height: 680px;
   }
 }
 
@@ -243,13 +250,13 @@ section.max-w-\[1300px\].mt-17.lg\:mt-30 {
 
 /* Fix ProductCard CLS on category pages */
 .relative.bg-white.shadow-sm.overflow-hidden.group.flex-shrink-0.h-full {
-  min-height: 350px;
+  min-height: 420px;
   contain: layout style;
 }
 
 @media (max-width: 767px) {
   .relative.bg-white.shadow-sm.overflow-hidden.group.flex-shrink-0.h-full {
-    min-height: 320px;
+    min-height: 360px;
   }
 }
 

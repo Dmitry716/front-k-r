@@ -288,6 +288,7 @@ const Header = () => {
                         height={17}
                         alt="arrow"
                         className="group-hover:rotate-180 transition-transform"
+                        priority
                       />
                     </button>
 
@@ -555,6 +556,7 @@ const Header = () => {
             alt="logo"
             width={192}
             height={28}
+            priority
           />
         </Link>
 
