@@ -84,52 +84,13 @@ const HeroSlider = () => {
   const slides = [
     {
       id: 1,
-      image: "/sliders/single.webp",
-      title: "Одиночные памятники",
-      subtitle: "Классические и современные модели из высококачественного гранита",
+      imageDesktop: "/sliders/1.jpg",
+      imageMobile: "/sliders/1m.jpg",
+      title: "Гранитные памятники",
+      subtitle: "700+ уникальных моделей эксклюзивных и классических памятников",
       button: {
         text: "Смотреть каталог",
-        href: "/monuments/single",
-      },
-    },
-    {
-      id: 2,
-      image: "/sliders/composite.webp",
-      title: "Составные памятники",
-      subtitle: "Многоэлементные комплексы с богатым оформлением",
-      button: {
-        text: "Посмотреть модели",
-        href: "/monuments/composite",
-      },
-    },
-    {
-      id: 3,
-      image: "/sliders/exclusive.webp",
-      title: "Эксклюзивные памятники",
-      subtitle: "Уникальные авторские работы из редких пород гранита",
-      button: {
-        text: "Изучить коллекцию",
-        href: "/monuments/exclusive",
-      },
-    },
-    {
-      id: 4,
-      image: "/sliders/complex.webp",
-      title: "Мемориальные комплексы",
-      subtitle: "Полное благоустройство места захоронения с оградой",
-      button: {
-        text: "Узнать подробнее",
-        href: "/monuments/complex",
-      },
-    },
-    {
-      id: 5,
-      image: "/sliders/fences.webp",
-      title: "Ограды для захоронений",
-      subtitle: "Ограды на кладбище любой сложности",
-      button: {
-        text: "Выбрать ограду",
-        href: "/fences",
+        href: "/monuments",
       },
     },
   ];
@@ -210,7 +171,7 @@ const HeroSlider = () => {
           >
             {/* Next.js Image для оптимизации */}
             <Image
-              src={slide.image}
+              src={windowWidth >= 768 ? slide.imageDesktop : slide.imageMobile}
               alt={slide.title}
               fill
               priority={index === 0}
@@ -237,7 +198,7 @@ const HeroSlider = () => {
               >
                 <h2
                   className="font-bold mb-2"
-                  style={{ fontSize: fontSize.title, paddingInlineEnd: "300px" }}
+                  style={{ fontSize: fontSize.title }}
                 >
                   {slide.title}
                 </h2>
@@ -262,7 +223,7 @@ const HeroSlider = () => {
               </div>
             ) : (
               // Мобильная версия - контент внизу поверх изображения
-              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20">
+              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20">
                 <h2
                   className="font-bold mb-2 text-white"
                   style={{ fontSize: fontSize.title }}
@@ -336,16 +297,16 @@ const HeroSlider = () => {
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className="relative w-[14px] h-[14px] rounded-full bg-white border-1 border-[#2c3a54] transition-colors flex items-center justify-center"
+            className="relative w-3.5 h-3.5 rounded-full bg-white border border-[#2c3a54] transition-colors flex items-center justify-center"
             type="button"
             aria-label={`Перейти к слайду ${index + 1}`}
           >
             {/* Активный — большой тёмный кружок внутри */}
             {index === currentSlide ? (
-              <span className="w-[8px] h-[8px] rounded-full bg-[#2c3a54]"></span>
+              <span className="w-2 h-2 rounded-full bg-[#2c3a54]"></span>
             ) : (
               // Неактивный — при hover появляется меньший тёмный кружок
-              <span className="absolute w-[6px] h-[6px] rounded-full bg-[#2c3a54] opacity-0 hover:opacity-100 transition-opacity"></span>
+              <span className="absolute w-1.5 h-1.5 rounded-full bg-[#2c3a54] opacity-0 hover:opacity-100 transition-opacity"></span>
             )}
           </button>
         ))}
