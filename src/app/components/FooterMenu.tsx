@@ -89,7 +89,7 @@ const FooterMenu = () => {
 
   return (
     <>
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#e6e8ed] shadow-lg z-100">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-[#e6e8ed] shadow-lg z-50">
         <div className="flex">
           {/* Главная — ссылка */}
           <Link

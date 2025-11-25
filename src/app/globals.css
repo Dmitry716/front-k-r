@@ -21,6 +21,10 @@
   --foreground: #ffffff;
 }
 
+html {
+  position: relative;
+}
+
 /* Prevent layout shift from fonts and images */
 body {
   font-size: 16px;
@@ -75,7 +79,6 @@ div.mt-17.lg\:mt-30 {
 /* Fix body shift - ensure stable height before content loads */
 body.min-w-\[360px\] {
   min-height: 100vh;
-  contain: layout;
 }
 
 /* Reserve space for category page product grid */

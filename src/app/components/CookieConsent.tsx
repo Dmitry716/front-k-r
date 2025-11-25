@@ -3,46 +3,76 @@
 import { useState, useEffect } from 'react';
 
 const CookieConsent = () => {
-  const [showBanner, setShowBanner] = useState(false);
+  const [showBanner, setShowBanner] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    const consent = localStorage.getItem('cookieConsent');
-    if (!consent) {
+    setIsClient(true);
+    try {
+      const consent = localStorage.getItem('cookieConsent');
+      const consentTime = localStorage.getItem('cookieConsentTime');
+      const now = Date.now();
+      const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+
+      // Показываем баннер если:
+      // 1. Нет согласия вообще
+      // 2. Согласие истекло (30 дней)
+      if (!consent || !consentTime) {
+        setShowBanner(true);
+      } else if (now - parseInt(consentTime) > thirtyDaysInMs) {
+        setShowBanner(true);
+      } else {
+        setShowBanner(false);
+      }
+    } catch (error) {
+      console.error('Error checking cookie consent:', error);
       setShowBanner(true);
     }
   }, []);
 
   const acceptCookies = () => {
-    localStorage.setItem('cookieConsent', 'accepted');
-    setShowBanner(false);
-    // Reload to load metrika if needed
-    window.location.reload();
+    try {
+      localStorage.setItem('cookieConsent', 'accepted');
+      localStorage.setItem('cookieConsentTime', Date.now().toString());
+      setShowBanner(false);
+      // Reload to load metrika if needed
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      console.error('Error saving cookie consent:', error);
+    }
   };
 
   const declineCookies = () => {
-    localStorage.setItem('cookieConsent', 'declined');
-    setShowBanner(false);
+    try {
+      localStorage.setItem('cookieConsent', 'declined');
+      localStorage.setItem('cookieConsentTime', Date.now().toString());
+      setShowBanner(false);
+    } catch (error) {
+      console.error('Error saving cookie consent:', error);
+    }
   };
 
-  if (!showBanner) return null;
+  if (!isClient || !showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 z-200">
-      <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between">
-        <p className="text-sm mb-2 md:mb-0">
+    <div className="fixed bottom-0 left-0 right-0 bg-gray-800 text-white p-4 z-50">
+      <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+        <p className="text-sm">
           Мы используем файлы cookie для улучшения работы сайта. Продолжая использовать сайт, вы соглашаетесь с нашей{' '}
           <a href="/cookies" className="underline">Политикой использования файлов cookie</a>.
         </p>
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 shrink-0">
           <button
             onClick={declineCookies}
-            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-sm"
+            className="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded text-sm whitespace-nowrap"
           >
             Отклонить
           </button>
           <button
             onClick={acceptCookies}
-            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm"
+            className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm whitespace-nowrap"
           >
             Принять
           </button>

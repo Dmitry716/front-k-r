@@ -5,7 +5,11 @@ import { AdminProtector } from "./components/AdminProtector";
 import YandexMetrika from "./components/YandexMetrika";
 import SchemaOrg from "./components/SchemaOrg";
 import { schemaOrganization } from "@/lib/seo-schema";
-import LayoutWrapper from "./components/LayoutWrapper";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import FooterMenu from "./components/FooterMenu";
+import CookieConsent from "./components/CookieConsent";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Default metadata для корневого layout - используется как fallback
 export const metadata: Metadata = {
@@ -82,11 +86,14 @@ export default function RootLayout({
       </head>
       <body className="min-w-[360px]">
         <YandexMetrika />
+        <ScrollToTop />
         <DropdownProvider>
           <AdminProtector>
-            <LayoutWrapper>
-              {children}
-            </LayoutWrapper>
+            <Header />
+            {children}
+            <Footer />
+            <FooterMenu />
+            <CookieConsent />
           </AdminProtector>
         </DropdownProvider>
       </body>

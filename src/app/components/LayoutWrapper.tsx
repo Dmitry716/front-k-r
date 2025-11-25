@@ -18,13 +18,15 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
 
   // Для обычных страниц - полная вёрстка
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <ScrollToTop />
       <Header />
-      {children}
+      <main className="flex-1">
+        {children}
+      </main>
       <Footer />
-      <FooterMenu />
       <CookieConsent />
-    </>
+      <FooterMenu />
+    </div>
   );
 }

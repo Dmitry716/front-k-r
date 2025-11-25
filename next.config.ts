@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: false,
     formats: ['image/avif', 'image/webp'],
+    qualities: [60, 65, 75, 80], // Поддержка всех используемых качеств
   },
   // Отключаем восстановление скролла
   experimental: {
