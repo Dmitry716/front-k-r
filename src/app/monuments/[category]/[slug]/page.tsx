@@ -543,9 +543,31 @@ const ProductPage = () => {
         );
     };
 
+    // Функция для нормализации пути к изображению (как в ProductCard)
+    const normalizeImagePath = (imagePath: string | undefined): string => {
+        if (!imagePath || imagePath.trim() === '') return '/placeholder.png';
+        
+        // Если путь уже начинается с http/https - возвращаем как есть
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+            return imagePath;
+        }
+        
+        let normalizedPath = imagePath;
+        
+        // Если путь не начинается с / - добавляем его
+        if (!normalizedPath.startsWith('/')) {
+            normalizedPath = `/${normalizedPath}`;
+        }
+        
+        // Кодируем пробелы и другие специальные символы, но сохраняем слеши
+        const parts = normalizedPath.split('/');
+        const encodedParts = parts.map(part => encodeURIComponent(part));
+        return encodedParts.join('/');
+    };
+
     // Выбираем изображение для отображения
     const displayImage = selectedColor ? selectedColor.image : product.image;
-    const heroImageSrc = displayImage && displayImage.trim() !== "" ? displayImage : "/single/example1.webp";
+    const heroImageSrc = normalizeImagePath(displayImage);
 
     const closeGraniteModal = () => {
         setIsGraniteModalOpen(false);
