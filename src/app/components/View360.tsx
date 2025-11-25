@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 
 interface View360Props {
   baseImagePath: string;
@@ -189,12 +190,15 @@ export default function View360({ baseImagePath, sourceImagePath = '', totalFram
       <img
         ref={imageRef}
         alt="360 View"
-        className={`w-full h-auto object-contain transition-all duration-100 md:pr-4 ${
+        className={`w-full h-auto object-contain rounded-lg transition-all duration-100 md:pr-4 ${
           isAnimating && isDraggingRef.current ? 'cursor-grabbing opacity-90' : isAnimating ? 'cursor-grab' : 'cursor-default'
         }`}
         onMouseDown={handleDragStart}
         onTouchStart={handleDragStart}
-        draggable={false} loading="lazy"
+        draggable={false}
+        loading="lazy"
+        width={800}
+        height={800}
       />
 
       {/* Кнопка 360° - маленькая как звёздочка */}

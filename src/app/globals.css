@@ -61,6 +61,61 @@ main.min-h-screen > div:first-child {
   }
 }
 
+/* Prevent CLS for "Другие категории" section on category pages */
+div.mt-17.lg\:mt-30 {
+  min-height: 80px;
+}
+
+@media (min-width: 1024px) {
+  div.mt-17.lg\:mt-30 {
+    min-height: 160px;
+  }
+}
+
+/* Fix body shift - ensure stable height before content loads */
+body.min-w-\[360px\] {
+  min-height: 100vh;
+  contain: layout;
+}
+
+/* Reserve space for category page product grid */
+.page-centered.mt-5.max-w-\[1300px\] {
+  min-height: 600px;
+}
+
+@media (max-width: 1023px) {
+  .page-centered.mt-5.max-w-\[1300px\] {
+    min-height: 400px;
+  }
+}
+
+/* Fix footer menu icons causing shift on mobile */
+.lg\:hidden.fixed.bottom-0 {
+  height: 64px;
+  contain: layout;
+}
+
+.lg\:hidden.fixed.bottom-0 img {
+  width: 25px !important;
+  height: 24px !important;
+}
+
+/* Stabilize "Другие категории" images */
+div.mt-17.lg\:mt-30 img {
+  aspect-ratio: 1;
+}
+
+/* Prevent shifts from product grid */
+.grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-3 {
+  min-height: 400px;
+}
+
+@media (max-width: 1023px) {
+  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-3 {
+    min-height: 300px;
+  }
+}
+
 @media (max-width: 499px) {
   main.min-h-screen > div:first-child {
     height: 100vw !important;
@@ -166,6 +221,48 @@ body {
 
 .gradient {
   background: linear-gradient(180deg,#f5f6fa 0,rgba(245,246,250,0) 100%);
+}
+
+/* Prevent CLS on StoreInfo section (shop slider) */
+section.max-w-\[1300px\].mt-17.lg\:mt-30 {
+  min-height: 500px; /* Reserve space for shop slider */
+  contain: layout;
+}
+
+@media (max-width: 1023px) {
+  section.max-w-\[1300px\].mt-17.lg\:mt-30 {
+    min-height: 650px;
+  }
+}
+
+@media (max-width: 767px) {
+  section.max-w-\[1300px\].mt-17.lg\:mt-30 {
+    min-height: 450px;
+  }
+}
+
+/* Fix ProductCard CLS on category pages */
+.relative.bg-white.shadow-sm.overflow-hidden.group.flex-shrink-0.h-full {
+  min-height: 350px;
+  contain: layout style;
+}
+
+@media (max-width: 767px) {
+  .relative.bg-white.shadow-sm.overflow-hidden.group.flex-shrink-0.h-full {
+    min-height: 320px;
+  }
+}
+
+/* Stabilize footer to prevent 0.567 CLS */
+footer.bg-white.border-t.border-\[#e6e8ed\] {
+  min-height: 400px;
+  contain: layout;
+}
+
+@media (max-width: 1023px) {
+  footer.bg-white.border-t.border-\[#e6e8ed\] {
+    min-height: 800px;
+  }
 }
 
 .scrollbar-hide {

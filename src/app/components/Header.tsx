@@ -78,7 +78,7 @@ function StoreStatusInline() {
       <button className="flex items-center text-[#2c3a54] hover:text-[#1a2a4a] transition h-full" aria-haspopup="true" aria-expanded="false">
         <span className={`inline-block w-2 h-2 mr-2 xl:mr-3 rounded-full flex-shrink-0 ${colorClass}`}></span>
         <span className="whitespace-nowrap">{status || 'Закрыто'}</span>
-        <Image src={'/arrow.svg'} width={17} height={17} alt="arrow" className="group-hover:rotate-180 transition-transform flex-shrink-0" />
+        <Image src={'/arrow.svg'} width={17} height={17} alt="arrow" className="group-hover:rotate-180 transition-transform flex-shrink-0" priority />
       </button>
 
       <div className="absolute left-1/2 transform -translate-x-1/2 top-full mt-0 bg-[#f5f6fa] border border-gray-200 rounded-md shadow-lg z-50 hidden group-hover:block focus-within:block">
@@ -350,7 +350,7 @@ const Header = () => {
 
               {/* Адрес */}
               <div className="flex items-center space-x-2 text-sm text-[#2c3a54]">
-                <Image width={28} height={28} src={"/map.svg"} alt="Map" />
+                <Image width={28} height={28} src={"/map.svg"} alt="Map" priority />
                 <span>Витебск, ул. Терешковой 9Б</span>
               </div>
 

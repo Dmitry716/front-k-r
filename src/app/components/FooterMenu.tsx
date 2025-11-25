@@ -102,6 +102,7 @@ const FooterMenu = () => {
               width={25}
               height={24}
               className="mx-auto"
+              priority
             />
             <span className="text-xs mt-1 text-[#2c3a54]">Главная</span>
           </Link>
@@ -118,6 +119,7 @@ const FooterMenu = () => {
               width={25}
               height={24}
               className="mx-auto"
+              priority
             />
             <span className="text-xs mt-1 text-[#2c3a54]">Каталог</span>
           </button>
@@ -133,6 +135,7 @@ const FooterMenu = () => {
               width={25}
               height={24}
               className="mx-auto"
+              priority
             />
             <span className="text-xs mt-1 text-[#2c3a54]">Портфолио</span>
           </Link>
@@ -147,6 +150,7 @@ const FooterMenu = () => {
               alt="Контакты"
               width={25}
               height={24}
+              priority
               className="mx-auto"
             />
             <span className="text-xs mt-1 text-[#2c3a54]">Контакты</span>

@@ -105,7 +105,7 @@ const FooterPhoneDropdown: React.FC<FooterPhoneDropdownProps> = ({
       <div className="flex justify-between items-start text-sm px-5 py-3.75">
         <div>
           <div className="flex items-center space-x-2">
-            <Image src="/map.svg" alt="Адрес" width={20} height={20} />
+            <Image src="/map.svg" alt="Адрес" width={20} height={20} priority />
             <span className="font-bold text-[16px] text-nowrap leading-4">
               Витебск, ул. Терешковой 9Б
             </span>
