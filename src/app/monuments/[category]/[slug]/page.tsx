@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useParams, notFound } from "next/navigation";
 import ProductWorksGallery from "@/app/components/ProductWorksGallery";
 import PathPage from "../../../components/PathPage";
@@ -114,6 +115,7 @@ const ProductPage = () => {
     const [isMobile, setIsMobile] = useState(false);
     const [isNarrowMobile, setIsNarrowMobile] = useState(false);
     const [isFavorite, setIsFavorite] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
     // Модальное окно для видов гранита (как на странице /granite)
     const [isGraniteModalOpen, setIsGraniteModalOpen] = useState(false);
     const [currentGraniteSlide, setCurrentGraniteSlide] = useState(0);
@@ -144,6 +146,11 @@ const ProductPage = () => {
     // Refs
     const modalRef = useRef<HTMLDivElement>(null);
     const backdropRef = useRef<HTMLDivElement>(null);
+
+    // Монтирование на клиенте для portal
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Загрузка данных продукта
     useEffect(() => {
@@ -1105,9 +1112,9 @@ const ProductPage = () => {
                 onSubmit={handleModalSubmit}
             />
 
-            {isGraniteModalOpen && (
+            {isMounted && isGraniteModalOpen && createPortal(
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center"
+                    className="fixed inset-0 z-9999 flex items-center justify-center"
                     style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                     onClick={closeGraniteModal}
                 >
@@ -1115,13 +1122,13 @@ const ProductPage = () => {
                         className="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center p-4"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">
+                        <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-50">
                             {currentGraniteSlide + 1} / {graniteTypes.length}
                         </div>
 
                         <button
                             onClick={prevGraniteSlide}
-                            className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+                            className="absolute left-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
                             style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         >
                             {"<"}
@@ -1129,7 +1136,7 @@ const ProductPage = () => {
 
                         <button
                             onClick={nextGraniteSlide}
-                            className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+                            className="absolute right-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
                             style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         >
                             {">"}
@@ -1149,14 +1156,14 @@ const ProductPage = () => {
                             {graniteTypes[currentGraniteSlide].name}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
 
             {/* Модальное окно для готовых работ и примеров оформления */}
-            {isImageModalOpen &&
-                imageSlides.length > 0 && ( // Убедитесь, что массив не пуст
+            {isMounted && isImageModalOpen && imageSlides.length > 0 && createPortal(
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center"
+                        className="fixed inset-0 z-9999 flex items-center justify-center"
                         style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         onClick={closeImageModal}
                     >
@@ -1165,14 +1172,14 @@ const ProductPage = () => {
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Индикатор текущего слайда */}
-                            <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">
+                            <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-50">
                                 {currentImageSlide + 1} / {imageSlides.length}
                             </div>
 
                             {/* Стрелка влево */}
                             <button
                                 onClick={prevImageSlide}
-                                className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+                                className="absolute left-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
                                 style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                             >
                                 {"<"}
@@ -1181,7 +1188,7 @@ const ProductPage = () => {
                             {/* Стрелка вправо */}
                             <button
                                 onClick={nextImageSlide}
-                                className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+                                className="absolute right-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
                                 style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                             >
                                 {">"}
@@ -1203,7 +1210,8 @@ const ProductPage = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
+                    </div>,
+                    document.body
                 )}
 
             {/* Модальное окно для заказа звонка */}

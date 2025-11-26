@@ -24,6 +24,10 @@ const nextConfig: NextConfig = {
         hostname: 'k-r.by',
       },
       {
+        protocol: 'https',
+        hostname: 'api.k-r.by',
+      },
+      {
         protocol: 'http',
         hostname: 'localhost',
       },

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { apiClient } from '@/lib/api-client';
 
 interface Work {
@@ -30,6 +31,7 @@ const ProductWorksGallery = ({
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentModalSlide, setCurrentModalSlide] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
 
     // Адаптивность
     useEffect(() => {
@@ -39,6 +41,11 @@ const ProductWorksGallery = ({
         checkScreenSize();
         window.addEventListener("resize", checkScreenSize);
         return () => window.removeEventListener("resize", checkScreenSize);
+    }, []);
+
+    // Монтирование на клиенте для portal
+    useEffect(() => {
+        setIsMounted(true);
     }, []);
 
     // Маппинг slug категорий в их русские названия (как они хранятся в БД)
@@ -165,7 +172,7 @@ const ProductWorksGallery = ({
     // Если загрузка
     if (loading) {
         return (
-            <section className={`mb-15 md:mb-22.5 mt-17 lg:mt-30 ${className}`} style={{ backgroundColor: 'white' }}>
+            <section className={`mb-15 md:mb-22.5 ${className}`} style={{ backgroundColor: 'white' }}>
                 <div className="pt-15 md:pt-[93px] max-w-[1300px] container-centered">
                     <div className="text-center text-gray-500">Загрузка работ...</div>
                 </div>
@@ -179,7 +186,7 @@ const ProductWorksGallery = ({
     }
 
     return (
-        <section className={`mb-15 md:mb-22.5 mt-17 lg:mt-30 ${className}`} style={{ backgroundColor: 'white' }}>
+        <section className={`mb-15 md:mb-22.5 ${className}`} style={{ backgroundColor: 'white' }}>
             <div className="pt-15 md:pt-[93px] max-w-[1300px] container-centered">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-4xl font-bold text-[#2c3a54] ml-2.5">
@@ -196,9 +203,9 @@ const ProductWorksGallery = ({
                 </div>
 
                 {/* Модальное окно */}
-                {isModalOpen && (
+                {isMounted && isModalOpen && createPortal(
                     <div
-                        className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.8)]"
+                        className="fixed inset-0 z-9999 flex items-center justify-center bg-[rgba(0,0,0,0.8)]"
                         onClick={closeModal}
                     >
                         <div
@@ -206,14 +213,14 @@ const ProductWorksGallery = ({
                             onClick={(e) => e.stopPropagation()}
                         >
                             {/* Индикатор текущего слайда */}
-                            <div className="absolute top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-3 py-1 rounded z-10">
+                            <div className="absolute top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-3 py-1 rounded z-50">
                                 {currentModalSlide + 1} / {works.length}
                             </div>
 
                             {/* Кнопка закрытия */}
                             <button
                                 onClick={closeModal}
-                                className="absolute top-4 right-4 text-white text-2xl w-10 h-10 flex items-center justify-center bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 transition z-10"
+                                className="absolute top-4 right-4 text-white text-2xl w-10 h-10 flex items-center justify-center bg-black bg-opacity-70 rounded-full hover:bg-opacity-90 transition z-50"
                             >
                                 ×
                             </button>
@@ -222,7 +229,7 @@ const ProductWorksGallery = ({
                             {works.length > 1 && (
                                 <button
                                     onClick={prevSlide}
-                                    className="absolute left-4 z-10 w-10 h-10 flex items-center justify-center text-white text-xl rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition"
+                                    className="absolute left-4 z-50 w-10 h-10 flex items-center justify-center text-white text-xl rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition"
                                 >
                                     ←
                                 </button>
@@ -232,7 +239,7 @@ const ProductWorksGallery = ({
                             {works.length > 1 && (
                                 <button
                                     onClick={nextSlide}
-                                    className="absolute right-4 z-10 w-10 h-10 flex items-center justify-center text-white text-xl rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition"
+                                    className="absolute right-4 z-50 w-10 h-10 flex items-center justify-center text-white text-xl rounded-full bg-black bg-opacity-50 hover:bg-opacity-70 transition"
                                 >
                                     →
                                 </button>
@@ -264,7 +271,8 @@ const ProductWorksGallery = ({
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </div>,
+                    document.body
                 )}
             </div>
         </section>

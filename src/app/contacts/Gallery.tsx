@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 
 // Предполагаем, что у вас уже есть массив slides
@@ -16,6 +17,7 @@ const Gallery = () => {
     // Модальное окно
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentModalSlide, setCurrentModalSlide] = useState(0);
+    const [isMounted, setIsMounted] = useState(false);
 
     // Функция для изменения текущего слайда (для миниатюр)
     const handleThumbnailClick = (index: number) => {
@@ -43,6 +45,11 @@ const Gallery = () => {
     const prevSlide = () => {
         setCurrentModalSlide((prev) => (prev - 1 + slides.length) % slides.length);
     };
+
+    // Монтирование на клиенте для portal
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
 
     // Закрытие по Esc
     useEffect(() => {
@@ -107,9 +114,9 @@ const Gallery = () => {
             </div>
 
             {/* Модальное окно */}
-            {isModalOpen && (
+            {isMounted && isModalOpen && createPortal(
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center"
+                    className="fixed inset-0 z-9999 flex items-center justify-center"
                     style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                     onClick={closeModal} // Закрытие при клике вне изображения
                 >
@@ -118,14 +125,14 @@ const Gallery = () => {
                         onClick={(e) => e.stopPropagation()} // Не закрывать при клике на контент
                     >
                         {/* Индикатор текущего слайда (например, "1 / 16") */}
-                        <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">
+                        <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-50">
                             {currentModalSlide + 1} / {slides.length}
                         </div>
 
                         {/* Стрелка влево */}
                         <button
                             onClick={prevSlide}
-                            className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+                            className="absolute left-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
                             style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         >
                             {"<"}
@@ -134,7 +141,7 @@ const Gallery = () => {
                         {/* Стрелка вправо */}
                         <button
                             onClick={nextSlide}
-                            className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+                            className="absolute right-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
                             style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
                         >
                             {">"}
@@ -154,7 +161,8 @@ const Gallery = () => {
                             {slides[currentModalSlide].alt}
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );
