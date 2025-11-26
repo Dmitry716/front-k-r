@@ -128,7 +128,7 @@ const Footer = () => {
           </div>
 
           <Link
-            href="#"
+            href="/contacts"
             className="text-sm text-[#2c3a54] mt-1 hover:underline"
           >
             Подробнее

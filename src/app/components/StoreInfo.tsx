@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRef } from "react";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 
 const StoreInfo = () => {
   const now = new Date();
@@ -74,6 +75,7 @@ const StoreInfo = () => {
   // Состояние модального окна
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentModalSlide, setCurrentModalSlide] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
 
   // Рефы для свайпа — по одному набору на каждый слайдер
   const desktopRefs = useRef({ startX: 0, startY: 0, isDragging: false });
@@ -89,6 +91,10 @@ const StoreInfo = () => {
   };
 
   // Закрытие по Esc
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isModalOpen) return;
@@ -694,24 +700,24 @@ const StoreInfo = () => {
       </div>
 
       {/* Модальное окно */}
-      {isModalOpen && (
+      {isMounted && isModalOpen && createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center"
+          className="fixed inset-0 z-9999 flex items-center justify-center"
           style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
-          onClick={closeModal} // Закрытие при клике вне изображения
+          onClick={closeModal}
         >
           <div
             className="relative w-full max-w-6xl max-h-[90vh] flex items-center justify-center p-4"
-            onClick={(e) => e.stopPropagation()} // Не закрывать при клике на контент
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Индикатор текущего слайда (например, "1 / 5") */}
-            <div className="absolute top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">
+            <div className="absolute top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-50">
               {currentModalSlide + 1} / {slides.length}
             </div>
             {/* Стрелка влево */}
             <button
               onClick={prevSlide}
-              className="absolute left-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+              className="absolute left-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
               style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
             >
               {"<"}
@@ -720,7 +726,7 @@ const StoreInfo = () => {
             {/* Стрелка вправо */}
             <button
               onClick={nextSlide}
-              className="absolute right-4 z-10 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
+              className="absolute right-4 z-50 w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-white text-lg sm:text-xl rounded-full hover:bg-opacity-70 transition cursor-pointer"
               style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
             >
               {">"}
@@ -738,7 +744,8 @@ const StoreInfo = () => {
               />
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </section>
   );
