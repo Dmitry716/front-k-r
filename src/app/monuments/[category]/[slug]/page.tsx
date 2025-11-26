@@ -775,6 +775,7 @@ const ProductPage = () => {
                                 width={800}
                                 height={800}
                                 priority
+                                quality={90}
                                 sizes="(max-width: 640px) 100vw, (max-width: 1023px) 70vw, 523px"
                                 className="w-full h-auto object-contain rounded-lg md:pr-4"
                             />
