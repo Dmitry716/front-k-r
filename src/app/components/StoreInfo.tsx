@@ -464,7 +464,7 @@ const StoreInfo = () => {
                 <div className="absolute left-0 translate-x-0 top-full mt-0 bg-[#f5f6fa] border border-gray-200 rounded-md shadow-lg z-50 hidden group-hover:block focus-within:block">
                   <div className="py-1 text-sm whitespace-nowrap">
                     <div className="flex items-center px-4 py-2 text-gray-700">
-                      <span className="text-blue-600">Пн—Пт</span>
+                      <span>Пн—Пт</span>
                       <span className="flex-1 text-center text-gray-400 mx-2">…………………</span>
                       <span>с 09:00 до 18:00</span>
                     </div>
@@ -552,7 +552,7 @@ const StoreInfo = () => {
               <div className="absolute left-0 translate-x-0 top-full mt-0 bg-[#f5f6fa] border border-gray-200 rounded-md shadow-lg z-50 hidden group-hover:block focus-within:block">
                 <div className="py-1 text-sm whitespace-nowrap">
                   <div className="flex items-center px-4 py-2 text-gray-700">
-                    <span className="text-blue-600">Пн—Пт</span>
+                    <span>Пн—Пт</span>
                     <span className="flex-1 text-center text-gray-400 mx-2">…………………</span>
                     <span>с 09:00 до 18:00</span>
                   </div>
@@ -643,7 +643,7 @@ const StoreInfo = () => {
               <div className="absolute left-0 transform translate-x-0 top-full mt-0 bg-[#f5f6fa] border border-gray-200 rounded-md shadow-lg z-50 hidden group-hover:block focus-within:block">
                 <div className="py-1 text-sm whitespace-nowrap">
                   <div className="flex items-center px-4 py-2 text-gray-700">
-                    <span className="text-blue-600">Пн—Пт</span>
+                    <span>Пн—Пт</span>
                     <span className="flex-1 text-center text-gray-400 mx-2">…………………</span>
                     <span>с 09:00 до 18:00</span>
                   </div>

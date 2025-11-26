@@ -84,19 +84,31 @@ const HeroSlider = () => {
   const slides = [
     {
       id: 1,
-      imageDesktop: "/sliders/1.jpg",
-      imageMobile: "/sliders/1m.jpg",
+      imageDesktop: "/sliders/1.webp",
+      imageMobile: "/sliders/1m.webp",
       title: "Гранитные памятники",
       subtitle: "700+ уникальных моделей эксклюзивных и классических памятников",
       button: {
         text: "Смотреть каталог",
         href: "/monuments",
       },
+      color: "#2c3a54"
+    },
+    {
+      id: 2,
+      imageDesktop: "/sliders/2.webp",
+      imageMobile: "/sliders/2m.webp",
+      title: "Готовые памятники с оформлением у нас в офисе",
+      subtitle: "Десятки вариантов гранита, материалов для благоустройства, вариантов оформления и аксессуаров",
+      button: {
+        text: "Подробнее",
+        href: "/contacts",
+      },
+      color: "#fff"
     },
   ];
 
   const totalSlides = slides.length;
-  const slide = slides[currentSlide]
 
   // Автоплей
   useEffect(() => {
@@ -193,7 +205,7 @@ const HeroSlider = () => {
                   paddingBottom: padding.y,
                   minWidth: "45vw",
                   maxWidth: "54vw",
-                  color: "#2c3a54",
+                  color: slide.color,
                 }}
               >
                 <h2

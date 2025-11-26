@@ -2,6 +2,7 @@
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
+import LoadingSpinner from "./LoadingSpinner";
 
 const Blog = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -62,7 +63,7 @@ const Blog = () => {
         </h2>
 
         {/* Используем flex + gap, чтобы отступы не ломали ширину */}
-        {loading && <div className="ml-2.5 text-[#6B809E] mb-4">Загрузка...</div>}
+        {loading && <div className="ml-2.5"><LoadingSpinner size={32} ariaLabel="Загрузка блога" /></div>}
         {error && <div className="ml-2.5 text-red-600 mb-4">{error}</div>}
         <div className="flex flex-col md:flex-row space-x-2.5 space-y-5 md:space-y-0">
           {blogs.map((blog) => (

@@ -62,7 +62,7 @@ const Footer = () => {
                 alt="Раскрыть"
                 width={18}
                 height={12}
-                style={{ width: 'auto', height: 'auto' }}
+                style={{ width: '18px', height: '18px' }}
                 className={`transform transition-transform ${
                   openMenus.includes(category.key) ? "rotate-180" : ""
                 }`}

@@ -10,6 +10,7 @@ import ProductCard from "../components/ProductCard";
 import Pagination from "../components/Pagination";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
 import { Product } from "../types/types";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 // Функция для получения товара по slug из всех категорий
 const fetchProductBySlug = async (slug: string): Promise<Product | null> => {
@@ -168,7 +169,7 @@ const FavoritesPage = () => {
                     {/* Сетка избранных продуктов */}
                     {isLoading ? (
                         <div className="flex justify-center items-center h-64">
-                            <div className="text-gray-500">Загружаем избранные товары...</div>
+                            <LoadingSpinner size={40} ariaLabel="Загрузка избранных товаров" />
                         </div>
                     ) : favoriteProducts.length > 0 ? (
                         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-3 mb-7.5">

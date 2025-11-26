@@ -29,7 +29,7 @@ const nextConfig: NextConfig = {
       },
     ],
     unoptimized: false,
-    formats: ['image/avif', 'image/webp'],
+    formats: ['image/webp', 'image/avif'],
     qualities: [60, 65, 75, 80], // Поддержка всех используемых качеств
   },
   // Отключаем восстановление скролла

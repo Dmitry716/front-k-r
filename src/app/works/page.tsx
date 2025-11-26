@@ -7,6 +7,7 @@ import SidebarCatalogMenu from "../components/Sidebar/SidebarCatalogMenu";
 import SidebarStickyHelp from "../components/Sidebar/SidebarStickyHelp";
 import Pagination from "../components/Pagination";
 import Blog from "../components/Blog";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 interface Work {
   id: number;
@@ -119,7 +120,9 @@ const OurWorksPage = () => {
                 </div>
                 <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
                     <PathPage />
-                    <div className="text-center py-10">Загрузка работ...</div>
+                    <div className="text-center py-10 flex justify-center">
+                        <LoadingSpinner size={40} ariaLabel="Загрузка работ" />
+                    </div>
                 </div>
             </section>
         );

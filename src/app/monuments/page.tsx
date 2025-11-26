@@ -11,6 +11,7 @@ import { categoriesMonuments } from "../mock/categories";
 import { apiClient, API_ENDPOINTS } from "../../lib/api-client";
 import { ColorOption } from "../types/types";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
+import LoadingSpinner from "../components/LoadingSpinner";
 
 export const dynamic = 'force-dynamic';
 
@@ -313,7 +314,7 @@ const MonumentsPage = () => {
                     {/* Сетка продуктов */}
                     {loading ? (
                         <div className="flex justify-center items-center h-64">
-                            <div className="text-lg">Загрузка памятников...</div>
+                            <LoadingSpinner size={40} ariaLabel="Загрузка памятников" />
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-3 mb-7.5">

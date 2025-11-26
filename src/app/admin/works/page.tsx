@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { apiClient } from "@/lib/api-client";
+import LoadingSpinner from "@/app/components/LoadingSpinner";
 
 interface Work {
   id: number;
@@ -398,7 +399,7 @@ const WorksAdmin = () => {
   };
 
   if (loading) {
-    return <div className="p-6">Загрузка...</div>;
+    return <div className="p-6 flex justify-center"><LoadingSpinner size={40} ariaLabel="Загрузка работ" /></div>;
   }
 
   return (
