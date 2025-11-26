@@ -329,14 +329,14 @@ const Header = () => {
         <div className="w-full bg-[#f5f6fa] border-b border-gray-200">
           <div className="max-w-[1300px] flex justify-between h-[80px] items-center container-centered">
             <div className="flex justify-between items-center w-full">
-              <Link href={"/"} style={{ width: '200px', height: '48px', display: 'block' }}>
+              <Link href={"/"} style={{ width: '200px', height: '68px', display: 'block' }}>
                 <Image
                   width={200}
                   height={48}
                   src={"/logo_kamenaya_roza.svg"}
                   alt="logo"
                   priority
-                  style={{ width: '200px', height: '48px' }}
+                  style={{ width: '200px', height: '68px' }}
                 />
               </Link>
               {/* Рассрочка */}

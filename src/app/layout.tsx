@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Viewport } from "next";
 import "./globals.css";
 import { DropdownProvider } from "./context/DropDownContext";
 import { AdminProtector } from "./components/AdminProtector";
@@ -11,6 +12,14 @@ import FooterMenu from "./components/FooterMenu";
 import CookieConsent from "./components/CookieConsent";
 import ScrollToTop from "./components/ScrollToTop";
 
+// Viewport configuration для мобильных браузеров
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#2c3a54",
+};
+
 // Default metadata для корневого layout - используется как fallback
 export const metadata: Metadata = {
   title: "Каменная Роза в Витебске",
@@ -18,6 +27,18 @@ export const metadata: Metadata = {
     "Производство и установка памятников, оград, аксессуаров из гранита.",
   metadataBase: new URL("https://k-r.by"),
   robots: "index, follow",
+  icons: {
+    icon: [
+      { url: "/favicon.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicon-192x192.webp", sizes: "192x192", type: "image/webp" },
+    ],
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
   openGraph: {
     title: "Каменная Роза в Витебске",
     description:
@@ -42,6 +63,10 @@ export const metadata: Metadata = {
       "Производство и установка памятников, оград, аксессуаров из гранита.",
     images: ["https://k-r.by/monuments.jpg"],
   },
+  other: {
+    "theme-color": "#2c3a54",
+    "msapplication-TileColor": "#2c3a54",
+  },
 };
 
 export default function RootLayout({
@@ -52,6 +77,14 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
+        {/* Favicon ссылки для всех браузеров */}
+        <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+        <link rel="icon" href="/favicon-192x192.png" sizes="192x192" type="image/png" />
+        <link rel="mask-icon" href="/favicon-192x192.webp" color="#2c3a54" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        
         {/* Preload критических шрифтов для устранения блокировки */}
         <link
           rel="preload"
