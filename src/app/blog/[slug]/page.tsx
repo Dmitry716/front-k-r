@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Footer from '@/app/components/Footer';
 import PathPage from '@/app/components/PathPage';
 import SidebarCatalogMenu from '@/app/components/Sidebar/SidebarCatalogMenu';
 import SidebarStickyHelp from '@/app/components/Sidebar/SidebarStickyHelp';
@@ -266,9 +265,6 @@ export default function BlogPage({ params }: BlogPageProps) {
           )}
         </div>
       </section>
-
-      {/* Футер */}
-      <Footer />
     </>
   );
 }

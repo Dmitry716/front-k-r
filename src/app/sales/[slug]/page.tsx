@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from "@/lib/api-client";
 import OurWorksSlider from '@/app/components/OurWorksSlider';
-import Footer from '@/app/components/Footer';
 import ProductCard from '@/app/components/ProductCard';
 import PathPage from '../../components/PathPage';
 import SidebarCatalogMenu from '../../components/Sidebar/SidebarCatalogMenu';
@@ -383,9 +382,6 @@ export default function CampaignPage({ params }: CampaignPageProps) {
 
       {/* Слайдер наших работ */}
       <OurWorksSlider />
-
-      {/* Футер */}
-      <Footer />
     </>
   );
 }

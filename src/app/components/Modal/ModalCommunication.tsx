@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ProductData {
   name?: string;
@@ -32,6 +33,12 @@ const ModalCommunication: React.FC<ModalProps> = ({
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
   const [countryCode, setCountryCode] = useState('+375');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isMounted, setIsMounted] = useState(false);
+
+  // Монтирование на клиенте для portal
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Блокировка скролла
   useEffect(() => {
@@ -287,10 +294,10 @@ const ModalCommunication: React.FC<ModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  return isMounted ? createPortal(
     <div
       ref={backdropRef}
-      className="fixed inset-0 z-2000 flex items-center justify-center p-4"
+      className="fixed inset-0 z-9999 flex items-center justify-center p-4"
       style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
     >
       <div
@@ -410,8 +417,9 @@ const ModalCommunication: React.FC<ModalProps> = ({
           </div>
         </form>
       </div>
-    </div>
-  );
+    </div>,
+    document.body
+  ) : null;
 };
 
 export default ModalCommunication;
