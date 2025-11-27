@@ -1,6 +1,8 @@
 import { Metadata } from 'next';
 import { getPageSEOData, generateMetadataFromSEO } from "@/lib/seo-metadata";
 
+export const revalidate = 3600; // Revalidate every hour
+
 interface LayoutProps {
   children: React.ReactNode;
   params: Promise<{ category: string }>;
