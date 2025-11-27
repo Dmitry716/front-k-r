@@ -13,11 +13,27 @@ export async function generateMetadata(
   props: LandscapeLayoutProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const params = await props.params;
-  const { category, slug } = params;
+  try {
+    const params = await props.params;
+    const { category, slug } = params;
 
-  // Загружаем SEO данные ландшафтного элемента
-  return await getMetadataForLandscape(category, slug);
+    // Загружаем SEO данные ландшафтного элемента
+    const metadata = await getMetadataForLandscape(category, slug);
+    
+    // Гарантируем что title всегда есть
+    if (!metadata.title) {
+      metadata.title = 'Благоустройство | Каменная Роза';
+    }
+    
+    return metadata;
+  } catch (error) {
+    console.error('Error generating landscape metadata:', error);
+    // Возвращаем fallback metadata
+    return {
+      title: 'Благоустройство | Каменная Роза',
+      description: 'Благоустройство могил и памятников',
+    };
+  }
 }
 
 export default function LandscapeLayout({

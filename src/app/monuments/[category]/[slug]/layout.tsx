@@ -13,11 +13,27 @@ export async function generateMetadata(
   props: MonumentLayoutProps,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const params = await props.params;
-  const { category, slug } = params;
+  try {
+    const params = await props.params;
+    const { category, slug } = params;
 
-  // Загружаем SEO данные памятника
-  return await getMetadataForMonument(category, slug);
+    // Загружаем SEO данные памятника
+    const metadata = await getMetadataForMonument(category, slug);
+    
+    // Гарантируем что title всегда есть
+    if (!metadata.title) {
+      metadata.title = 'Памятники из гранита | Каменная Роза';
+    }
+    
+    return metadata;
+  } catch (error) {
+    console.error('Error generating monument metadata:', error);
+    // Возвращаем fallback metadata
+    return {
+      title: 'Памятники из гранита | Каменная Роза',
+      description: 'Памятники из гранита с доставкой и установкой',
+    };
+  }
 }
 
 export default function MonumentLayout({
