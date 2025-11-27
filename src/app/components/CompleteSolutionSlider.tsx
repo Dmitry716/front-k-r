@@ -185,9 +185,9 @@ const CompleteSolutionSlider = () => {
       </div>
       {/* Кнопка внизу */}
       <div className="mt-10 flex">
-        <button className="font-bold md:min-w-[330px] px-7.5 py-3 bg-[#2c3a54] border border-[#2c3a54] text-white rounded-full hover:bg-white hover:text-[#2c3a54] transition">
-          <Link href="/monuments/complex">Смотреть все</Link>
-        </button>
+        <Link href="/monuments/complex" className="font-bold md:min-w-[330px] px-7.5 py-3 bg-[#2c3a54] border border-[#2c3a54] text-white rounded-full hover:bg-white hover:text-[#2c3a54] transition flex items-center justify-center">
+          Смотреть все
+        </Link>
       </div>
     </section>
   );
