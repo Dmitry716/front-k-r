@@ -78,13 +78,13 @@ const Footer = () => {
               style={{ maxHeight: "0px" }}
             >
               {category.items.map((item, index) => (
-                <Link key={index} href={item.href}>
-                  <li className="py-3.75 ml-7.5 border-b border-[#dee5e8]">
+                <li key={index} className="py-3.75 ml-7.5 border-b border-[#dee5e8]">
+                  <Link href={item.href}>
                     <span className="text-[#2c3a54] hover:text-[#2c3a54cc] transition">
                       {item.name}
                     </span>
-                  </li>
-                </Link>
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>

@@ -62,6 +62,7 @@ const FAQ = () => {
               <div key={index} className="border-b border-[#cbcbcb]">
                 {/* Заголовок-кнопка */}
                 <button
+                  id={`faq-title-${index}`}
                   onClick={() => toggleAccordion(index)}
                   className={`w-full flex justify-between text-[#2c3a54] items-center py-5 text-left transition-colors`}
                   aria-expanded={openIndex === index}
