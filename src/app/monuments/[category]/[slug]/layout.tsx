@@ -1,6 +1,9 @@
 import { Metadata, ResolvingMetadata } from 'next';
 import { getMetadataForMonument } from '@/lib/entity-seo-metadata';
 
+export const dynamic = 'force-static';
+export const revalidate = 60;
+
 interface MonumentLayoutProps {
   children: React.ReactNode;
   params: Promise<{

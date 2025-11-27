@@ -1,6 +1,9 @@
 import { Metadata, ResolvingMetadata } from 'next';
 import { getMetadataForFence } from '@/lib/entity-seo-metadata';
 
+export const dynamic = 'force-static';
+export const revalidate = 60;
+
 interface FenceLayoutProps {
   children: React.ReactNode;
   params: Promise<{

@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { getPageSEOData, generateMetadataFromSEO } from "@/lib/seo-metadata";
 
+export const dynamic = 'force-static';
 export const revalidate = 3600; // Revalidate every hour
 
 interface LayoutProps {

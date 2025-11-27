@@ -1,6 +1,9 @@
 import { Metadata, ResolvingMetadata } from 'next';
 import { getMetadataForLandscape } from '@/lib/entity-seo-metadata';
 
+export const dynamic = 'force-static';
+export const revalidate = 60;
+
 interface LandscapeLayoutProps {
   children: React.ReactNode;
   params: Promise<{

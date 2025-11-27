@@ -1,6 +1,9 @@
 import { Metadata, ResolvingMetadata } from 'next';
 import { getMetadataForAccessory } from '@/lib/entity-seo-metadata';
 
+export const dynamic = 'force-static';
+export const revalidate = 60;
+
 interface AccessoryLayoutProps {
   children: React.ReactNode;
   params: Promise<{
