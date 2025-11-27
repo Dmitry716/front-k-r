@@ -77,13 +77,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        {/* Favicon ссылки для всех браузеров */}
-        <link rel="shortcut icon" href="/favicon.png" type="image/png" />
-        <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
-        <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
-        <link rel="icon" href="/favicon-192x192.png" sizes="192x192" type="image/png" />
-        <link rel="mask-icon" href="/favicon-192x192.webp" color="#2c3a54" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        {/* Favicon ссылки управляются через metadata API */}
         
         {/* Preload критических шрифтов для устранения блокировки */}
         <link
