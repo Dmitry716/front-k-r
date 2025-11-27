@@ -262,7 +262,8 @@ const HeroSlider = () => {
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+            className="absolute left-4 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+            style={{ top: 'calc(50% - 20px)' }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -280,7 +281,8 @@ const HeroSlider = () => {
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+            className="absolute right-4 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+            style={{ top: 'calc(50% - 20px)' }}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -301,9 +303,10 @@ const HeroSlider = () => {
 
       {/* Индикаторы */}
       <div
-        className={`absolute left-1/2 transform -translate-x-1/2 flex space-x-4 z-30 ${
+        className={`absolute flex space-x-4 z-30 ${
           windowWidth < 768 ? "my-3" : "bottom-4"
         }`}
+        style={{ left: '50%', marginLeft: '-28px' }}
       >
         {slides.map((_, index) => (
           <button

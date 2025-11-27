@@ -331,7 +331,8 @@ const OurWorksSlider = ({
                             {!isTablet && (
                                 <button
                                     onClick={scrollLeft}
-                                    className="absolute -left-2 border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                                    className="absolute -left-2 border border-[#2c3a54] z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                                    style={{ top: 'calc(50% - 16px)' }}
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
@@ -366,7 +367,8 @@ const OurWorksSlider = ({
                             {!isTablet && (
                                 <button
                                     onClick={scrollRight}
-                                    className="absolute -right-2 border border-[#2c3a54] top-1/2 -translate-y-1/2 z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                                    className="absolute -right-2 border border-[#2c3a54] z-10 w-8 h-8 bg-white bg-opacity-70 rounded-full flex items-center justify-center hover:bg-opacity-100 transition"
+                                    style={{ top: 'calc(50% - 16px)' }}
                                 >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"

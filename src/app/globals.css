@@ -411,3 +411,30 @@ footer.bg-white.border-t.border-\[#e6e8ed\] {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;  /* Safari and Chrome */
 }
+
+/* iOS Safari критичные фиксы */
+/* Убрать треугольники disclosure в details/summary */
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* Предотвратить zoom на input focus (iOS) */
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="number"],
+textarea,
+select {
+  font-size: 16px;
+}
+
+/* Убрать серую подсветку при тапе */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Исправить рендеринг transform на iOS */
+.absolute {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}

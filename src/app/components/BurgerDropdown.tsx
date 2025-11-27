@@ -45,7 +45,7 @@ const BurgerDropdown: React.FC<BurgerDropdownProps> = ({
             <li key={index} className="border-b border-gray-200">
               {category.subcategories.length > 0 ? (
                 <details className="group">
-                  <summary className="flex justify-between items-center cursor-pointer pr-5 pl-2 py-1.25 font-medium text-[#2c3a54] hover:text-[#2c3a5499] select-none">
+                  <summary className="flex justify-between items-center cursor-pointer pr-5 pl-2 py-1.25 font-medium text-[#2c3a54] hover:text-[#2c3a5499] select-none [&::-webkit-details-marker]:hidden list-none">
                     <div className="flex items-center space-x-2.5">
                       <Image
                         src={category.icon}
@@ -102,7 +102,7 @@ const BurgerDropdown: React.FC<BurgerDropdownProps> = ({
             <li key={index} className="border-b border-gray-200">
               {item.subcategories && item.subcategories.length > 0 ? (
                 <details className="group">
-                  <summary className="flex justify-between items-center cursor-pointer px-5 py-4 font-medium text-[#2c3a54] hover:text-[#2c3a5499] select-none">
+                  <summary className="flex justify-between items-center cursor-pointer px-5 py-4 font-medium text-[#2c3a54] hover:text-[#2c3a5499] select-none [&::-webkit-details-marker]:hidden list-none">
                     <div className="flex items-center space-x-6">
                       <Image
                         src={item.icon}

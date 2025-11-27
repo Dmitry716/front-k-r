@@ -15,13 +15,19 @@ const GraniteTypesPage = () => {
     const openModal = (index: number) => {
         setCurrentModalSlide(index);
         setIsModalOpen(true);
-        document.body.style.overflow = "hidden"; // Блокируем скролл
+        // Блокируем скролл для iOS
+        document.body.style.overflow = "hidden";
+        document.body.style.position = "fixed";
+        document.body.style.width = "100%";
     };
 
     // Функция для закрытия модального окна
     const closeModal = () => {
         setIsModalOpen(false);
-        document.body.style.overflow = "auto"; // Возвращаем скролл
+        // Возвращаем скролл для iOS
+        document.body.style.overflow = "";
+        document.body.style.position = "";
+        document.body.style.width = "";
     };
 
     // Функции для навигации в модалке
@@ -89,7 +95,7 @@ const GraniteTypesPage = () => {
             {isModalOpen && (
                 <div
                     className="fixed inset-0 z-50 flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+                    style={{ backgroundColor: "rgba(0,0,0,0.8)", touchAction: 'none' }}
                     onClick={closeModal} // Закрытие при клике вне изображения
                 >
                     <div
