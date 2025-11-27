@@ -22,21 +22,42 @@ const categoryToSeoSlug: Record<string, string> = {
 
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
-  const seoSlug = categoryToSeoSlug[params.category];
+  const categoryName = params.category;
+  const seoSlug = categoryToSeoSlug[categoryName];
+  
+  // Категории имена для fallback
+  const categoryNames: Record<string, string> = {
+    'single': 'Одиночные',
+    'double': 'Двойные',
+    'cheap': 'Недорогие',
+    'cross': 'В виде креста',
+    'heart': 'В виде сердца',
+    'composite': 'Составные',
+    'europe': 'Европейские',
+    'artistic': 'Художественная резка',
+    'tree': 'В виде деревьев',
+    'complex': 'Мемориальные комплексы',
+  };
+  
+  const displayName = categoryNames[categoryName] || 'Памятники';
   
   if (seoSlug) {
     try {
       const seoData = await getPageSEOData(seoSlug);
-      return generateMetadataFromSEO(seoData);
+      if (seoData) {
+        return generateMetadataFromSEO(seoData);
+      }
     } catch (error) {
       console.error(`Failed to load SEO for ${seoSlug}:`, error);
     }
   }
   
-  // Fallback метаданные
+  // Полный fallback метаданные с обязательным title
   return {
-    title: 'Памятники',
-    description: 'Каталог памятников',
+    title: `${displayName} гранитные памятники | Каменная Роза`,
+    description: `Каталог ${displayName.toLowerCase()} гранитных памятников с доставкой и установкой в Витебске`,
+    keywords: `${displayName.toLowerCase()}, памятники, гранит`,
+    robots: 'index, follow',
   };
 }
 

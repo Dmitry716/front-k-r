@@ -18,21 +18,38 @@ const categoryToSeoSlug: Record<string, string> = {
 
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
-  const seoSlug = categoryToSeoSlug[params.category];
+  const categoryName = params.category;
+  const seoSlug = categoryToSeoSlug[categoryName];
+  
+  // Категории имена для fallback
+  const categoryNames: Record<string, string> = {
+    'graves': 'Могилы',
+    'foundation': 'Фундаменты',
+    'tiles': 'Плитки',
+    'tables': 'Столики',
+    'gravel': 'Щебень',
+    'lawn': 'Газон',
+  };
+  
+  const displayName = categoryNames[categoryName] || 'Благоустройство';
   
   if (seoSlug) {
     try {
       const seoData = await getPageSEOData(seoSlug);
-      return generateMetadataFromSEO(seoData);
+      if (seoData) {
+        return generateMetadataFromSEO(seoData);
+      }
     } catch (error) {
       console.error(`Failed to load SEO for ${seoSlug}:`, error);
     }
   }
   
-  // Fallback метаданные
+  // Полный fallback метаданные с обязательным title
   return {
-    title: 'Благоустройство',
-    description: 'Услуги благоустройства кладбищ',
+    title: `Благоустройство ${displayName.toLowerCase()} | Каменная Роза`,
+    description: `Услуги благоустройства ${displayName.toLowerCase()} кладбищ в Витебске`,
+    keywords: `благоустройство, ${displayName.toLowerCase()}, кладбище`,
+    robots: 'index, follow',
   };
 }
 

@@ -19,21 +19,39 @@ const categoryToSeoSlug: Record<string, string> = {
 
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
-  const seoSlug = categoryToSeoSlug[params.category];
+  const categoryName = params.category;
+  const seoSlug = categoryToSeoSlug[categoryName];
+  
+  // Категории имена для fallback
+  const categoryNames: Record<string, string> = {
+    'vases': 'Вазы',
+    'lamps': 'Лампы',
+    'sculptures': 'Скульптуры',
+    'frames': 'Рамки',
+    'bronze': 'Бронза',
+    'plates': 'Таблички',
+    'tables': 'Столики',
+  };
+  
+  const displayName = categoryNames[categoryName] || 'Аксессуары';
   
   if (seoSlug) {
     try {
       const seoData = await getPageSEOData(seoSlug);
-      return generateMetadataFromSEO(seoData);
+      if (seoData) {
+        return generateMetadataFromSEO(seoData);
+      }
     } catch (error) {
       console.error(`Failed to load SEO for ${seoSlug}:`, error);
     }
   }
   
-  // Fallback метаданные
+  // Полный fallback метаданные с обязательным title
   return {
-    title: 'Аксессуары',
-    description: 'Каталог аксессуаров для памятников',
+    title: `${displayName} | Каменная Роза`,
+    description: `Каталог ${displayName.toLowerCase()} для памятников с доставкой в Витебске`,
+    keywords: `${displayName.toLowerCase()}, аксессуары, памятники`,
+    robots: 'index, follow',
   };
 }
 

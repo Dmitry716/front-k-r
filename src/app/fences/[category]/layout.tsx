@@ -15,21 +15,35 @@ const categoryToSeoSlug: Record<string, string> = {
 
 export async function generateMetadata(props: LayoutProps): Promise<Metadata> {
   const params = await props.params;
-  const seoSlug = categoryToSeoSlug[params.category];
+  const categoryName = params.category;
+  const seoSlug = categoryToSeoSlug[categoryName];
+  
+  // Категории имена для fallback
+  const categoryNames: Record<string, string> = {
+    'granite': 'Гранитные',
+    'polymer': 'Полимерные',
+    'metal': 'Металлические',
+  };
+  
+  const displayName = categoryNames[categoryName] || 'Ограды';
   
   if (seoSlug) {
     try {
       const seoData = await getPageSEOData(seoSlug);
-      return generateMetadataFromSEO(seoData);
+      if (seoData) {
+        return generateMetadataFromSEO(seoData);
+      }
     } catch (error) {
       console.error(`Failed to load SEO for ${seoSlug}:`, error);
     }
   }
   
-  // Fallback метаданные
+  // Полный fallback метаданные с обязательным title
   return {
-    title: 'Ограды',
-    description: 'Каталог оград',
+    title: `${displayName} ограды | Каменная Роза`,
+    description: `Каталог ${displayName.toLowerCase()} оград с доставкой и установкой в Витебске`,
+    keywords: `${displayName.toLowerCase()} ограды, ограды, гранит`,
+    robots: 'index, follow',
   };
 }
 
