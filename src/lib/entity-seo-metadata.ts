@@ -339,3 +339,45 @@ export async function getMetadataForLandscape(
   const landscapeData = await getLandscapeSEOData(category, slug);
   return generateMetadataFromEntity(landscapeData, fallbackTitle, fallbackDescription);
 }
+
+/**
+ * Загружает SEO данные эксклюзивного памятника по slug
+ */
+export async function getExclusiveMonumentSEOData(slug: string): Promise<EntitySEOData | null> {
+  try {
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_BASE_URL || 'https://k-r.by/api'}/monuments/exclusive/${slug}`,
+      {
+        next: { revalidate: 3600 },
+      }
+    );
+
+    if (!response.ok) {
+      console.warn(`Exclusive monument SEO данные не найдены для ${slug}`);
+      return null;
+    }
+
+    const data = await response.json();
+
+    if (data.success && data.data) {
+      return data.data;
+    }
+
+    return null;
+  } catch (error) {
+    console.error(`Ошибка загрузки SEO данных эксклюзивного памятника ${slug}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Комбинированная функция для эксклюзивных памятников: загружает данные и генерирует Metadata
+ */
+export async function getMetadataForExclusiveMonument(
+  slug: string,
+  fallbackTitle?: string,
+  fallbackDescription?: string
+): Promise<Metadata> {
+  const exclusiveData = await getExclusiveMonumentSEOData(slug);
+  return generateMetadataFromEntity(exclusiveData, fallbackTitle, fallbackDescription);
+}

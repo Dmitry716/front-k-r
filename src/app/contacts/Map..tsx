@@ -36,12 +36,10 @@ const Map = () => {
                 {/* Встраиваемая карта */}
                 <iframe
                     src="https://yandex.ru/map-widget/v1/?ll=30.249887%2C55.181719&mode=search&oid=131130763398&ol=biz&z=17.1"
-                    width="100%" // Используем 100% ширины контейнера
                     height="400"
-                    frameBorder="0"
                     allowFullScreen={true}
-                    style={{ position: "relative" }} // Убираем inline-стиль, если он не обязателен
-                    className="w-full" // Убедимся, что iframe занимает всю ширину родителя
+                    style={{ position: "relative", border: 0 }}
+                    className="w-full"
                 ></iframe>
             </div>
         </div>

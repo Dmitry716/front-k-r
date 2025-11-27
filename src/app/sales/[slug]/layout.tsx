@@ -8,6 +8,9 @@ interface CampaignLayoutProps {
   }>;
 }
 
+export const dynamic = 'force-static';
+export const revalidate = 300;
+
 export async function generateMetadata(
   props: CampaignLayoutProps,
   parent: ResolvingMetadata
