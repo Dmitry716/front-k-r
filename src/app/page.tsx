@@ -65,7 +65,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function Home() {
    return (
-    <main className="min-h-screen">
+    <main>
         <HeroSlider/>
         <PopularCategories />
         <StoreInfo />

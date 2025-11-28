@@ -155,7 +155,7 @@ const HeroSlider = () => {
             </div>
 
             {/* Мобильная версия - контент внизу поверх изображения */}
-            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20 md:hidden">
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 pb-8 z-20 md:hidden">
               <h2 className="font-bold mb-2 text-white text-[20px]">{slide.title}</h2>
               <p className="mb-4 text-white/90 text-[16px]">{slide.subtitle}</p>
               <Link
