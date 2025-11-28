@@ -302,3 +302,9 @@ select {
 body {
   -webkit-touch-callout: none;
 }
+
+/* Burger dropdown menu - fixed height that works at any zoom level */
+#burger-dropdown {
+  max-height: calc(100vh - 76px - 61px);
+  min-height: auto;
+}

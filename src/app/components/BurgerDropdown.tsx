@@ -33,10 +33,11 @@ const BurgerDropdown: React.FC<BurgerDropdownProps> = ({
         text-sm
         text-[#2c3a54]
         overflow-y-auto
-        max-h-[calc(100vh-137px)]
+        pb-5
         min-w-90
+        max-h-screen
       "
-      style={{ boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)" }}
+      style={{ maxHeight: 'calc(100vh - 107px)', boxShadow: "0 8px 24px rgba(0, 0, 0, 0.12)" }}
     >
       <nav>
         <ul className="divide-y divide-gray-200">
