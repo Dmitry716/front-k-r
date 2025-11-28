@@ -181,16 +181,28 @@ const HeroSlider = () => {
               index === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0"
             }`}
           >
-            {/* Next.js Image для оптимизации */}
+            {/* Мобильное изображение */}
             <Image
-              src={windowWidth >= 768 ? slide.imageDesktop : slide.imageMobile}
+              src={slide.imageMobile}
               alt={slide.title}
               fill
               priority={index === 0}
               fetchPriority={index === 0 ? "high" : "low"}
               quality={index === 0 ? 75 : 60}
-              sizes="(max-width: 768px) 100vw, 1300px"
-              className="object-cover object-center"
+              sizes="(max-width: 768px) 100vw, 0px"
+              className="object-cover object-center md:hidden"
+            />
+            
+            {/* Десктопное изображение */}
+            <Image
+              src={slide.imageDesktop}
+              alt={slide.title}
+              fill
+              priority={index === 0}
+              fetchPriority={index === 0 ? "high" : "low"}
+              quality={index === 0 ? 75 : 60}
+              sizes="(max-width: 768px) 0px, 1300px"
+              className="object-cover object-center hidden md:block"
             />
             
             {/* Контент слайда поверх изображения */}
