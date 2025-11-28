@@ -21,14 +21,20 @@
   --foreground: #ffffff;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html {
   position: relative;
+  overflow-x: hidden;
 }
 
 /* Prevent layout shift from fonts and images */
 body {
   font-size: 16px;
   line-height: 1.5;
+  overflow-x: hidden;
 }
 
 /* Prevent CLS for hero slider - reserve exact space before JS loads */
@@ -122,9 +128,7 @@ div.mt-17.lg\:mt-30 img {
 }
 
 /* Image styling - prevent jank on iOS */
-img {
-  /* Removed: content-visibility: auto causes rendering jank on iOS */
-}
+/* Removed: content-visibility: auto causes rendering jank on iOS */
 
 @theme inline {
   --color-background: var(--background);
