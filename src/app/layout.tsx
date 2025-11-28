@@ -117,7 +117,7 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/section/2m.webp"
+          href="/sliders/2m.webp"
           fetchPriority="high"
         />
         
