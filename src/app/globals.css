@@ -81,35 +81,8 @@ body.min-w-\[360px\] {
   min-height: 100vh;
 }
 
-/* Reserve space for category page product grid */
-.page-centered.mt-5.max-w-\[1300px\] {
-  min-height: 750px;
-  contain: layout;
-}
-
-.page-centered.mt-5.max-w-\[1300px\].flex {
-  min-height: 900px;
-}
-
-@media (max-width: 1023px) {
-  .page-centered.mt-5.max-w-\[1300px\] {
-    min-height: 520px;
-  }
-
-  .page-centered.mt-5.max-w-\[1300px\].flex {
-    min-height: 720px;
-  }
-}
-
-@media (max-width: 767px) {
-  .page-centered.mt-5.max-w-\[1300px\] {
-    min-height: 680px;
-  }
-
-  .page-centered.mt-5.max-w-\[1300px\].flex {
-    min-height: 640px;
-  }
-}
+/* Reserve space for category page product grid - removed aggressive min-height */
+/* Using natural content flow instead to prevent layout jank on mobile */
 
 /* Fix footer menu icons causing shift on mobile */
 .lg\:hidden.fixed.bottom-0 {
@@ -245,92 +218,18 @@ body {
   background: linear-gradient(180deg,#f5f6fa 0,rgba(245,246,250,0) 100%);
 }
 
-/* Prevent CLS on StoreInfo section (shop slider) */
-section.max-w-\[1300px\].mt-17.lg\:mt-30 {
-  min-height: 500px; /* Reserve space for shop slider */
-  contain: layout;
-}
+/* Prevent CLS on StoreInfo section (shop slider) - removed aggressive min-height */
+/* Using natural content flow and aspect-ratio for images instead */
 
-@media (max-width: 1023px) {
-  section.max-w-\[1300px\].mt-17.lg\:mt-30 {
-    min-height: 650px;
-  }
-}
+/* Fixed ProductCard CLS - using aspect-ratio instead of rigid min-height */
 
-@media (max-width: 767px) {
-  section.max-w-\[1300px\].mt-17.lg\:mt-30 {
-    min-height: 450px;
-  }
-}
-
-/* Fix ProductCard CLS on category pages */
-.relative.bg-white.shadow-sm.overflow-hidden.group.shrink-0.h-full {
-  min-height: 420px;
-  contain: layout style;
-}
-
-@media (max-width: 767px) {
-  .relative.bg-white.shadow-sm.overflow-hidden.group.shrink-0.h-full {
-    min-height: 360px;
-  }
-}
-
-.single-product {
-  min-height: 900px;
-  contain: layout paint;
-}
-
-@media (max-width: 1023px) {
-  .single-product {
-    min-height: 700px;
-  }
-}
-
-@media (max-width: 767px) {
-  .single-product {
-    min-height: 620px;
-  }
-}
-
-/* Stabilize single product hero media */
-.single-product-media {
-  min-height: 520px;
-  contain: layout paint;
-}
-
-@media (max-width: 1023px) {
-  .single-product-media {
-    min-height: 420px;
-  }
-}
-
-@media (max-width: 767px) {
-  .single-product-media {
-    min-height: 360px;
-  }
-}
+/* Hero slider with natural responsive height, no aggressive min-height on content */
 
 .single-product-media img,
 .single-product-media picture {
   width: 100%;
   height: auto;
   object-fit: contain;
-}
-
-.single-product-price {
-  min-height: 110px;
-  contain: layout;
-}
-
-@media (max-width: 767px) {
-  .single-product-price {
-    min-height: 90px;
-  }
-}
-
-.single-product-icons {
-  min-height: 120px;
-  contain: layout;
 }
 
 .single-product-icons__item {
@@ -370,39 +269,8 @@ section.max-w-\[1300px\].mt-17.lg\:mt-30 {
   min-height: 150px;
 }
 
-.single-product-info {
-  min-height: 540px;
-  contain: layout;
-}
-
-@media (max-width: 1023px) {
-  .single-product-info {
-    min-height: 780px;
-  }
-}
-
-.fences-grid {
-  min-height: 520px;
-  contain: layout;
-}
-
-@media (max-width: 1023px) {
-  .fences-grid {
-    min-height: 840px;
-  }
-}
-
-/* Stabilize footer block so contact section reserves space before hydration */
-footer.bg-white.border-t.border-\[#e6e8ed\] {
-  min-height: 560px;
-  contain: layout paint;
-}
-
-@media (max-width: 1023px) {
-  footer.bg-white.border-t.border-\[#e6e8ed\] {
-    min-height: 980px;
-  }
-}
+/* Footer: removed aggressive min-height that caused layout jank on iOS */
+/* Using natural content flow with flexbox instead */
 
 .scrollbar-hide {
   -ms-overflow-style: none;  /* Internet Explorer 10+ */
