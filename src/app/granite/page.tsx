@@ -15,19 +15,25 @@ const GraniteTypesPage = () => {
     const openModal = (index: number) => {
         setCurrentModalSlide(index);
         setIsModalOpen(true);
-        // Блокируем скролл для iOS
+        // Правильная блокировка скролла для iOS и других браузеров
+        const scrollY = window.scrollY;
         document.body.style.overflow = "hidden";
-        document.body.style.position = "fixed";
-        document.body.style.width = "100%";
+        document.body.style.position = "relative";
+        document.documentElement.style.overscrollBehavior = "none";
+        // Сохраняем позицию скролла
+        document.body.dataset.scrollY = String(scrollY);
     };
 
     // Функция для закрытия модального окна
     const closeModal = () => {
         setIsModalOpen(false);
-        // Возвращаем скролл для iOS
+        // Возвращаем скролл и позицию
         document.body.style.overflow = "";
         document.body.style.position = "";
-        document.body.style.width = "";
+        document.documentElement.style.overscrollBehavior = "";
+        // Восстанавливаем позицию скролла
+        const scrollY = parseInt(document.body.dataset.scrollY || "0", 10);
+        window.scrollTo(0, scrollY);
     };
 
     // Функции для навигации в модалке
@@ -62,9 +68,9 @@ const GraniteTypesPage = () => {
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
                     <div className="ml-2.5"><PathPage /></div>
-                    <h1 className="text-black text-[28px] ml-2.5 my-5 lg:ml-5 lg:my-7.5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Виды гранита</h1>
+                    <h1 className="text-black text-[28px] ml-2.5 my-5 lg:ml-5 lg:my-7.5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">Виды гранита</h1>
 
                     {/* Сетка видов гранита */}
                     <div className="grid space-y-5 lg:space-y-7.5 pb-5 lg:px-2.5 grid-cols-3 md:grid-cols-6 shadow-xs">
@@ -94,13 +100,13 @@ const GraniteTypesPage = () => {
             {/* Модальное окно */}
             {isModalOpen && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center"
-                    style={{ backgroundColor: "rgba(0,0,0,0.8)", touchAction: 'none' }}
-                    onClick={closeModal} // Закрытие при клике вне изображения
+                    className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+                    style={{ backgroundColor: "rgba(0,0,0,0.8)" }}
+                    onClick={closeModal}
                 >
                     <div
                         className="relative w-full max-w-6xl max-h-[90vh] flex flex-col items-center justify-center p-4"
-                        onClick={(e) => e.stopPropagation()} // Не закрывать при клике на контент
+                        onClick={(e) => e.stopPropagation()}
                     >
                         {/* Индикатор текущего слайда (например, "1 / 36") */}
                         <div className="fixed top-4 left-4 text-white text-sm bg-black bg-opacity-70 px-2 py-1 rounded z-10">

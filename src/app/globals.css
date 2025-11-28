@@ -87,7 +87,6 @@ body.min-w-\[360px\] {
 /* Fix footer menu icons causing shift on mobile */
 .lg\:hidden.fixed.bottom-0 {
   height: 64px;
-  contain: layout;
 }
 
 .lg\:hidden.fixed.bottom-0 img {
@@ -100,16 +99,8 @@ div.mt-17.lg\:mt-30 img {
   aspect-ratio: 1;
 }
 
-/* Prevent shifts from product grid */
-.grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-3 {
-  min-height: 400px;
-}
-
-@media (max-width: 1023px) {
-  .grid.grid-cols-2.md\:grid-cols-4.lg\:grid-cols-3 {
-    min-height: 300px;
-  }
-}
+/* Prevent shifts from product grid - using natural content flow */
+/* Removed min-height that was causing layout issues on mobile */
 
 @media (max-width: 499px) {
   main.min-h-screen > div:first-child {
@@ -250,7 +241,6 @@ body {
   display: flex;
   flex-direction: column;
   height: 100%;
-  contain: layout paint;
 }
 
 .promo-card__image {
@@ -305,4 +295,23 @@ select {
 .absolute {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+}
+
+/* iOS Safari: fix modal rendering and prevent rubber-band scroll */
+.fixed {
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Prevent iOS Safari scroll jank with fixed positioned elements */
+body {
+  -webkit-touch-callout: none;
+}
+
+body[style*="overflow: hidden"] {
+  position: fixed;
+  width: 100%;
+  height: 100vh;
 }
