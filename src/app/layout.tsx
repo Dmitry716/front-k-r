@@ -99,13 +99,25 @@ export default function RootLayout({
         <link
           rel="preload"
           as="image"
-          href="/sliders/single.webp"
+          href="/sliders/1.webp"
           fetchPriority="high"
         />
         <link
           rel="preload"
           as="image"
-          href="/section/cheap.webp"
+          href="/sliders/1m.webp"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/sliders/2.webp"
+          fetchPriority="high"
+        />
+        <link
+          rel="preload"
+          as="image"
+          href="/section/2m.webp"
           fetchPriority="high"
         />
         
