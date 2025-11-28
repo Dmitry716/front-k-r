@@ -142,7 +142,7 @@ const HeroSlider = () => {
                 <h2 className="font-bold mb-2 text-[20px] lg:text-[36px]">
                   {slide.title}
                 </h2>
-                <p className="mb-5 lg:mb-14 text-[16px] md:text-[14px]">
+                <p className="mb-5 lg:mb-14 text-[16px] md:text-[14px] lg:text-[18px]">
                   {slide.subtitle}
                 </p>
                 <Link
