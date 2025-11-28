@@ -206,20 +206,21 @@ const HeroSlider = () => {
             />
             
             {/* Контент слайда поверх изображения */}
-            {windowWidth >= 768 ? (
-              // Десктопная версия - текст слева
-              <div
-                className="relative z-20"
-                style={{
-                  paddingLeft: padding.x,
-                  paddingRight: padding.x,
-                  paddingTop: padding.y,
-                  paddingBottom: padding.y,
-                  minWidth: "45vw",
-                  maxWidth: "54vw",
-                  color: slide.color,
-                }}
-              >
+            
+            {/* Десктопная версия - текст слева */}
+            <div
+              className="relative z-20 hidden md:flex md:items-center"
+              style={{
+                paddingLeft: padding.x,
+                paddingRight: padding.x,
+                paddingTop: padding.y,
+                paddingBottom: padding.y,
+                minWidth: "45vw",
+                maxWidth: "54vw",
+                color: slide.color,
+              }}
+            >
+              <div>
                 <h2
                   className="font-bold mb-2"
                   style={{ fontSize: fontSize.title }}
@@ -229,7 +230,7 @@ const HeroSlider = () => {
                 <p
                   style={{
                     fontSize: fontSize.subtitle,
-                    marginBottom: windowWidth > 1200 ? "56px" : "20px",
+                    marginBottom: "56px",
                   }}
                 >
                   {slide.subtitle}
@@ -239,32 +240,32 @@ const HeroSlider = () => {
                   className="bg-transparent px-6 py-3 border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54] hover:text-white transition"
                   style={{
                     fontSize: fontSize.button,
-                    padding: windowWidth > 1280 ? "11px 24px" : "10px 20px",
+                    padding: "11px 24px",
                   }}
                 >
                   {slide.button.text}
                 </Link>
               </div>
-            ) : (
-              // Мобильная версия - контент внизу поверх изображения
-              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20">
-                <h2
-                  className="font-bold mb-2 text-white"
-                  style={{ fontSize: fontSize.title }}
-                >
-                  {slide.title}
-                </h2>
-                <p className="mb-4 text-white/90" style={{ fontSize: fontSize.subtitle }}>
-                  {slide.subtitle}
-                </p>
-                <Link
-                  href={slide.button.href}
-                  className="inline-block bg-white text-[#2c3a54] px-4 py-2 rounded-full font-medium text-sm"
-                >
-                  {slide.button.text}
-                </Link>
-              </div>
-            )}
+            </div>
+
+            {/* Мобильная версия - контент внизу поверх изображения */}
+            <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20 md:hidden">
+              <h2
+                className="font-bold mb-2 text-white"
+                style={{ fontSize: fontSize.title }}
+              >
+                {slide.title}
+              </h2>
+              <p className="mb-4 text-white/90" style={{ fontSize: fontSize.subtitle }}>
+                {slide.subtitle}
+              </p>
+              <Link
+                href={slide.button.href}
+                className="inline-block bg-white text-[#2c3a54] px-4 py-2 rounded-full font-medium text-sm"
+              >
+                {slide.button.text}
+              </Link>
+            </div>
           </div>
         ))}
       </div>
