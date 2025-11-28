@@ -6,80 +6,9 @@ import Image from "next/image";
 const HeroSlider = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
-  const [windowWidth, setWindowWidth] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
-
-  // Адаптивная высота
-  const getSliderHeight = () => {
-    if (windowWidth >= 768) {
-      return "clamp(226px, 29.5vw, 400px)";
-    } else if (windowWidth >= 601) {
-      return "70vw";
-    } else if (windowWidth >= 500) {
-      return "85vw";
-    } else if (windowWidth >= 425) {
-      return "100vw";
-    } else if (windowWidth >= 375) {
-      return "112vw";
-    } else if (windowWidth >= 320) {
-      return "120vw";
-    } else {
-      return "138vw";
-    }
-  };
-
-  // Определение размеров шрифтов
-  const getFontSize = () => {
-    if (windowWidth > 1280) {
-      return {
-        title: "36px",
-        subtitle: "18px",
-        button: "18px",
-      };
-    } else if (windowWidth > 1024) {
-      return {
-        title: "24px",
-        subtitle: "18px",
-        button: "18px",
-      };
-    } else if (windowWidth > 768) {
-      return {
-        title: "20px",
-        subtitle: "16px",
-        button: "18px",
-      };
-    } else {
-      return {
-        title: "20px",
-        subtitle: "16px",
-        button: "18px",
-      };
-    }
-  };
-
-  // Определение padding для контейнера
-  const getPadding = () => {
-    if (windowWidth > 1024) {
-      return {
-        x: "80px",
-        y: "60px",
-      };
-    } else {
-      return {
-        x: "40px",
-        y: "26px",
-      };
-    }
-  };
-
-  // Отслеживаем ширину окна
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  // Slider sizing and typography switched to responsive Tailwind classes
 
   const slides = [
     {
@@ -159,11 +88,8 @@ const HeroSlider = () => {
     setTouchEnd(0);
   };
 
-  const fontSize = getFontSize();
-  const padding = getPadding();
-
   return (
-    <div className="relative" style={{ height: getSliderHeight() }}>
+    <div className="relative" style={{ height: 'clamp(226px, 29.5vw, 400px)' }}>
       <section
         className="max-w-[1300px] container-centered h-full relative"
         onMouseEnter={handleMouseEnter}
@@ -209,39 +135,19 @@ const HeroSlider = () => {
             
             {/* Десктопная версия - текст слева */}
             <div
-              className="relative z-20 hidden md:flex md:items-center"
-              style={{
-                paddingLeft: padding.x,
-                paddingRight: padding.x,
-                paddingTop: padding.y,
-                paddingBottom: padding.y,
-                minWidth: "45vw",
-                maxWidth: "54vw",
-                color: slide.color,
-              }}
+              className="relative z-20 hidden md:flex md:items-center md:px-20 md:py-[60px] px-10 py-[26px]"
+              style={{ color: slide.color }}
             >
-              <div>
-                <h2
-                  className="font-bold mb-2"
-                  style={{ fontSize: fontSize.title }}
-                >
+              <div className="md:w-[45vw] md:max-w-[54vw]">
+                <h2 className="font-bold mb-2 text-[20px] md:text-[24px] lg:text-[36px]">
                   {slide.title}
                 </h2>
-                <p
-                  style={{
-                    fontSize: fontSize.subtitle,
-                    marginBottom: "56px",
-                  }}
-                >
+                <p className="mb-14 text-[16px] md:text-[18px]">
                   {slide.subtitle}
                 </p>
                 <Link
                   href={slide.button.href}
-                  className="bg-transparent px-6 py-3 border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54] hover:text-white transition"
-                  style={{
-                    fontSize: fontSize.button,
-                    padding: "11px 24px",
-                  }}
+                  className="bg-transparent px-6 py-3 border-2 border-[#2c3a54] rounded-full font-medium hover:bg-[#2c3a54] hover:text-white transition text-[18px]"
                 >
                   {slide.button.text}
                 </Link>
@@ -250,15 +156,8 @@ const HeroSlider = () => {
 
             {/* Мобильная версия - контент внизу поверх изображения */}
             <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 via-black/60 to-transparent p-4 pb-12 z-20 md:hidden">
-              <h2
-                className="font-bold mb-2 text-white"
-                style={{ fontSize: fontSize.title }}
-              >
-                {slide.title}
-              </h2>
-              <p className="mb-4 text-white/90" style={{ fontSize: fontSize.subtitle }}>
-                {slide.subtitle}
-              </p>
+              <h2 className="font-bold mb-2 text-white text-[20px]">{slide.title}</h2>
+              <p className="mb-4 text-white/90 text-[16px]">{slide.subtitle}</p>
               <Link
                 href={slide.button.href}
                 className="inline-block bg-white text-[#2c3a54] px-4 py-2 rounded-full font-medium text-sm"
@@ -271,11 +170,10 @@ const HeroSlider = () => {
       </div>
 
       {/* Кнопки навигации - за пределами контейнера */}
-      {windowWidth >= 768 && (
         <>
           <button
             onClick={prevSlide}
-            className="absolute left-4 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+            className="hidden md:flex absolute left-4 w-10 h-10 bg-white bg-opacity-80 rounded-full items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
             style={{ top: 'calc(50% - 20px)' }}
           >
             <svg
@@ -294,7 +192,7 @@ const HeroSlider = () => {
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-4 w-10 h-10 bg-white bg-opacity-80 rounded-full flex items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
+            className="hidden md:flex absolute right-4 w-10 h-10 bg-white bg-opacity-80 rounded-full items-center justify-center hover:bg-opacity-100 transition z-10 shadow-lg"
             style={{ top: 'calc(50% - 20px)' }}
           >
             <svg
@@ -312,15 +210,9 @@ const HeroSlider = () => {
             </svg>
           </button>
         </>
-      )}
 
       {/* Индикаторы */}
-      <div
-        className={`absolute flex space-x-4 z-30 ${
-          windowWidth < 768 ? "my-3" : "bottom-4"
-        }`}
-        style={{ left: '50%', marginLeft: '-28px' }}
-      >
+      <div className="absolute left-1/2 -translate-x-1/2 flex space-x-4 z-30 bottom-3 md:bottom-4">
         {slides.map((_, index) => (
           <button
             key={index}
