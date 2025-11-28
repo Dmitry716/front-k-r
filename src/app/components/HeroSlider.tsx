@@ -135,14 +135,14 @@ const HeroSlider = () => {
             
             {/* Десктопная версия - текст слева */}
             <div
-              className="relative z-20 hidden md:flex md:items-center md:px-20 md:py-[60px] px-10 py-[26px]"
+              className="relative z-20 hidden md:flex md:items-center md:px-20 md:py-10 px-10 py-[26px]"
               style={{ color: slide.color }}
             >
               <div className="md:w-[45vw] md:max-w-[54vw]">
-                <h2 className="font-bold mb-2 text-[20px] md:text-[24px] lg:text-[36px]">
+                <h2 className="font-bold mb-2 text-[20px] lg:text-[36px]">
                   {slide.title}
                 </h2>
-                <p className="mb-14 text-[16px] md:text-[18px]">
+                <p className="mb-5 lg:mb-14 text-[16px] md:text-[14px]">
                   {slide.subtitle}
                 </p>
                 <Link
