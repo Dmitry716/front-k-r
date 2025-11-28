@@ -6,34 +6,24 @@ import SidebarCatalogMenu from "../components/Sidebar/SidebarCatalogMenu";
 import SidebarStickyHelp from "../components/Sidebar/SidebarStickyHelp";
 import { graniteTypes } from "../mock/graniteTypes";
 import { PageDescriptionBlock } from "../components/PageDescriptionBlock";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 const GraniteTypesPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentModalSlide, setCurrentModalSlide] = useState(0);
 
+    // Используем хук для правильного управления скроллом
+    useScrollLock(isModalOpen);
+
     // Функция для открытия модального окна
     const openModal = (index: number) => {
         setCurrentModalSlide(index);
         setIsModalOpen(true);
-        // Правильная блокировка скролла для iOS и других браузеров
-        const scrollY = window.scrollY;
-        document.body.style.overflow = "hidden";
-        document.body.style.position = "relative";
-        document.documentElement.style.overscrollBehavior = "none";
-        // Сохраняем позицию скролла
-        document.body.dataset.scrollY = String(scrollY);
     };
 
     // Функция для закрытия модального окна
     const closeModal = () => {
         setIsModalOpen(false);
-        // Возвращаем скролл и позицию
-        document.body.style.overflow = "";
-        document.body.style.position = "";
-        document.documentElement.style.overscrollBehavior = "";
-        // Восстанавливаем позицию скролла
-        const scrollY = parseInt(document.body.dataset.scrollY || "0", 10);
-        window.scrollTo(0, scrollY);
     };
 
     // Функции для навигации в модалке

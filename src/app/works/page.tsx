@@ -8,6 +8,7 @@ import SidebarStickyHelp from "../components/Sidebar/SidebarStickyHelp";
 import Pagination from "../components/Pagination";
 import Blog from "../components/Blog";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 interface Work {
   id: number;
@@ -72,18 +73,19 @@ const OurWorksPage = () => {
     // Получаем работы для текущей страницы ИЗ ОТФИЛЬТРОВАННОГО МАССИВА
     const currentWorks = getWorksForPage(filteredWorks, currentPage);
 
+    // Используем хук для правильного управления скроллом
+    useScrollLock(isModalOpen);
+
     // Функция для открытия модального окна
     const openModal = (index: number) => {
         // Индекс в массиве filteredWorks
         setCurrentModalSlide(index);
         setIsModalOpen(true);
-        document.body.style.overflow = "hidden"; // Блокируем скролл
     };
 
     // Функция для закрытия модального окна
     const closeModal = () => {
         setIsModalOpen(false);
-        document.body.style.overflow = "auto"; // Возвращаем скролл
     };
 
     // Функции для навигации в модалке
@@ -118,7 +120,7 @@ const OurWorksPage = () => {
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
                     <PathPage />
                     <div className="text-center py-10 flex justify-center">
                         <LoadingSpinner size={40} ariaLabel="Загрузка работ" />
@@ -135,9 +137,9 @@ const OurWorksPage = () => {
                     <SidebarCatalogMenu />
                     <SidebarStickyHelp />
                 </div>
-                <div className="w-[100%] lg:ml-5 lg:max-w-[75%]">
+                <div className="w-full lg:ml-5 lg:max-w-[75%]">
                     <PathPage />
-                    <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-[600]">Наши работы</h1>
+                    <h1 className="text-black text-[28px] mt-2.5 mb-5 leading-8 lg:text-[40px] lg:leading-12 font-semibold">Наши работы</h1>
 
                     {/* Панель категорий */}
                     <div className="flex flex-wrap gap-2 mb-6">

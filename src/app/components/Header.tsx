@@ -235,10 +235,8 @@ const Header = () => {
   useEffect(() => {
     if (isPhoneDropdownOpen || isBurgerDropdownOpen) {
       document.body.style.overflow = "hidden";
-      document.body.style.touchAction = "none";
     } else {
       document.body.style.overflow = "";
-      document.body.style.touchAction = "";
     }
   }, [isPhoneDropdownOpen, isBurgerDropdownOpen]);
 

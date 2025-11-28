@@ -17,6 +17,7 @@ import { getMaterialData } from "@/lib/materials-mapping";
 import { apiClient } from "@/lib/api-client";
 import ProductWorksGallery from "@/app/components/ProductWorksGallery";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
+import { useScrollLock } from "../../../hooks/useScrollLock";
 
 interface Product {
   id: number;
@@ -146,6 +147,9 @@ const ExclusiveProductPage = () => {
     window.addEventListener("resize", checkScreenSize);
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
+
+  // Используем хук для правильного управления скроллом при обеих модалях
+  useScrollLock(isImageModalOpen || isGraniteModalOpen);
 
   // Инициализация избранного
   useEffect(() => {
@@ -287,13 +291,11 @@ const ExclusiveProductPage = () => {
 
   const closeGraniteModal = () => {
     setIsGraniteModalOpen(false);
-    document.body.style.overflow = "auto";
   };
 
   const openGraniteModal = (index: number) => {
     setCurrentGraniteSlide(index);
     setIsGraniteModalOpen(true);
-    document.body.style.overflow = "hidden";
   };
 
   // Функции для модального окна с примерами оформления
@@ -307,12 +309,10 @@ const ExclusiveProductPage = () => {
   const openImageModal = (index: number) => {
     setCurrentImageSlide(index);
     setIsImageModalOpen(true);
-    document.body.style.overflow = "hidden";
   };
 
   const closeImageModal = () => {
     setIsImageModalOpen(false);
-    document.body.style.overflow = "auto";
   };
 
   const nextImageSlide = () => {

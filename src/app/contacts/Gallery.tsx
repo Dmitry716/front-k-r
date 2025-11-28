@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
+import { useScrollLock } from "../hooks/useScrollLock";
 
 // Предполагаем, что у вас уже есть массив slides
 const slides = [
@@ -19,6 +20,9 @@ const Gallery = () => {
     const [currentModalSlide, setCurrentModalSlide] = useState(0);
     const [isMounted, setIsMounted] = useState(false);
 
+    // Используем хук для правильного управления скроллом
+    useScrollLock(isModalOpen);
+
     // Функция для изменения текущего слайда (для миниатюр)
     const handleThumbnailClick = (index: number) => {
         setCurrentSlideIndex(index);
@@ -28,13 +32,11 @@ const Gallery = () => {
     const openModal = (index: number) => {
         setCurrentModalSlide(index);
         setIsModalOpen(true);
-        document.body.style.overflow = "hidden"; // Блокируем скролл
     };
 
     // Функция для закрытия модального окна
     const closeModal = () => {
         setIsModalOpen(false);
-        document.body.style.overflow = "auto"; // Возвращаем скролл
     };
 
     // Функции для навигации в модалке

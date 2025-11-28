@@ -14,6 +14,7 @@ import { apiClient } from "@/lib/api-client";
 import ModalCommunication from "../../../components/Modal/ModalCommunication";
 import { categorySlugToName } from "../page";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import { useScrollLock } from "../../../hooks/useScrollLock";
 
 // Функция для конвертации товара из админки в формат ProductCard
 function convertMonumentToProductFormat(dbProduct: Record<string, unknown>) {
