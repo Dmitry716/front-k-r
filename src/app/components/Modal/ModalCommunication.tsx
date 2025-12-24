@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 interface ProductData {
   name?: string;
@@ -34,6 +35,8 @@ const ModalCommunication: React.FC<ModalProps> = ({
   const [countryCode, setCountryCode] = useState('+375');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isMounted, setIsMounted] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   // Монтирование на клиенте для portal
   useEffect(() => {
@@ -154,6 +157,12 @@ const ModalCommunication: React.FC<ModalProps> = ({
 
       const expectedDigits = countryCode === '+375' ? '12 цифр' : '11 цифр';
       setMessage({ type: 'error', text: `Пожалуйста, введите корректный номер телефона (${expectedDigits})` });
+      return;
+    }
+
+    // Валидация reCAPTCHA
+    if (!recaptchaToken) {
+      setMessage({ type: 'error', text: 'Пожалуйста, подтвердите, что вы не робот' });
       return;
     }
 
@@ -283,6 +292,10 @@ const ModalCommunication: React.FC<ModalProps> = ({
         setMessage(null);
         // Очищаем форму
         setPhoneNumber('');
+        setRecaptchaToken(null);
+        if (recaptchaRef.current) {
+          recaptchaRef.current.reset();
+        }
       }, 2000);
     } catch (error) {
       console.error('❌ Ошибка отправки:', error);
@@ -397,6 +410,18 @@ const ModalCommunication: React.FC<ModalProps> = ({
             </div>
           </div>
 
+          {/* reCAPTCHA */}
+          <div className="mb-5 flex justify-center">
+            <ReCAPTCHA
+              ref={recaptchaRef}
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+              onChange={(token) => setRecaptchaToken(token)}
+              onExpired={() => setRecaptchaToken(null)}
+              theme="light"
+              size="normal"
+            />
+          </div>
+
           {/* Кнопка отправки */}
           <div className="mb-2.5 md:mb-5">
             <button
@@ -411,7 +436,7 @@ const ModalCommunication: React.FC<ModalProps> = ({
           {/* Политика конфиденциальности */}
           <div className="text-xs text-[#2c3a54]">
             Отправляя заявку, вы соглашаетесь с{" "}
-            <a href="#" className="text-[#cd5554] underline">
+            <a href="/policy" className="text-[#cd5554] underline">
               политикой конфиденциальности
             </a>
           </div>
