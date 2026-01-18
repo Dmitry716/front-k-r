@@ -1,0 +1,21 @@
+maxximum.by {
+    @frontend_api {
+        path /api/admin /api/download-template /api/revalidate-seo /api/reviews
+    }
+
+    handle @frontend_api {
+        reverse_proxy frontend:3001
+    }
+
+    handle /uploads/* {
+        reverse_proxy back-k-r-backend-1:3001
+    }
+
+    handle /api/* {
+        reverse_proxy 172.20.0.1:3001
+    }
+
+    handle {
+        reverse_proxy frontend:3000
+    }
+}

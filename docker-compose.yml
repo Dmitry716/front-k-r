@@ -2,10 +2,16 @@ services:
   frontend:
     build: .
     environment:
-      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
-      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL}
+
+      NEXT_PUBLIC_TELEGRAM_BOT_TOKEN: ${NEXT_PUBLIC_TELEGRAM_BOT_TOKEN}
+      NEXT_PUBLIC_TELEGRAM_CHAT_ID: ${NEXT_PUBLIC_TELEGRAM_CHAT_ID}
+
+      NEXT_PUBLIC_RECAPTCHA_SITE_KEY: ${NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+      NEXT_PUBLIC_RECAPTCHA_SECRET_KEY: ${NEXT_PUBLIC_RECAPTCHA_SECRET_KEY}
     ports:
-      - '3001:3001'
+      - '3000:3000'
     extra_hosts:
       - "host.docker.internal:host-gateway" # "maxximum.by:host-gateway"
       - "k-r.by:172.20.0.1"
