@@ -1,0 +1,34 @@
+services:
+  frontend:
+    build: .
+    environment:
+      JWT_ACCESS_SECRET: ${JWT_ACCESS_SECRET}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
+    ports:
+      - '3001:3001'
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # "maxximum.by:host-gateway"
+      - "k-r.by:172.20.0.1"
+  
+  proxy:
+    image: caddy:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp" # For HTTP/3 support
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
+
+networks:
+  default:
+    name: public_net
+    external: true
