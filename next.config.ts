@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import path from "path";
 
 const nextConfig: NextConfig = {
   // Turbopack конфигурация для Next.js 16+
@@ -70,6 +69,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  output: 'standalone', 
 };
 
 export default nextConfig;
